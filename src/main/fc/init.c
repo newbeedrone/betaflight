@@ -154,6 +154,8 @@
 #include "rx/rx_spi.h"
 #include "rx/spektrum.h"
 
+#include "io/vtx_beesign.h"
+
 #include "scheduler/scheduler.h"
 
 #include "sensors/acceleration.h"
@@ -873,6 +875,10 @@ void init(void)
 
 #ifdef USE_VTX_TRAMP
     vtxTrampInit();
+#endif
+
+#ifdef USE_VTX_BEESIGN
+    beesignInit();
 #endif
 
 #ifdef USE_VTX_RTC6705
