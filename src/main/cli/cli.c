@@ -120,6 +120,7 @@ bool cliMode = false;
 #include "io/usb_msc.h"
 #include "io/vtx_control.h"
 #include "io/vtx.h"
+#include "io/vtx_beesign.h"
 
 #include "msp/msp.h"
 #include "msp/msp_box.h"
@@ -5969,6 +5970,19 @@ static void cliDshotTelemetryInfo(char *cmdline)
 }
 #endif
 
+#ifdef USE_VTX_BEESIGN
+static void beesignSetVTxLock(char *cmdline) {
+    UNUSED(cmdline);
+    bsSetVTxLock();
+    cliPrintLine("beesign vtx lock success");
+}
+ static void beesignSetVTxUnlock(char *cmdline) {
+    UNUSED(cmdline);
+    bsSetVTxUnlock();
+    cliPrintLine("beesign vtx unlock success");
+}
+#endif // USE_VTX_BEESIGN
+
 static void printConfig(char *cmdline, bool doDiff)
 {
     dumpFlags_t dumpMask = DUMP_MASTER;
@@ -6398,6 +6412,10 @@ const clicmd_t cmdTable[] = {
 #endif
 #ifdef USE_VTX_TABLE
     CLI_COMMAND_DEF("vtxtable", "vtx frequency table", "<band> <bandname> <bandletter> [FACTORY|CUSTOM] <freq> ... <freq>\r\n", cliVtxTable),
+#endif
+#ifdef USE_VTX_BEESIGN
+    CLI_COMMAND_DEF("beesign_vtx_lock", "beesign", NULL, beesignSetVTxLock),
+    CLI_COMMAND_DEF("beesign_vtx_unlock", "beesign", NULL, beesignSetVTxUnlock),
 #endif
 };
 
