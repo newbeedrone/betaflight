@@ -33,6 +33,7 @@
 #include "cms/cms_types.h"
 #include "cms/cms_menu_vtx_beesign.h"
 
+#include "drivers/beesign.h"
 #include "drivers/vtx_common.h"
 
 #include "fc/config.h"
@@ -51,12 +52,12 @@ static uint8_t bs_vtxmode;
 static uint8_t porModeStr[10] =     {"  POR MODE"};
 static uint8_t porModeFREQStr[10] = {"      5584"};
 
-static OSD_TAB_t bsEntryVtxMode =         {&bs_vtxmode, VTX_BEESIGN_MODE_COUNT - 1, &bsModeNames[0]};
-static OSD_TAB_t bsEntryVtxBand =         {&bs_vtxBand, VTX_BEESIGN_BAND_COUNT - 1, &vtx58BandNames[1]};
+static OSD_TAB_t bsEntryVtxMode =         {&bs_vtxmode, BEESIGN_VTX_MODE_COUNT - 1, &bsModeNames[0]};
+static OSD_TAB_t bsEntryVtxBand =         {&bs_vtxBand, BEESIGN_BAND_COUNT - 1, &vtx58BandNames[1]};
 static OSD_UINT8_t bsEntryVtxChannel =    {&bs_vtxChannel, 1, VTX_SETTINGS_CHANNEL_COUNT, 1};
-static OSD_UINT16_t bsEntryVtxFreq =      {&bs_vtxFreq, VTX_BEESIGN_MIN_FREQUENCY_MHZ, VTX_BEESIGN_MAX_FREQUENCY_MHZ, 1};
-static OSD_UINT16_t bsShowVtxFreq =       {&bs_showFreq, VTX_BEESIGN_MIN_FREQUENCY_MHZ, VTX_BEESIGN_MAX_FREQUENCY_MHZ, 0};
-static OSD_TAB_t bsEntryVtxPower =        {&bs_vtxPower, VTX_BEESIGN_POWER_COUNT - VTX_BEESIGN_MIN_POWER, &bsPowerNames[VTX_BEESIGN_MIN_POWER]};
+static OSD_UINT16_t bsEntryVtxFreq =      {&bs_vtxFreq, BEESIGN_MIN_FREQUENCY_MHZ, BEESIGN_MAX_FREQUENCY_MHZ, 1};
+static OSD_UINT16_t bsShowVtxFreq =       {&bs_showFreq, BEESIGN_MIN_FREQUENCY_MHZ, BEESIGN_MAX_FREQUENCY_MHZ, 0};
+static OSD_TAB_t bsEntryVtxPower =        {&bs_vtxPower, BEESIGN_POWER_COUNT - BEESIGN_MIN_POWER, &bsPowerNames[BEESIGN_MIN_POWER]};
 
 CMS_Menu cmsx_menuVtxBeesign; // Forward
 static long bsCmsConfigMode(const OSD_Entry *self);
@@ -77,7 +78,7 @@ static void bs_Vtx_ConfigRead(void)
         bs_vtxFreq = vtxSettingsConfig()->freq;
     }
     if (vtxSettingsConfig()->power > 1) {
-        bs_vtxPower = vtxSettingsConfig()->power - VTX_BEESIGN_MIN_POWER;
+        bs_vtxPower = vtxSettingsConfig()->power - BEESIGN_MIN_POWER;
     } else {
         bs_vtxPower = 0;
     }
@@ -99,10 +100,10 @@ static long bsCmsConfigRaceSave(displayPort_t *pDisp, const void *self)
     UNUSED(pDisp);
     UNUSED(self);
 
-    bsSetMode(VTX_BEESIGN_VTX_RACE_MODE);
+    bsSetMode(BEESIGN_VTX_RACE_MODE);
     vtxSettingsConfigMutable()->band = bs_vtxBand + 1;
     vtxSettingsConfigMutable()->channel = bs_vtxChannel;
-    vtxSettingsConfigMutable()->power = bs_vtxPower + VTX_BEESIGN_MIN_POWER;
+    vtxSettingsConfigMutable()->power = bs_vtxPower + BEESIGN_MIN_POWER;
     vtxSettingsConfigMutable()->freq = bs_showFreq;
 
     saveConfigAndNotify();
@@ -114,10 +115,10 @@ static long bsCmsConfigManualSave(displayPort_t *pDisp, const void *self)
     UNUSED(pDisp);
     UNUSED(self);
 
-    bsSetMode(VTX_BEESIGN_VTX_MANUAL_MODE);
+    bsSetMode(BEESIGN_VTX_MANUAL_MODE);
     vtxSettingsConfigMutable()->band = 0;
     vtxSettingsConfigMutable()->channel = bs_vtxChannel;
-    vtxSettingsConfigMutable()->power = bs_vtxPower + VTX_BEESIGN_MIN_POWER;
+    vtxSettingsConfigMutable()->power = bs_vtxPower + BEESIGN_MIN_POWER;
     vtxSettingsConfigMutable()->freq = bs_vtxFreq;
 
     saveConfigAndNotify();
@@ -129,11 +130,11 @@ static long bsCmsConfigPorSave(displayPort_t *pDisp, const void *self)
     UNUSED(pDisp);
     UNUSED(self);
 
-    bsSetMode(VTX_BEESIGN_VTX_POR_MODE);
+    bsSetMode(BEESIGN_VTX_POR_MODE);
     vtxSettingsConfigMutable()->band = 0;
     vtxSettingsConfigMutable()->channel = bs_vtxChannel;
-    vtxSettingsConfigMutable()->power = VTX_PWR_PIT + VTX_BEESIGN_MIN_POWER;
-    vtxSettingsConfigMutable()->freq = VTX_BEESIGN_POR_FREQUENCY_MHZ;
+    vtxSettingsConfigMutable()->power = VTX_PWR_PIT + BEESIGN_MIN_POWER;
+    vtxSettingsConfigMutable()->freq = BEESIGN_POR_FREQUENCY_MHZ;
 
     saveConfigAndNotify();
     return 0;

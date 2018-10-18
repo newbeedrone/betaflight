@@ -64,6 +64,7 @@
 #include "telemetry/telemetry.h"
 #include "telemetry/srxl.h"
 
+#include "drivers/beesign.h"
 #include "drivers/vtx_common.h"
 #include "drivers/dshot.h"
 

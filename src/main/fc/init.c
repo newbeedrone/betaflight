@@ -42,6 +42,14 @@
 #include "config/feature.h"
 
 #include "drivers/accgyro/accgyro.h"
+<<<<<<< HEAD
+=======
+#include "drivers/beesign.h"
+#include "drivers/camera_control.h"
+#include "drivers/compass/compass.h"
+#include "drivers/pwm_esc_detect.h"
+#include "drivers/pwm_output.h"
+>>>>>>> 2a89b543c... 将 beesign 协议放到 drivers 目录
 #include "drivers/adc.h"
 #include "drivers/bus.h"
 #include "drivers/bus_i2c.h"
@@ -879,6 +887,10 @@ void init(void)
 
 #ifdef USE_VTX_BEESIGN
     beesignInit();
+#endif
+
+#ifdef USE_VTX_BEESIGN
+    beesignVtxInit();
 #endif
 
 #ifdef USE_VTX_RTC6705

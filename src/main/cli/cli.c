@@ -59,6 +59,7 @@ bool cliMode = false;
 
 #include "drivers/accgyro/accgyro.h"
 #include "drivers/adc.h"
+#include "drivers/beesign.h"
 #include "drivers/buf_writer.h"
 #include "drivers/bus_spi.h"
 #include "drivers/dma.h"
