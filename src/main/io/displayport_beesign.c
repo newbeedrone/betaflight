@@ -28,6 +28,7 @@
 #include "common/utils.h"
 
 #include "drivers/beesign.h"
+#include "drivers/time.h"
 #include "drivers/display.h"
 
 #include "fc/config.h"
@@ -62,7 +63,7 @@ static int clearScreen(displayPort_t *displayPort)
 {
     UNUSED(displayPort);
 
-    bsClearDispaly();
+    beClearScreenBuff();
 
     return 0;
 }
@@ -70,19 +71,20 @@ static int clearScreen(displayPort_t *displayPort)
 static int drawScreen(displayPort_t *displayPort)
 {
     UNUSED(displayPort);
+    bsDisplay();
     return 0;
 }
 
 static int screenSize(const displayPort_t *displayPort)
 {
     UNUSED(displayPort);
-    return BEESIGN_OSD_POS_MAX + 1;
+    return BEESIGN_CHARS_PER_SCREEN;
 }
 
 static int writeString(displayPort_t *displayPort, uint8_t x, uint8_t y, const char *s)
 {
     UNUSED(displayPort);
-    bsSetDisplayInOneRow(x, y, (uint8_t*)s);
+    bsWriteBuffRow(x, y, s);
 
     return 0;
 }
@@ -90,7 +92,7 @@ static int writeString(displayPort_t *displayPort, uint8_t x, uint8_t y, const c
 static int writeChar(displayPort_t *displayPort, uint8_t x, uint8_t y, uint8_t c)
 {
     UNUSED(displayPort);
-    bsSetDisplayOneChar(x, y, c);
+    bsWriteBuffChar(x, y, c);
 
     return 0;
 }
@@ -109,6 +111,7 @@ static bool isSynced(const displayPort_t *displayPort)
 
 static void resync(displayPort_t *displayPort)
 {
+    bsDisplayAllScreen();
     UNUSED(displayPort);
 }
 
@@ -147,9 +150,11 @@ displayPort_t *beesignDisplayPortInit(const vcdProfile_t *vcdProfile)
 
     bsSetOsdHosOffset(vcdProfile -> h_offset);
     bsSetOsdVosOffset(vcdProfile -> v_offset);
+    bsSetOsdMode(BEESIGN_OSD_MODE_CUSTOM);
+    delayMicroseconds(1000000);
     displayInit(&beesignDisplayPort, &beesignVTable);
 
-    resync(&beesignDisplayPort);
+    // resync(&beesignDisplayPort);
     return &beesignDisplayPort;
 }
 #endif // USE_OSD_BEESIGN

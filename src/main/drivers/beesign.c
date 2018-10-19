@@ -37,6 +37,7 @@
 #include "cms/cms_menu_vtx_tramp.h"
 
 #include "drivers/beesign.h"
+#include "drivers/time.h"
 #include "drivers/vtx_common.h"
 
 #include "io/serial.h"
@@ -51,6 +52,7 @@ static uint8_t receiveFrame[BEESIGN_FM_MAX_LEN];
 static uint8_t receiveFrameValid = 0;
 static serialPort_t *beesignSerialPort = NULL;
 
+#define MAX_CHARS2UPDATE        100
 #define POLY                    (0xB2)
 #define CALC_CRC(crc, data)     do {                                                        \
                                     crc ^= (data);                                          \
@@ -196,13 +198,17 @@ uint8_t beesignSend(uint8_t id, uint8_t len, uint8_t *pData) {
     package.crc = beesignCRC(&package);
 
     serialWrite(beesignSerialPort, package.hdr);
+    delayMicroseconds(100);
     serialWrite(beesignSerialPort, package.type);
+    delayMicroseconds(100);
     serialWrite(beesignSerialPort, package.len);
+    delayMicroseconds(100);
     for (uint8_t i = 0; i < len; i++) {
         serialWrite(beesignSerialPort, *(package.payload + i));
+        delayMicroseconds(100);
     }
     serialWrite(beesignSerialPort, package.crc);
-
+    delayMicroseconds(1000);
     return BEESIGN_OK;
 }
 
@@ -278,6 +284,10 @@ void bsGetVtxState(void) {
 
 /********************************** BEESIGN OSD ********************************************/
 #if defined(USE_OSD_BEESIGN)
+
+static uint8_t screenBuffer[BEESIGN_CHARS_PER_SCREEN];
+static uint8_t shadowBuffer[BEESIGN_CHARS_PER_SCREEN];
+
 void bsSetOsdMode(uint8_t mode) {
     if (mode > BEESIGN_OSD_MODE_CUSTOM) {
         mode = BEESIGN_OSD_MODE_OFF;
@@ -301,7 +311,7 @@ void bsSetOsdVosOffset(uint8_t offset) {
 
 void bsSetDisplayContentOneFrame(uint8_t pos, uint8_t *data, uint8_t len) {
     uint8_t s[BEESIGN_PL_MAX_LEN];
-    if (pos > BEESIGN_OSD_POS_MAX) {
+    if (pos >= BEESIGN_CHARS_PER_SCREEN) {
         return;
     }
     if (len > BEESIGN_PL_MAX_LEN - 1) {
@@ -311,14 +321,14 @@ void bsSetDisplayContentOneFrame(uint8_t pos, uint8_t *data, uint8_t len) {
     for (int i = 0; i < len; i++) {
         s[i + 1] = data[i];
     }
-    beesignSend(BEESIGN_O_SET_DISPLAY, len, s);
+    beesignSend(BEESIGN_O_SET_DISPLAY, len + 1, s);
 }
 
 void bsSetDisplayOneChar(uint8_t x, uint8_t y, uint8_t data) {
-    if (y > BEESIGN_LINES_PER_SCREEN) {
+    if (y >= BEESIGN_LINES_PER_SCREEN) {
         return;
     }
-    if (x > BEESIGN_CHARS_PER_LINE) {
+    if (x >= BEESIGN_CHARS_PER_LINE) {
         return;
     }
     bsSetDisplayContentOneFrame(y * BEESIGN_CHARS_PER_LINE + x, &data, 1);
@@ -326,7 +336,7 @@ void bsSetDisplayOneChar(uint8_t x, uint8_t y, uint8_t data) {
 
 void bsSetDisplayInOneRow(uint8_t x, uint8_t y, uint8_t *data) {
     int i = 0;
-    if (y > BEESIGN_LINES_PER_SCREEN) {
+    if (y >= BEESIGN_LINES_PER_SCREEN) {
         return;
     }
     for (i = 0; *(data+i); i++) {
@@ -337,8 +347,59 @@ void bsSetDisplayInOneRow(uint8_t x, uint8_t y, uint8_t *data) {
     bsSetDisplayContentOneFrame(y * BEESIGN_CHARS_PER_LINE + x, data, i);
 }
 
+void beClearScreenBuff(void) {
+    memset(screenBuffer, 0x20, BEESIGN_CHARS_PER_SCREEN);
+}
+
+void bsWriteBuffChar(uint8_t x, uint8_t y, uint8_t c)
+{
+    if (y >= BEESIGN_LINES_PER_SCREEN) {
+        return;
+    }
+    if (x >= BEESIGN_CHARS_PER_LINE) {
+        return;
+    }
+    screenBuffer[y*BEESIGN_CHARS_PER_LINE+x] = c;
+}
+
+void bsWriteBuffRow(uint8_t x, uint8_t y, const char *buff)
+{
+    if (y >= BEESIGN_LINES_PER_SCREEN) {
+        return;
+    }
+    if (x >= BEESIGN_CHARS_PER_LINE) {
+        return;
+    }
+    for (int i = 0; *(buff+i); i++) {
+        if (x+i < BEESIGN_CHARS_PER_LINE) {// Do not write over screen
+            screenBuffer[y*BEESIGN_CHARS_PER_LINE+x+i] = *(buff+i);
+        }
+    }
+}
+
+void bsDisplay(void) {
+    uint8_t pos = 0;
+    uint8_t seriaBuff[2];
+    for (int i = 0; i < BEESIGN_CHARS_PER_SCREEN; i++) {
+        if (screenBuffer[pos] != shadowBuffer[pos]) {
+            seriaBuff[0] = pos;
+            seriaBuff[1] = screenBuffer[pos];
+            beesignSend(BEESIGN_O_SET_DISPLAY, 2, seriaBuff);
+            shadowBuffer[pos] = screenBuffer[pos];
+        }
+    }
+}
+
+void bsDisplayAllScreen(void) {
+    for (int i = 0; i < BEESIGN_LINES_PER_SCREEN;i++) {
+        bsSetDisplayContentOneFrame(i * BEESIGN_CHARS_PER_LINE, &screenBuffer[BEESIGN_CHARS_PER_LINE * i], BEESIGN_CHARS_PER_LINE);
+        delayMicroseconds(100000);
+    }
+}
+
 void bsClearDispaly(void) {
-    beesignSend(BEESIGN_O_CLR_DISPLAY, 0, NULL);
+    uint8_t clrData = 0;
+    beesignSend(BEESIGN_O_CLR_DISPLAY, 1, &clrData);
 }
 
 void bsUpdateCharacterFont(uint8_t id, uint8_t *data) {

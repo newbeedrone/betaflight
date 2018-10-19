@@ -92,7 +92,7 @@
 #define BEESIGN_OSD_HOS_MAX         63
 #define BEESIGN_OSD_VOS_MAX         31
 
-#define BEESIGN_OSD_POS_MAX         249
+#define BEESIGN_CHARS_PER_SCREEN         250
 
 #define BEESIGN_CHARS_MAX                   0xBF
 #define BEESIGN_CHARS_UNLOCK_ADDR_MIN       0xA0
@@ -186,6 +186,11 @@ void bsSetFreq(uint16_t freq);
 void bsSetOsdMode(uint8_t mode);
 void bsSetOsdHosOffset(uint8_t offset);
 void bsSetOsdVosOffset(uint8_t offset);
+void beClearScreenBuff(void);
+void bsWriteBuffChar(uint8_t x, uint8_t y, uint8_t c);
+void bsWriteBuffRow(uint8_t x, uint8_t y, const char *buff);
+void bsDisplay(void);
+void bsDisplayAllScreen(void);
 void bsSetDisplayContentOneFrame(uint8_t pos, uint8_t *data, uint8_t len);
 void bsSetDisplayOneChar(uint8_t x, uint8_t y, uint8_t data);
 void bsSetDisplayInOneRow(uint8_t x, uint8_t y, uint8_t *data);
