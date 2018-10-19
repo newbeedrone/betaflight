@@ -151,6 +151,7 @@ COMMON_SRC = \
             drivers/vtx_common.c \
             drivers/vtx_table.c \
             io/dashboard.c \
+            io/displayport_beesign.c \
             io/displayport_max7456.c \
             io/displayport_msp.c \
             io/displayport_oled.c \
