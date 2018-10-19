@@ -315,7 +315,6 @@ void bsSetDisplayContentOneFrame(uint8_t pos, uint8_t *data, uint8_t len) {
 }
 
 void bsSetDisplayOneChar(uint8_t x, uint8_t y, uint8_t data) {
-    int i;
     if (y > BEESIGN_LINES_PER_SCREEN) {
         return;
     }
@@ -326,11 +325,11 @@ void bsSetDisplayOneChar(uint8_t x, uint8_t y, uint8_t data) {
 }
 
 void bsSetDisplayInOneRow(uint8_t x, uint8_t y, uint8_t *data) {
-    int i;
+    int i = 0;
     if (y > BEESIGN_LINES_PER_SCREEN) {
         return;
     }
-    for (i = 0; *(buff+i); i++) {
+    for (i = 0; *(data+i); i++) {
         if (x + i > BEESIGN_CHARS_PER_LINE) {
             break;
         }

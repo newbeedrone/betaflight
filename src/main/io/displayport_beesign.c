@@ -35,6 +35,8 @@
 #include "io/displayport_beesign.h"
 #include "io/osd.h"
 
+#include "pg/vcd.h"
+
 displayPort_t beesignDisplayPort;
 
 static int grab(displayPort_t *displayPort)
@@ -80,7 +82,7 @@ static int screenSize(const displayPort_t *displayPort)
 static int writeString(displayPort_t *displayPort, uint8_t x, uint8_t y, const char *s)
 {
     UNUSED(displayPort);
-    bsSetDisplayInOneRow(x, y, s);
+    bsSetDisplayInOneRow(x, y, (uint8_t*)s);
 
     return 0;
 }
@@ -143,7 +145,7 @@ displayPort_t *beesignDisplayPortInit(const vcdProfile_t *vcdProfile)
         return NULL;
     }
 
-    bsSetOsdHolOffset(vcdProfile -> h_offset);
+    bsSetOsdHosOffset(vcdProfile -> h_offset);
     bsSetOsdVosOffset(vcdProfile -> v_offset);
     displayInit(&beesignDisplayPort, &beesignVTable);
 
