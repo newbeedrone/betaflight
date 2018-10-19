@@ -206,6 +206,7 @@ uint8_t beesignSend(uint8_t id, uint8_t len, uint8_t *pData) {
     return BEESIGN_OK;
 }
 
+/********************************** BEESIGN VTX ********************************************/
 void bsSetVTxUnlock(void) {
     uint16_t unlock = BEESIGN_VTX_UNLOCK;
     uint8_t unlockData[2] = {unlock >> 8, unlock};
@@ -272,6 +273,93 @@ void bsGetVtxState(void) {
     uint8_t buf = '0';
     beesignSend(BEESIGN_V_GET_STATUS, 1, &buf);
 }
+
+/******************************** BEESIGN VTX END ******************************************/
+
+/********************************** BEESIGN OSD ********************************************/
+#if defined(USE_OSD_BEESIGN)
+void bsSetOsdMode(uint8_t mode) {
+    if (mode > BEESIGN_OSD_MODE_CUSTOM) {
+        mode = BEESIGN_OSD_MODE_OFF;
+    }
+    beesignSend(BEESIGN_O_SET_MODE, 1, &mode);
+}
+
+void bsSetOsdHosOffset(uint8_t offset) {
+    if (offset > BEESIGN_OSD_HOS_MAX) {
+        offset = BEESIGN_OSD_HOS_MAX;
+    }
+    beesignSend(BEESIGN_O_SET_HOS, 1, &offset);
+}
+
+void bsSetOsdVosOffset(uint8_t offset) {
+    if (offset > BEESIGN_OSD_VOS_MAX) {
+        offset = BEESIGN_OSD_VOS_MAX;
+    }
+    beesignSend(BEESIGN_O_SET_VOS, 1, &offset);
+}
+
+void bsSetDisplayContentOneFrame(uint8_t pos, uint8_t *data, uint8_t len) {
+    uint8_t s[BEESIGN_PL_MAX_LEN];
+    if (pos > BEESIGN_OSD_POS_MAX) {
+        return;
+    }
+    if (len > BEESIGN_PL_MAX_LEN - 1) {
+        len = BEESIGN_PL_MAX_LEN - 1;
+    }
+    s[0] = pos;
+    for (int i = 0; i < len; i++) {
+        s[i + 1] = data[i];
+    }
+    beesignSend(BEESIGN_O_SET_DISPLAY, len, s);
+}
+
+void bsSetDisplayOneChar(uint8_t x, uint8_t y, uint8_t data) {
+    int i;
+    if (y > BEESIGN_LINES_PER_SCREEN) {
+        return;
+    }
+    if (x > BEESIGN_CHARS_PER_LINE) {
+        return;
+    }
+    bsSetDisplayContentOneFrame(y * BEESIGN_CHARS_PER_LINE + x, &data, 1);
+}
+
+void bsSetDisplayInOneRow(uint8_t x, uint8_t y, uint8_t *data) {
+    int i;
+    if (y > BEESIGN_LINES_PER_SCREEN) {
+        return;
+    }
+    for (i = 0; *(buff+i); i++) {
+        if (x + i > BEESIGN_CHARS_PER_LINE) {
+            break;
+        }
+    }
+    bsSetDisplayContentOneFrame(y * BEESIGN_CHARS_PER_LINE + x, data, i);
+}
+
+void bsClearDispaly(void) {
+    beesignSend(BEESIGN_O_CLR_DISPLAY, 0, NULL);
+}
+
+void bsUpdateCharacterFont(uint8_t id, uint8_t *data) {
+    uint8_t sendData[BEESIGN_CHARS_FONT_LEN + 1];
+    uint16_t unlockData = BEESIGN_CHARS_UNLOCK;
+    if (id > BEESIGN_CHARS_MAX) {
+        return;
+    }
+    if (id < BEESIGN_CHARS_UNLOCK_ADDR_MIN) {
+        uint8_t buf[2] = {unlockData >> 8, unlockData & 0x00FF};
+        beesignSend(BEESIGN_O_FONT_UNLOCK, 2, buf);
+    }
+    *sendData = id;
+    memcpy(&sendData[1], data, BEESIGN_CHARS_FONT_LEN);
+    beesignSend(BEESIGN_O_UDT_FONT, BEESIGN_CHARS_FONT_LEN + 1, sendData);
+}
+
+
+#endif //defined(USE_OSD_BEESIGN)
+/******************************** BEESIGN OSD END ******************************************/
 
 bool beesignInit(void)
 {

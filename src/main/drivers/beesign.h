@@ -89,6 +89,19 @@
 #define BEESIGN_OSD_MODE_MINI       1
 #define BEESIGN_OSD_MODE_CUSTOM     2
 
+#define BEESIGN_OSD_HOS_MAX         63
+#define BEESIGN_OSD_VOS_MAX         31
+
+#define BEESIGN_OSD_POS_MAX         249
+
+#define BEESIGN_CHARS_MAX                   0xBF
+#define BEESIGN_CHARS_UNLOCK_ADDR_MIN       0xA0
+#define BEESIGN_CHARS_UNLOCK                0xABBA
+#define BEESIGN_CHARS_FONT_LEN              36
+#define BEESIGN_CHARS_PER_LINE              25
+#define BEESIGN_LINES_PER_SCREEN            10
+
+
 // VTX commands
 #define BEESIGN_V_GET_STATUS    0x10
 #define BEESIGN_V_SET_CHAN      0x11
@@ -107,7 +120,6 @@
 #define BEESIGN_O_SET_DISPLAY   0x25
 #define BEESIGN_O_CLR_DISPLAY   0x26
 #define BEESIGN_O_UDT_FONT      0x27
-
 #define BEESIGN_O_FONT_UNLOCK   0x29
 
 // Audio commands
@@ -170,3 +182,12 @@ void bsSetBandAndChannel(uint8_t band, uint8_t channel);
 void bsSetPower(uint8_t index);
 void bsSetMode(uint8_t mode);
 void bsSetFreq(uint16_t freq);
+
+void bsSetOsdMode(uint8_t mode);
+void bsSetOsdHosOffset(uint8_t offset);
+void bsSetOsdVosOffset(uint8_t offset);
+void bsSetDisplayContentOneFrame(uint8_t pos, uint8_t *data, uint8_t len);
+void bsSetDisplayOneChar(uint8_t x, uint8_t y, uint8_t data);
+void bsSetDisplayInOneRow(uint8_t x, uint8_t y, uint8_t *data);
+void bsClearDispaly(void);
+void bsUpdateCharacterFont(uint8_t id, uint8_t *data);
