@@ -63,7 +63,7 @@ static int clearScreen(displayPort_t *displayPort)
 {
     UNUSED(displayPort);
 
-    beClearScreenBuff();
+    bsClearScreenBuff();
 
     return 0;
 }
@@ -106,13 +106,15 @@ static bool isTransferInProgress(const displayPort_t *displayPort)
 static bool isSynced(const displayPort_t *displayPort)
 {
     UNUSED(displayPort);
-    return true;
+    return bsBuffersSynced();
 }
 
 static void resync(displayPort_t *displayPort)
 {
     bsDisplayAllScreen();
     UNUSED(displayPort);
+    displayPort->rows = BEESIGN_LINES_PER_SCREEN;
+    displayPort->cols = BEESIGN_CHARS_PER_LINE;
 }
 
 static int heartbeat(displayPort_t *displayPort)
