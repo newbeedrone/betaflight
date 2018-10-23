@@ -198,17 +198,13 @@ uint8_t beesignSend(uint8_t id, uint8_t len, uint8_t *pData) {
     package.crc = beesignCRC(&package);
 
     serialWrite(beesignSerialPort, package.hdr);
-    delayMicroseconds(100);
     serialWrite(beesignSerialPort, package.type);
-    delayMicroseconds(100);
     serialWrite(beesignSerialPort, package.len);
-    delayMicroseconds(100);
     for (uint8_t i = 0; i < len; i++) {
         serialWrite(beesignSerialPort, *(package.payload + i));
-        delayMicroseconds(100);
     }
     serialWrite(beesignSerialPort, package.crc);
-    delayMicroseconds(1000);
+    delayMicroseconds(50000);
     return BEESIGN_OK;
 }
 
@@ -285,8 +281,8 @@ void bsGetVtxState(void) {
 /********************************** BEESIGN OSD ********************************************/
 #if defined(USE_OSD_BEESIGN)
 
-static uint8_t screenBuffer[BEESIGN_CHARS_PER_SCREEN];
-static uint8_t shadowBuffer[BEESIGN_CHARS_PER_SCREEN];
+static uint8_t bsScreenBuffer[BEESIGN_CHARS_PER_SCREEN];
+static uint8_t bsShadowBuffer[BEESIGN_CHARS_PER_SCREEN];
 
 void bsSetOsdMode(uint8_t mode) {
     if (mode > BEESIGN_OSD_MODE_CUSTOM) {
@@ -296,6 +292,7 @@ void bsSetOsdMode(uint8_t mode) {
 }
 
 void bsSetOsdHosOffset(uint8_t offset) {
+    offset += 4;
     if (offset > BEESIGN_OSD_HOS_MAX) {
         offset = BEESIGN_OSD_HOS_MAX;
     }
@@ -303,10 +300,16 @@ void bsSetOsdHosOffset(uint8_t offset) {
 }
 
 void bsSetOsdVosOffset(uint8_t offset) {
+    offset += 25;
     if (offset > BEESIGN_OSD_VOS_MAX) {
         offset = BEESIGN_OSD_VOS_MAX;
     }
     beesignSend(BEESIGN_O_SET_VOS, 1, &offset);
+}
+
+void bsClearDispaly(void) {
+    uint8_t clrData = 0;
+    beesignSend(BEESIGN_O_CLR_DISPLAY, 1, &clrData);
 }
 
 void bsSetDisplayContentOneFrame(uint8_t pos, uint8_t *data, uint8_t len) {
@@ -347,8 +350,8 @@ void bsSetDisplayInOneRow(uint8_t x, uint8_t y, uint8_t *data) {
     bsSetDisplayContentOneFrame(y * BEESIGN_CHARS_PER_LINE + x, data, i);
 }
 
-void beClearScreenBuff(void) {
-    memset(screenBuffer, 0x20, BEESIGN_CHARS_PER_SCREEN);
+void bsClearScreenBuff(void) {
+    memset(bsScreenBuffer, 0x20, BEESIGN_CHARS_PER_SCREEN);
 }
 
 void bsWriteBuffChar(uint8_t x, uint8_t y, uint8_t c)
@@ -359,7 +362,7 @@ void bsWriteBuffChar(uint8_t x, uint8_t y, uint8_t c)
     if (x >= BEESIGN_CHARS_PER_LINE) {
         return;
     }
-    screenBuffer[y*BEESIGN_CHARS_PER_LINE+x] = c;
+    bsScreenBuffer[y*BEESIGN_CHARS_PER_LINE+x] = c;
 }
 
 void bsWriteBuffRow(uint8_t x, uint8_t y, const char *buff)
@@ -372,34 +375,63 @@ void bsWriteBuffRow(uint8_t x, uint8_t y, const char *buff)
     }
     for (int i = 0; *(buff+i); i++) {
         if (x+i < BEESIGN_CHARS_PER_LINE) {// Do not write over screen
-            screenBuffer[y*BEESIGN_CHARS_PER_LINE+x+i] = *(buff+i);
+            bsScreenBuffer[y*BEESIGN_CHARS_PER_LINE+x+i] = *(buff+i);
         }
     }
 }
 
 void bsDisplay(void) {
-    uint8_t pos = 0;
-    uint8_t seriaBuff[2];
+    uint8_t buffStartPos = 0xFF;
+    uint8_t buffEndPos = 0xFF;
+    uint8_t seriaBuff[BEESIGN_CHARS_PER_LINE + 1];
     for (int i = 0; i < BEESIGN_CHARS_PER_SCREEN; i++) {
-        if (screenBuffer[pos] != shadowBuffer[pos]) {
-            seriaBuff[0] = pos;
-            seriaBuff[1] = screenBuffer[pos];
-            beesignSend(BEESIGN_O_SET_DISPLAY, 2, seriaBuff);
-            shadowBuffer[pos] = screenBuffer[pos];
+        if (bsScreenBuffer[i] != bsShadowBuffer[i]) {
+            if (buffStartPos == 0xFF) {
+                buffStartPos = i;
+            }
+            seriaBuff[i - buffStartPos + 1] = bsScreenBuffer[i];
+            if (i - buffStartPos + 1 >= BEESIGN_CHARS_PER_LINE) {
+                seriaBuff[0] = buffStartPos;
+                beesignSend(BEESIGN_O_SET_DISPLAY, i - buffStartPos + 2, seriaBuff);
+                buffStartPos = 0xFF;
+            }
+            buffEndPos = i;
+            bsShadowBuffer[i] = bsScreenBuffer[i];
+        } else {
+            if ((buffStartPos != 0xFF)) {
+                if (i - buffStartPos + 1 < 10) {
+                    seriaBuff[i - buffStartPos + 1] = bsScreenBuffer[i];
+                } else {
+                    seriaBuff[0] = buffStartPos;
+                    beesignSend(BEESIGN_O_SET_DISPLAY, buffEndPos - buffStartPos + 2, seriaBuff);
+                    buffStartPos = 0xFF;
+                }
+                
+            }
         }
+    }
+    if (buffStartPos != 0xFF) {
+        seriaBuff[0] = buffStartPos;
+        beesignSend(BEESIGN_O_SET_DISPLAY, buffEndPos - buffStartPos + 2, seriaBuff);
+        buffStartPos = 0xFF;
     }
 }
 
 void bsDisplayAllScreen(void) {
     for (int i = 0; i < BEESIGN_LINES_PER_SCREEN;i++) {
-        bsSetDisplayContentOneFrame(i * BEESIGN_CHARS_PER_LINE, &screenBuffer[BEESIGN_CHARS_PER_LINE * i], BEESIGN_CHARS_PER_LINE);
-        delayMicroseconds(100000);
+        bsSetDisplayContentOneFrame(i * BEESIGN_CHARS_PER_LINE, &bsScreenBuffer[BEESIGN_CHARS_PER_LINE * i], BEESIGN_CHARS_PER_LINE);
     }
+    memcpy(bsShadowBuffer, bsScreenBuffer, BEESIGN_CHARS_PER_SCREEN);
 }
 
-void bsClearDispaly(void) {
-    uint8_t clrData = 0;
-    beesignSend(BEESIGN_O_CLR_DISPLAY, 1, &clrData);
+bool bsBuffersSynced(void)
+{
+    for (int i = 0; i < BEESIGN_CHARS_PER_SCREEN; i++) {
+        if (bsScreenBuffer[i] != bsShadowBuffer[i]) {
+            return false;
+        }
+    }
+    return true;
 }
 
 void bsUpdateCharacterFont(uint8_t id, uint8_t *data) {
