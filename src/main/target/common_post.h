@@ -139,11 +139,8 @@
 #undef USE_VTX_CONTROL
 #undef USE_VTX_TRAMP
 #undef USE_VTX_SMARTAUDIO
-<<<<<<< HEAD
 #undef USE_VTX_TABLE
-=======
 #undef USE_VTX_BEESIGN
->>>>>>> 942d94150... define beesign, if define rtc6705, undef beesign
 #endif
 
 #if defined(USE_RX_FRSKY_SPI_D) || defined(USE_RX_FRSKY_SPI_X)
@@ -210,6 +207,10 @@
 #undef USE_RX_LINK_QUALITY_INFO
 #undef USE_OSD_PROFILES
 #undef USE_OSD_STICK_OVERLAY
+#endif
+
+#if defined(USE_OSD_BEESIGN)
+#define USE_OSD
 #endif
 
 #if defined(USE_GPS_RESCUE)
