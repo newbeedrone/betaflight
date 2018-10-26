@@ -22,17 +22,5 @@
 
 #include <stdint.h>
 
-typedef struct beeSignDevice_s {
-    uint8_t version;
-    uint8_t channel;
-    uint8_t power;
-    uint8_t lastPower;
-    uint8_t mode;
-    uint16_t freq;
-    uint16_t porfreq;
-} beeSignDevice_t;
-
-extern beeSignDevice_t bsDevice;
-
 bool beesignVtxInit(void);
 void beesignProcess(timeUs_t currentTimeUs);

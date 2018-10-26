@@ -74,15 +74,6 @@ static vtxDevice_t vtxBeesign = {
 };
 #endif
 
-beeSignDevice_t bsDevice = {
-    .version = 1,
-    .channel = -1,
-    .power = -1,
-    .mode = 0,
-    .freq = 0,
-    .porfreq = 0,
-};
-
 void vtxBSProcess(vtxDevice_t *vtxDevice, timeUs_t currentTimeUs)
 {
     UNUSED(vtxDevice);

@@ -165,9 +165,20 @@ typedef struct BEESIGN_FRAME_T {
     uint8_t crc;
 } beesign_frame_t;
 
+typedef struct beeSignDevice_s {
+    uint8_t version;
+    uint8_t channel;
+    uint8_t power;
+    uint8_t lastPower;
+    uint8_t mode;
+    uint16_t freq;
+    uint16_t porfreq;
+} beeSignDevice_t;
+
 extern const char * const bsPowerNames[];
 extern const char * const bsModeNames[];
 extern const uint16_t bsPowerTable[];
+extern beeSignDevice_t bsDevice;
 
 bool beesignInit(void);
 bool checkBeesignSerialPort(void);

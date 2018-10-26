@@ -66,6 +66,15 @@ static serialPort_t *beesignSerialPort = NULL;
                                     crc = (crc & 1) ? ((crc >> 1) ^ POLY) : (crc >> 1);     \
                                 } while (0)
 
+beeSignDevice_t bsDevice = {
+    .version = 1,
+    .channel = -1,
+    .power = -1,
+    .mode = 0,
+    .freq = 0,
+    .porfreq = 0,
+};
+
 typedef enum {
     BS_STATE_HDR = 0,
     BS_STATE_TYPE,
