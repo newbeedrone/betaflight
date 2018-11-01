@@ -219,17 +219,19 @@ uint8_t beesignSend(uint8_t id, uint8_t len, uint8_t *pData) {
 
 /********************************** BEESIGN VTX ********************************************/
 void bsSetVTxUnlock(void) {
+    uint8_t vtxSaveData = 0;
     uint16_t unlock = BEESIGN_VTX_UNLOCK;
     uint8_t unlockData[2] = {unlock >> 8, unlock};
     beesignSend(BEESIGN_V_UNLOCK, 2, unlockData);
-    beesignSend(BEESIGN_M_SAVE_SETTING, 1, 0);
+    beesignSend(BEESIGN_M_SAVE_SETTING, 1, &vtxSaveData);
 }
 
 void bsSetVTxLock(void) {
+    uint8_t vtxSaveData = 0;
     uint16_t lock = BEESIGN_VTX_LOCK;
     uint8_t lockData[2] = {lock >> 8, lock};
     beesignSend(BEESIGN_V_LOCK, 2, lockData);
-    beesignSend(BEESIGN_M_SAVE_SETTING, 1, 0);
+    beesignSend(BEESIGN_M_SAVE_SETTING, 1, &vtxSaveData);
 }
 
 bool bsValidateBandAndChannel(uint8_t band, uint8_t channel)
