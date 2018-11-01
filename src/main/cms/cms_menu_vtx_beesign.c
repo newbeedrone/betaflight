@@ -100,7 +100,7 @@ static long bsCmsConfigRaceSave(displayPort_t *pDisp, const void *self)
     UNUSED(pDisp);
     UNUSED(self);
 
-    bsSetMode(BEESIGN_VTX_RACE_MODE);
+    bsSetVtxMode(BEESIGN_VTX_RACE_MODE);
     vtxSettingsConfigMutable()->band = bs_vtxBand + 1;
     vtxSettingsConfigMutable()->channel = bs_vtxChannel;
     vtxSettingsConfigMutable()->power = bs_vtxPower + BEESIGN_MIN_POWER;
@@ -115,7 +115,7 @@ static long bsCmsConfigManualSave(displayPort_t *pDisp, const void *self)
     UNUSED(pDisp);
     UNUSED(self);
 
-    bsSetMode(BEESIGN_VTX_MANUAL_MODE);
+    bsSetVtxMode(BEESIGN_VTX_MANUAL_MODE);
     vtxSettingsConfigMutable()->band = 0;
     vtxSettingsConfigMutable()->channel = bs_vtxChannel;
     vtxSettingsConfigMutable()->power = bs_vtxPower + BEESIGN_MIN_POWER;
@@ -130,7 +130,7 @@ static long bsCmsConfigPorSave(displayPort_t *pDisp, const void *self)
     UNUSED(pDisp);
     UNUSED(self);
 
-    bsSetMode(BEESIGN_VTX_POR_MODE);
+    bsSetVtxMode(BEESIGN_VTX_POR_MODE);
     vtxSettingsConfigMutable()->band = 0;
     vtxSettingsConfigMutable()->channel = bs_vtxChannel;
     vtxSettingsConfigMutable()->power = VTX_PWR_PIT + BEESIGN_MIN_POWER;

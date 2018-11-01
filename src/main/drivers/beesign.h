@@ -191,7 +191,7 @@ bool bsValidateFreq(uint16_t freq);
 bool bsValidateBandAndChannel(uint8_t band, uint8_t channel);
 void bsSetBandAndChannel(uint8_t band, uint8_t channel);
 void bsSetPower(uint8_t index);
-void bsSetMode(uint8_t mode);
+void bsSetVtxMode(uint8_t mode);
 void bsSetFreq(uint16_t freq);
 
 void bsSetOsdMode(uint8_t mode);

@@ -257,7 +257,7 @@ void bsSetPower(uint8_t index)
     beesignSend(BEESIGN_V_SET_PWR, 1, &index);
 }
 
-void bsSetMode(uint8_t mode)
+void bsSetVtxMode(uint8_t mode)
 {
     if (mode > 2) return;
     bsDevice.mode = mode;
