@@ -1,0 +1,1 @@
+# BEEBRAIN_BL_6500_SBUS_INTL is used mou6500, sbus receiver and vtx not lock
