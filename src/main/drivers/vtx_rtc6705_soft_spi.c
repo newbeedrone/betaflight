@@ -70,8 +70,13 @@
 static IO_t vtxPowerPin     = IO_NONE;
 #endif
 
+#ifdef RTC6705_POWER_PIN_HIGH_ENABLE
+#define ENABLE_VTX_POWER()          IOHi(vtxPowerPin)
+#define DISABLE_VTX_POWER()         IOLo(vtxPowerPin)
+#else
 #define ENABLE_VTX_POWER()          IOLo(vtxPowerPin)
 #define DISABLE_VTX_POWER()         IOHi(vtxPowerPin)
+#endif
 
 static IO_t rtc6705DataPin = IO_NONE;
 static IO_t rtc6705CsnPin = IO_NONE;
