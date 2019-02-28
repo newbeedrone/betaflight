@@ -31,6 +31,7 @@
 #include "common/time.h"
 
 #include "drivers/vtx_common.h"
+#include "drivers/usb_io.h"
 
 #include "fc/config.h"
 #include "fc/rc_modes.h"
@@ -164,9 +165,14 @@ static bool vtxProcessFrequency(vtxDevice_t *vtxDevice)
 
 static bool vtxProcessPower(vtxDevice_t *vtxDevice)
 {
+    bool isUsbInserted = usbCableIsInserted();
+    bool isPitModeValid = IS_RC_MODE_ACTIVE(BOXVTXPITMODE) && isModeActivationConditionPresent(BOXVTXPITMODE);
     uint8_t vtxPower;
     if (vtxCommonGetPowerIndex(vtxDevice, &vtxPower)) {
-        const vtxSettingsConfig_t settings = vtxGetSettings();
+        vtxSettingsConfig_t settings = vtxGetSettings();
+        if (isUsbInserted || isPitModeValid) {
+            settings.power = 0;
+        }
         if (vtxPower != settings.power) {
             vtxCommonSetPowerByIndex(vtxDevice, settings.power);
             return true;
@@ -231,6 +237,7 @@ static bool vtxProcessStateUpdate(vtxDevice_t *vtxDevice)
 void vtxUpdate(timeUs_t currentTimeUs)
 {
     static uint8_t currentSchedule = 0;
+    
 
     if (cliMode) {
         return;
@@ -238,8 +245,11 @@ void vtxUpdate(timeUs_t currentTimeUs)
 
     vtxDevice_t *vtxDevice = vtxCommonDevice();
     if (vtxDevice) {
+        
         // Check input sources for config updates
         vtxControlInputPoll();
+
+        
 
         const uint8_t startingSchedule = currentSchedule;
         bool vtxUpdatePending = false;
