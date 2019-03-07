@@ -299,6 +299,18 @@ rx_spi_received_e sfhssSpiDataReceived(uint8_t *packet)
     static uint8_t frame_recvd = 0;
     timeUs_t currentPacketReceivedTime;
     rx_spi_received_e ret = RX_SPI_RECEIVED_NONE;
+    static uint32_t ledBindBlinkTime = 0;
+
+    if (protocolState == STATE_INIT ||
+        protocolState == STATE_BIND ||
+        protocolState == STATE_BIND_TUNING1 ||
+        protocolState == STATE_BIND_TUNING2 ||
+        protocolState == STATE_BIND_TUNING3) {
+        if (millis() - ledBindBlinkTime > 100) {
+            ledBindBlinkTime = millis();
+            rxSpiLedToggle();
+        }
+    }
 
     currentPacketReceivedTime = micros();
     switch (protocolState) {
