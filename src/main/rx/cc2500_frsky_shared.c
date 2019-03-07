@@ -315,6 +315,18 @@ static bool getBind2(uint8_t *packet)
 rx_spi_received_e frSkySpiDataReceived(uint8_t *packet)
 {
     rx_spi_received_e ret = RX_SPI_RECEIVED_NONE;
+    static uint32_t ledBindBlinkTime = 0;
+
+    if (protocolState == STATE_INIT ||
+        protocolState == STATE_BIND ||
+        protocolState == STATE_BIND_TUNING ||
+        protocolState == STATE_BIND_BINDING1 ||
+        protocolState == STATE_BIND_BINDING2) {
+        if (millis() - ledBindBlinkTime > 100) {
+            ledBindBlinkTime = millis();
+            rxSpiLedToggle();
+        }
+    }
 
     switch (protocolState) {
     case STATE_INIT:
