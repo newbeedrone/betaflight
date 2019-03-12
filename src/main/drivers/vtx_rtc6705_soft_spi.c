@@ -89,7 +89,7 @@ void rtc6705IOInit(void)
     IOInit(vtxPowerPin, OWNER_VTX, 0);
 
     DISABLE_VTX_POWER();
-    IOConfigGPIO(vtxPowerPin, IOCFG_OUT_PP);
+    IOConfigGPIO(vtxPowerPin, IOCFG_OUT_OD);
 #endif
 
     rtc6705DataPin = IOGetByTag(IO_TAG(RTC6705_SPI_MOSI_PIN));
