@@ -262,7 +262,7 @@ void initActiveBoxIds(void)
     BME(BOXCAMERA3);
 #endif
 
-#if defined(USE_VTX_SMARTAUDIO) || defined(USE_VTX_TRAMP)
+#if defined(USE_VTX_SMARTAUDIO) || defined(USE_VTX_TRAMP) || defined(USE_RTC6705_PITMODE_CTRL)
     BME(BOXVTXPITMODE);
     BME(BOXVTXCONTROLDISABLE);
 #endif
