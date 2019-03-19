@@ -80,6 +80,12 @@ uint32_t gyroSetSampleRate(gyroDev_t *gyro, uint8_t lpf, uint8_t gyroSyncDenomin
         gyroSyncDenominator = 1; // Always full Sampling 1khz
     }
 
+#if defined(NBD_INFINITYF7)
+    gyro->gyroRateKHz = GYRO_RATE_3200_Hz;
+    gyroSamplePeriod = 312.5;
+    gyroSyncDenominator = 1; // Always full Sampling 1khz
+#endif /* defined(NBD_INFINITYF7) */
+
     // calculate gyro divider and targetLooptime (expected cycleTime)
     gyro->mpuDividerDrops  = gyroSyncDenominator - 1;
     const uint32_t targetLooptime = (uint32_t)(gyroSyncDenominator * gyroSamplePeriod);
