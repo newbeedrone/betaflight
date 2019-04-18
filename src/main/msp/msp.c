@@ -2189,7 +2189,7 @@ static mspResult_e mspProcessInCommand(uint8_t cmdMSP, sbuf_t *src)
         sbufReadU8(src);
 #endif
 #if defined(USE_BARO)
-        barometerConfigMutable()->baro_hardware = sbufReadU8(src);
+        //barometerConfigMutable()->baro_hardware = sbufReadU8(src);
 #else
         sbufReadU8(src);
 #endif
