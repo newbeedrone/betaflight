@@ -1014,7 +1014,7 @@ static void osdElementVtxChannel(osdElementParms_t *element)
     if (vtxDevice && vtxSettingsConfig()->lowPowerDisarm) {
         vtxCommonGetPowerIndex(vtxDevice, &vtxPower);
     }
-    tfp_sprintf(element->buff, "%c:%s:%1d", vtxBandLetter, vtxChannelName, vtxPower);
+    tfp_sprintf(element->buff, "%c:%s:%s", vtxBandLetter, vtxChannelName, vtxDevice->powerNames[vtxPower]);
 }
 #endif // USE_VTX_COMMON
 
