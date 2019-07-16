@@ -79,6 +79,24 @@
     #define DEFAULT_RX_FEATURE          FEATURE_RX_SERIAL
     #define SERIALRX_UART               SERIAL_PORT_USART2
     #define RX_CHANNELS_TAER
+#elif defined(BEEBRAIN_LITESF)
+    #define USE_RX_SPI
+    #define RX_SPI_INSTANCE             SPI2
+    #define RX_NSS_PIN                  SPI2_NSS_PIN
+    #define RX_SPI_EXTI_PIN             PB2
+    #define RX_SPI_LED_PIN              PA13
+    #define RX_CC2500_SPI_TX_EN_PIN     PB10
+    #define RX_CC2500_SPI_ANT_SEL_PIN   PA7
+    #define BINDPLUG_PIN                PC15
+    #define RX_CC2500_SPI_LNA_EN_PIN    NONE
+    #define DEFAULT_RX_FEATURE          FEATURE_RX_SPI
+    #define RX_SPI_DEFAULT_PROTOCOL     RX_SPI_SFHSS
+    #define USE_RX_FRSKY_SPI_TELEMETRY
+    #define USE_RX_CC2500_SPI_DIVERSITY
+    #define USE_RX_CC2500_SPI_PA_LNA
+    #define USE_RX_FRSKY_SPI_D
+    #define USE_RX_FRSKY_SPI_X
+    #define USE_RX_SFHSS_SPI
 #else
     #define USE_RX_SPI
     #define RX_SPI_INSTANCE             SPI2
