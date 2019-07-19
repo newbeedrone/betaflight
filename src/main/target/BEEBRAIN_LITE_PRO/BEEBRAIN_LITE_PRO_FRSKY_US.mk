@@ -1,0 +1,1 @@
+# BEEBRAIN_LITE_INTL is a variant of BEEBRAIN_LITE with frsky receiver and vtx lock

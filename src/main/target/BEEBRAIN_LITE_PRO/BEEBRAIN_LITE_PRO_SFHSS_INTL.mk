@@ -1,0 +1,1 @@
+# BEEBRAIN_LITESF is a variant of BEEBRAIN_LITE with futaba receiver and vtx not lock
