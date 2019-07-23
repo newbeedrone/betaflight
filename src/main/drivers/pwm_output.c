@@ -32,6 +32,7 @@
 #include "drivers/pwm_output.h"
 #include "drivers/time.h"
 #include "drivers/timer.h"
+#include "config/feature.h"
 
 #include "pg/motor.h"
 
@@ -118,6 +119,13 @@ static void pwmWriteUnused(uint8_t index, float value)
 
 static void pwmWriteStandard(uint8_t index, float value)
 {
+    if(featureIsEnabled(FEATURE_3D)) {
+        if (lrintf(value) - 1500 > 0) {
+            value = (value - 1500) * 2 + 1000;
+        } else {
+            value = (1500 - value) * 2 + 1000;
+        }
+    }
     /* TODO: move value to be a number between 0-1 (i.e. percent throttle from mixer) */
     *motors[index].channel.ccr = lrintf((value * motors[index].pulseScale) + motors[index].pulseOffset);
 }
