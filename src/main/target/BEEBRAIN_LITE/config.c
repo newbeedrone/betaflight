@@ -72,7 +72,7 @@
 
 #define BRUSHED_MOTORS_PWM_RATE 25000           // 25kHz
 
-#if defined(BEEBRAIN_LITED)
+#if (defined(BEEBRAIN_LITED_US) || defined(BEEBRAIN_LITED_INTL))
 #define BB_LITE_RSSI_CH_IDX     9
 #endif
 
@@ -155,7 +155,7 @@ void targetConfiguration(void)
 
     strcpy(pilotConfigMutable()->name, "BeeBrain Lite");
 
-#if defined(BEEBRAIN_LITED)
+#if (defined(BEEBRAIN_LITED_US) || defined(BEEBRAIN_LITED_INTL))
     // DSM version
     rxConfigMutable()->rssi_channel = BB_LITE_RSSI_CH_IDX;
     rxFailsafeChannelConfig_t *channelFailsafeConfig = rxFailsafeChannelConfigsMutable(BB_LITE_RSSI_CH_IDX - 1);

@@ -71,14 +71,14 @@
 #define GYRO_1_ALIGN                    CW90_DEG
 
 // *************** RX ******************************
-#if defined(BEEBRAIN_LITED)
+#if (defined(BEEBRAIN_LITED_US) || defined(BEEBRAIN_LITED_INTL))
     #define SERIALRX_PROVIDER           SERIALRX_SPEKTRUM2048
     #undef  USE_SPEKTRUM_REAL_RSSI
     #undef  USE_SPEKTRUM_FAKE_RSSI
     #define DEFAULT_RX_FEATURE          FEATURE_RX_SERIAL
     #define SERIALRX_UART               SERIAL_PORT_USART2
     #define RX_CHANNELS_TAER
-#elif defined(BEEBRAIN_LITESF)
+#elif (defined(BEEBRAIN_LITESF_US) || defined(BEEBRAIN_LITESF_INTL))
     #define USE_RX_SPI
     #define RX_SPI_INSTANCE             SPI2
     #define RX_NSS_PIN                  SPI2_NSS_PIN
@@ -86,7 +86,7 @@
     #define RX_SPI_LED_PIN              PA13
     #define RX_CC2500_SPI_TX_EN_PIN     PB10
     #define RX_CC2500_SPI_ANT_SEL_PIN   PA7
-    #define BINDPLUG_PIN                PC15
+    #define RX_SPI_BIND_PIN                PC15
     #define RX_CC2500_SPI_LNA_EN_PIN    NONE
     #define DEFAULT_RX_FEATURE          FEATURE_RX_SPI
     #define RX_SPI_DEFAULT_PROTOCOL     RX_SPI_SFHSS
@@ -104,7 +104,7 @@
     #define RX_SPI_LED_PIN              PA13
     #define RX_CC2500_SPI_TX_EN_PIN     PB10
     #define RX_CC2500_SPI_ANT_SEL_PIN   PA7
-    #define BINDPLUG_PIN                PC15
+    #define RX_SPI_BIND_PIN                PC15
     #define RX_CC2500_SPI_LNA_EN_PIN    NONE
     #define DEFAULT_RX_FEATURE          FEATURE_RX_SPI
     #define RX_SPI_DEFAULT_PROTOCOL     RX_SPI_FRSKY_D
@@ -136,6 +136,9 @@
 #define RTC6705_POWER_PIN               PA6
 #define RTC6705_POWER_PIN_HIGH_ENABLE
 #define USE_RTC6705_PITMODE_CTRL
+#if (defined(BEEBRAIN_LITED_US) || defined(BEEBRAIN_LITESF_US) || defined(BEEBRAIN_LITE_US))
+#define USE_VTX_LOCK_FREQ
+#endif
 
 // *************** BARO ****************************
 #define USE_BARO
