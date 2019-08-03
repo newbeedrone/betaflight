@@ -36,6 +36,10 @@
 
 #include "pg/motor.h"
 #include "pg/rx.h"
+#include "pg/pinio.h"
+#include "pg/piniobox.h"
+
+#include "msp/msp_box.h"
 
 #include "drivers/dshot.h"
 #include "drivers/motor.h"
@@ -617,7 +621,11 @@ static void calculateThrottleAndCurrentMotorEndpoints(timeUs_t currentTimeUs)
         motorRangeMax = motorOutputHigh;
         motorOutputMin = motorRangeMin;
         motorOutputRange = motorOutputHigh - motorOutputMin;
-        motorOutputMixSign = 1;
+        if (getBoxIdState(BOXUSER1)) {
+            motorOutputMixSign = -1;
+        } else {
+            motorOutputMixSign = 1;
+        }
     }
 
     throttle = constrainf(throttle / currentThrottleInputRange, 0.0f, 1.0f);
