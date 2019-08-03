@@ -50,6 +50,8 @@
 #include "pg/rx.h"
 #include "pg/rx_spi.h"
 #include "pg/rx_spi_cc2500.h"
+#include "pg/pinio.h"
+#include "pg/piniobox.h"
 
 #include "osd/osd.h"
 
@@ -74,6 +76,11 @@
 
 void targetConfiguration(void)
 {
+    pinioConfigMutable()->config[0] = PINIO_CONFIG_MODE_OUT_PP;
+    pinioBoxConfigMutable()->permanentId[0] = 40;
+    // rxConfigMutable()->midrc = 1500;
+    // rxConfigMutable()->mincheck = 1450;
+    // rxConfigMutable()->maxcheck = 1550;
     if (getDetectedMotorType() == MOTOR_BRUSHED) {
         motorConfigMutable()->dev.motorPwmRate = BRUSHED_MOTORS_PWM_RATE;
         motorConfigMutable()->minthrottle = 1030;
@@ -139,6 +146,11 @@ void targetConfiguration(void)
     modeActivationConditionsMutable(2)->auxChannelIndex  = AUX2 - NON_AUX_CHANNEL_COUNT;
     modeActivationConditionsMutable(2)->range.startStep  = CHANNEL_VALUE_TO_STEP(1300);
     modeActivationConditionsMutable(2)->range.endStep    = CHANNEL_VALUE_TO_STEP(1700);
+
+    modeActivationConditionsMutable(3)->modeId           =  BOXUSER1;
+    modeActivationConditionsMutable(3)->auxChannelIndex  = AUX3 - NON_AUX_CHANNEL_COUNT;
+    modeActivationConditionsMutable(3)->range.startStep  = CHANNEL_VALUE_TO_STEP(1700);
+    modeActivationConditionsMutable(3)->range.endStep    = CHANNEL_VALUE_TO_STEP(2100);
 
     // modeActivationConditionsMutable(3)->modeId           = BOXAIRMODE;
     // modeActivationConditionsMutable(3)->auxChannelIndex  = AUX2 - NON_AUX_CHANNEL_COUNT;
