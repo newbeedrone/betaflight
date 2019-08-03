@@ -26,6 +26,11 @@
 #include "platform.h"
 #include "drivers/time.h"
 
+#include "pg/pinio.h"
+#include "pg/piniobox.h"
+
+#include "msp/msp_box.h"
+
 #include "drivers/io.h"
 #include "pwm_output.h"
 #include "timer.h"
@@ -159,11 +164,13 @@ static void pwmWriteStandard(uint8_t index, float value)
 {
     if(featureIsEnabled(FEATURE_3D)) {
         if (lrintf(value) - 1500 > 0) {
+            pinioSet(0, 0);     // set to forward
             value = (value - 1500) * 2 + 1000;
         } else {
+            pinioSet(0, 1);     // set to backward
             value = (1500 - value) * 2 + 1000;
         }
-    }
+    } 
     /* TODO: move value to be a number between 0-1 (i.e. percent throttle from mixer) */
     *motors[index].channel.ccr = lrintf((value * motors[index].pulseScale) + motors[index].pulseOffset);
 }
