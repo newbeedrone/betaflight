@@ -78,6 +78,9 @@ void targetConfiguration(void)
 {
     pinioConfigMutable()->config[0] = PINIO_CONFIG_MODE_OUT_PP;
     pinioBoxConfigMutable()->permanentId[0] = 40;
+    flight3DConfigMutable()->neutral3d = 1500;
+    flight3DConfigMutable()->deadband3d_high = 1550;
+    flight3DConfigMutable()->deadband3d_low = 1450;
     // rxConfigMutable()->midrc = 1500;
     // rxConfigMutable()->mincheck = 1450;
     // rxConfigMutable()->maxcheck = 1550;
