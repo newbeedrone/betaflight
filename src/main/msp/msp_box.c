@@ -86,7 +86,7 @@ static const box_t boxes[CHECKBOX_ITEM_COUNT] = {
     { BOXBEEPGPSCOUNT, "BEEP GPS SATELLITE COUNT", 37 },
 //    { BOX3DONASWITCH, "3D ON A SWITCH", 38 }, (removed)
     { BOXVTXPITMODE, "VTX PIT MODE", 39 },
-    { BOXUSER1, "USER1", 40 },
+    { BOXUSER1, "TURTLE MODE", 40 },
     { BOXUSER2, "USER2", 41 },
     { BOXUSER3, "USER3", 42 },
     { BOXUSER4, "USER4", 43 },
