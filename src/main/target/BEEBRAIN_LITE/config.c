@@ -83,25 +83,60 @@ void targetConfiguration(void)
         motorConfigMutable()->minthrottle = 1030;
         pidConfigMutable()->pid_process_denom = 1;
     }
-
-    for (uint8_t pidProfileIndex = 0; pidProfileIndex < PID_PROFILE_COUNT; pidProfileIndex++) {
-        pidProfile_t *pidProfile = pidProfilesMutable(pidProfileIndex);
-
-        pidProfile->pid[PID_ROLL].P  = 84;
-        pidProfile->pid[PID_ROLL].I  = 50;
-        pidProfile->pid[PID_ROLL].D  = 58;
-        pidProfile->pid[PID_PITCH].P = 87;
-        pidProfile->pid[PID_PITCH].I = 55;
-        pidProfile->pid[PID_PITCH].D = 58;
-        pidProfile->pid[PID_YAW].P   = 110;
-        pidProfile->pid[PID_YAW].I   = 75;
-        pidProfile->pid[PID_YAW].D   = 25;
-        pidProfile->dterm_notch_cutoff = 0;
-    }
+    // gold
+    pidProfilesMutable(0)->pid[PID_ROLL].P  = 66;
+    pidProfilesMutable(0)->pid[PID_ROLL].I  = 40;
+    pidProfilesMutable(0)->pid[PID_ROLL].D  = 44;
+    pidProfilesMutable(0)->pid[PID_ROLL].F  = 20;
+    pidProfilesMutable(0)->pid[PID_PITCH].P = 72;
+    pidProfilesMutable(0)->pid[PID_PITCH].I = 45;
+    pidProfilesMutable(0)->pid[PID_PITCH].D = 43;
+    pidProfilesMutable(0)->pid[PID_PITCH].F = 25;
+    pidProfilesMutable(0)->pid[PID_YAW].P   = 95;
+    pidProfilesMutable(0)->pid[PID_YAW].I   = 45;
+    pidProfilesMutable(0)->pid[PID_YAW].D   = 43;
+    pidProfilesMutable(0)->pid[PID_YAW].F   = 0;
+    pidProfilesMutable(0)->dterm_notch_cutoff = 0;
+    pidProfilesMutable(0)->d_min[FD_ROLL]  = 20;
+    pidProfilesMutable(0)->d_min[FD_PITCH] = 22;
+    // plaid
+    pidProfilesMutable(1)->pid[PID_ROLL].P  = 62;
+    pidProfilesMutable(1)->pid[PID_ROLL].I  = 40;
+    pidProfilesMutable(1)->pid[PID_ROLL].D  = 44;
+    pidProfilesMutable(1)->pid[PID_ROLL].F  = 20;
+    pidProfilesMutable(1)->pid[PID_PITCH].P = 71;
+    pidProfilesMutable(1)->pid[PID_PITCH].I = 45;
+    pidProfilesMutable(1)->pid[PID_PITCH].D = 41;
+    pidProfilesMutable(1)->pid[PID_PITCH].F = 20;
+    pidProfilesMutable(1)->pid[PID_YAW].P   = 80;
+    pidProfilesMutable(1)->pid[PID_YAW].I   = 65;
+    pidProfilesMutable(1)->pid[PID_YAW].D   = 17;
+    pidProfilesMutable(1)->pid[PID_YAW].F   = 0;
+    pidProfilesMutable(1)->dterm_notch_cutoff = 0;
+    pidProfilesMutable(1)->d_min[FD_ROLL]  = 17;
+    pidProfilesMutable(1)->d_min[FD_PITCH] = 19;
+    // black
+    pidProfilesMutable(2)->pid[PID_ROLL].P  = 71;
+    pidProfilesMutable(2)->pid[PID_ROLL].I  = 44;
+    pidProfilesMutable(2)->pid[PID_ROLL].D  = 44;
+    pidProfilesMutable(2)->pid[PID_ROLL].F  = 70;
+    pidProfilesMutable(2)->pid[PID_PITCH].P = 75;
+    pidProfilesMutable(2)->pid[PID_PITCH].I = 46;
+    pidProfilesMutable(2)->pid[PID_PITCH].D = 43;
+    pidProfilesMutable(2)->pid[PID_PITCH].F = 75;
+    pidProfilesMutable(2)->pid[PID_YAW].P   = 97;
+    pidProfilesMutable(2)->pid[PID_YAW].I   = 65;
+    pidProfilesMutable(2)->pid[PID_YAW].D   = 23;
+    pidProfilesMutable(2)->pid[PID_YAW].F   = 0;
+    pidProfilesMutable(2)->dterm_notch_cutoff = 0;
+    pidProfilesMutable(2)->d_min[FD_ROLL]  = 16;
+    pidProfilesMutable(2)->d_min[FD_PITCH] = 15;
 
     for (uint8_t rateProfileIndex = 0; rateProfileIndex < CONTROL_RATE_PROFILE_COUNT; rateProfileIndex++) {
         controlRateConfig_t *controlRateConfig = controlRateProfilesMutable(rateProfileIndex);
 
+        controlRateConfig->rcRates[FD_ROLL] = 100;
+        controlRateConfig->rcRates[FD_PITCH] = 100;
         controlRateConfig->rcRates[FD_YAW] = 100;
         controlRateConfig->rcExpo[FD_ROLL] = 15;
         controlRateConfig->rcExpo[FD_PITCH] = 15;
