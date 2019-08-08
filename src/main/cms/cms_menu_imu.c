@@ -107,6 +107,9 @@ static long cmsx_profileIndexOnChange(displayPort_t *displayPort, const void *pt
     UNUSED(displayPort);
     UNUSED(ptr);
 
+    if (tmpPidProfileIndex == 0) {
+        tmpPidProfileIndex = 1;
+    }
     pidProfileIndex = tmpPidProfileIndex - 1;
     changePidProfile(pidProfileIndex);
 
@@ -643,11 +646,12 @@ static uint8_t cmsx_dstControlRateProfile;
 
 static const char * const cmsx_ProfileNames[] = {
     "-",
-    "1",
-    "2",
-    "3"
+    "GOLD",
+    "PAILD",
+    "BLACK"
 };
 
+static OSD_TAB_t cmsx_tmpPidProfileTable = { &tmpPidProfileIndex, 3, cmsx_ProfileNames };
 static OSD_TAB_t cmsx_PidProfileTable = { &cmsx_dstPidProfile, 3, cmsx_ProfileNames };
 static OSD_TAB_t cmsx_ControlRateProfileTable = { &cmsx_dstControlRateProfile, 3, cmsx_ProfileNames };
 
@@ -712,7 +716,7 @@ static const OSD_Entry cmsx_menuImuEntries[] =
 {
     { "-- PROFILE --", OME_Label, NULL, NULL, 0},
 
-    {"PID PROF",  OME_UINT8,   cmsx_profileIndexOnChange,     &(OSD_UINT8_t){ &tmpPidProfileIndex, 1, PID_PROFILE_COUNT, 1},    0},
+    {"PID PROF",  OME_TAB,     cmsx_profileIndexOnChange,     &cmsx_tmpPidProfileTable,    0},
     {"PID",       OME_Submenu, cmsMenuChange,                 &cmsx_menuPid,                                                 0},
     {"MISC PP",   OME_Submenu, cmsMenuChange,                 &cmsx_menuProfileOther,                                        0},
     {"FILT PP",   OME_Submenu, cmsMenuChange,                 &cmsx_menuFilterPerProfile,                                    0},
