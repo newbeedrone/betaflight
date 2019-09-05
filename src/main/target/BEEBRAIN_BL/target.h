@@ -98,6 +98,7 @@
 
 // *************** VTX *****************************
 #define USE_VTX_RTC6705
+#define USE_VTX_CONTROL
 #define RTC6705_CS_PIN                  PA14
 #define RTC6705_SPI_INSTANCE            SPI3
 
