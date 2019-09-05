@@ -51,16 +51,16 @@
 #define DISABLE_RTC6705()     IOHi(rtc6705CsnPin)
 #define ENABLE_RTC6705()      IOLo(rtc6705CsnPin)
 
-#if defined(USE_RTC6705_SOFTSPI_ON_HW_SPI)
+#if defined(RTC6705_SOFT_ON_HW_SPI_INSTANCE)
 #define DISABLE_HW_SPI()      do {                                              \
-                                  SPI_Cmd(RTC6705_SPI_INSTANCE, DISABLE);       \
+                                  SPI_Cmd(RTC6705_SOFT_ON_HW_SPI_INSTANCE, DISABLE);       \
                                   IOConfigGPIO(rtc6705DataPin, IOCFG_OUT_PP);   \
                                   IOConfigGPIO(rtc6705ClkPin, IOCFG_OUT_PP);    \
                               } while (0)
 #define ENABLE_HW_SPI()       do {                                              \
-                                  IOConfigGPIOAF(rtc6705DataPin, SPI_IO_AF_CFG, spiDevice[spiDeviceByInstance(RTC6705_SPI_INSTANCE)].af); \
-                                  IOConfigGPIOAF(rtc6705ClkPin, SPI_IO_AF_CFG, spiDevice[spiDeviceByInstance(RTC6705_SPI_INSTANCE)].af);  \
-                                  SPI_Cmd(RTC6705_SPI_INSTANCE, ENABLE);        \
+                                  IOConfigGPIOAF(rtc6705DataPin, SPI_IO_AF_CFG, spiDevice[spiDeviceByInstance(RTC6705_SOFT_ON_HW_SPI_INSTANCE)].af); \
+                                  IOConfigGPIOAF(rtc6705ClkPin, SPI_IO_AF_CFG, spiDevice[spiDeviceByInstance(RTC6705_SOFT_ON_HW_SPI_INSTANCE)].af);  \
+                                  SPI_Cmd(RTC6705_SOFT_ON_HW_SPI_INSTANCE, ENABLE);        \
                               } while (0)
 #else
 #define DISABLE_HW_SPI()      do {} while (0)
@@ -83,7 +83,7 @@ bool rtc6705SoftSpiIOInit(const vtxIOConfig_t *vtxIOConfig, const IO_t csnPin)
         return false;
     }
 
-#if !defined(USE_RTC6705_SOFTSPI_ON_HW_SPI)
+#if !defined(RTC6705_SOFT_ON_HW_SPI_INSTANCE)
     IOInit(rtc6705DataPin, OWNER_VTX_DATA, RESOURCE_SOFT_OFFSET);
     IOConfigGPIO(rtc6705DataPin, IOCFG_OUT_PP);
 
