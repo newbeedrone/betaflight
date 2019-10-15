@@ -98,6 +98,7 @@
     #define USE_RX_FRSKY_SPI_X
     #define USE_RX_SFHSS_SPI
 #else
+    #define DJTS
     #define USE_RX_SPI
     #define RX_SPI_INSTANCE             SPI2
     #define RX_NSS_PIN                  SPI2_NSS_PIN
