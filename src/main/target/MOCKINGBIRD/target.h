@@ -69,7 +69,6 @@
 #define USE_MPU_DATA_READY_SIGNAL
 
 #define GYRO_1_ALIGN                    CW90_DEG
-#define ACC_1_ALIGN                     CW90_DEG
 
 // *************** RX ******************************
 #if (defined(MOCKINGBIRD_DSM_US) || defined(MOCKINGBIRD_DSM_INTL))
@@ -98,6 +97,7 @@
     #define USE_RX_FRSKY_SPI_X
     #define USE_RX_SFHSS_SPI
 #else
+    #define DJTS
     #define USE_RX_SPI
     #define RX_SPI_INSTANCE             SPI2
     #define RX_NSS_PIN                  SPI2_NSS_PIN
@@ -124,13 +124,15 @@
 
 // *************** VTX *****************************
 #define USE_VTX_RTC6705
+#undef USE_VTX_SMARTAUDIO
+#undef USE_VTX_TRAMP
+#undef USE_VTX_TABLE
 #define RTC6705_CS_PIN                  PA14
-#define RTC6705_SPI_INSTANCE            SPI3
+#define RTC6705_SOFT_ON_HW_SPI_INSTANCE            SPI3
 
 #define USE_VTX_RTC6705_SOFTSPI
 #define RTC6705_SPI_MOSI_PIN            SPI3_MOSI_PIN
 #define RTC6705_SPICLK_PIN              SPI3_SCK_PIN
-#define USE_RTC6705_SOFTSPI_ON_HW_SPI
 #define RTC6705_POWER_PIN               PA6
 #define RTC6705_POWER_PIN_HIGH_ENABLE
 #define USE_RTC6705_PITMODE_CTRL
@@ -175,8 +177,7 @@
 #define USB_DETECT_PIN                  PA5
 
 #define USE_ESCSERIAL
-#define USE_SERIAL_4WAY_BLHELI_INTERFACE
-#define ENABLE_DSHOT_DMAR               true
+#define ENABLE_DSHOT_DMAR               DSHOT_DMAR_ON
 
 #define DEFAULT_FEATURES                (FEATURE_OSD | FEATURE_TELEMETRY | FEATURE_LED_STRIP)
 

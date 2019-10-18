@@ -47,6 +47,10 @@
 #include "flight/pid.h"
 #include "flight/imu.h"
 
+#include "pg/vcd.h"
+#include "pg/rx.h"
+#include "pg/motor.h"
+
 #include "rx/rx.h"
 #include "rx/cc2500_frsky_common.h"
 
@@ -67,9 +71,6 @@
 
 #include "telemetry/telemetry.h"
 
-#ifdef BRUSHED_MOTORS_PWM_RATE
-#undef BRUSHED_MOTORS_PWM_RATE
-#endif
 #ifdef BRUSHED_MOTORS_PWM_RATE
 #undef BRUSHED_MOTORS_PWM_RATE
 #endif
@@ -311,7 +312,7 @@ void targetConfiguration(void)
 
     strcpy(pilotConfigMutable()->name, "MKNGBRD");
 
-    adjustmentRangesMutable(0) -> adjustmentIndex       = AUX2 - NON_AUX_CHANNEL_COUNT;
+    adjustmentRangesMutable(0) -> auxSwitchChannelIndex = AUX2 - NON_AUX_CHANNEL_COUNT;
     adjustmentRangesMutable(0) -> auxChannelIndex       = AUX2 - NON_AUX_CHANNEL_COUNT;
     adjustmentRangesMutable(0) -> range.startStep       = CHANNEL_VALUE_TO_STEP(1425);
     adjustmentRangesMutable(0) -> range.endStep         = CHANNEL_VALUE_TO_STEP(1575);

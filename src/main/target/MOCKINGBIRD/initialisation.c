@@ -31,7 +31,6 @@
 #include "drivers/time.h"
 
 #include "io/vtx.h"
-#include "io/vtx_string.h"
 
 #include "fc/config.h"
 

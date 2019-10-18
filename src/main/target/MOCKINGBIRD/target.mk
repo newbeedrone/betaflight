@@ -7,6 +7,7 @@ TARGET_SRC  =                                       \
              drivers/barometer/barometer_bmp280.c   \
              drivers/max7456.c                      \
              drivers/vtx_rtc6705_soft_spi.c			\
+             drivers/vtx_rtc6705.c                  \
 			 drivers/flash_m25p16.c
 
 ifeq ($(TARGET), MOCKINGBIRD_FRSKY_US)
