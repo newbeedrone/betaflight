@@ -55,7 +55,7 @@ static vtxDevice_t vtxRTC6705 = {
 #endif
 
 static uint16_t rtc6705Frequency;
-static int8_t rtc6705PowerIndex;
+static int8_t rtc6705PowerIndex = VTX_RTC6705_DEFAULT_POWER_INDEX;
 
 static void vtxRTC6705SetBandAndChannel(vtxDevice_t *vtxDevice, uint8_t band, uint8_t channel);
 static void vtxRTC6705SetFrequency(vtxDevice_t *vtxDevice, uint16_t frequency);
