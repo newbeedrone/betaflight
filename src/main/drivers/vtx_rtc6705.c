@@ -53,6 +53,14 @@
 static IO_t vtxPowerPin     = IO_NONE;
 #endif
 
+#ifdef RTC6705_POWER_PIN_HIGH_ENABLE
+#define ENABLE_VTX_POWER()          IOHi(vtxPowerPin)
+#define DISABLE_VTX_POWER()         IOLo(vtxPowerPin)
+#else
+#define ENABLE_VTX_POWER()          IOLo(vtxPowerPin)
+#define DISABLE_VTX_POWER()         IOHi(vtxPowerPin)
+#endif
+
 static busDevice_t *busdev = NULL;
 
 #define DISABLE_RTC6705()   IOHi(busdev->busdev_u.spi.csnPin)
@@ -210,14 +218,14 @@ void rtc6705SetRFPower(uint8_t rf_power)
 void rtc6705Disable(void)
 {
     if (vtxPowerPin) {
-        IOHi(vtxPowerPin);
+        DISABLE_VTX_POWER();
     }
 }
 
 void rtc6705Enable(void)
 {
     if (vtxPowerPin) {
-        IOLo(vtxPowerPin);
+        ENABLE_VTX_POWER();
     }
 }
 #endif
