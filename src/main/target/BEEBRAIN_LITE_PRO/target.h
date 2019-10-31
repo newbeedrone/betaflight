@@ -177,8 +177,8 @@
 #define PINIO1_PIN              PA8 // turtle switcher
 #define USE_PINIOBOX
 
-#define USE_USB_DETECT
-#define USB_DETECT_PIN                  PA5
+// #define USE_USB_DETECT
+// #define USB_DETECT_PIN                  PA5
 
 #define USE_ESCSERIAL
 #define ENABLE_DSHOT_DMAR               DSHOT_DMAR_ON
