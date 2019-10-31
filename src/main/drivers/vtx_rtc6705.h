@@ -32,7 +32,7 @@
 #include "pg/vtx_io.h"
 
 #define VTX_RTC6705_POWER_COUNT           3
-#define VTX_RTC6705_DEFAULT_POWER_INDEX   3
+#define VTX_RTC6705_DEFAULT_POWER_INDEX   2
 
 #if defined(RTC6705_POWER_PIN)
 #define VTX_RTC6705_MIN_POWER_VALUE   0
