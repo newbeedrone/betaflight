@@ -126,7 +126,6 @@
 #define USE_VTX_RTC6705
 #undef USE_VTX_SMARTAUDIO
 #undef USE_VTX_TRAMP
-#undef USE_VTX_TABLE
 #define RTC6705_CS_PIN                  PA14
 #define RTC6705_SOFT_ON_HW_SPI_INSTANCE            SPI3
 
@@ -136,7 +135,7 @@
 #define RTC6705_POWER_PIN               PA6
 #define RTC6705_POWER_PIN_HIGH_ENABLE
 #define USE_RTC6705_PITMODE_CTRL
-#if (defined(BEEBRAIN_LITED_US) || defined(BEEBRAIN_LITESF_US) || defined(BEEBRAIN_LITE_US))
+#if (defined(BEEBRAIN_LITE_PRO_DSM_US) || defined(BEEBRAIN_LITE_PRO_SFHSS_US) || defined(BEEBRAIN_LITE_PRO_FRSKY_US))
 #define USE_VTX_LOCK_FREQ
 #endif
 
