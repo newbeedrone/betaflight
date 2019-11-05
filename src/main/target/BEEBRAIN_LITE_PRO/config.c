@@ -225,7 +225,7 @@ void targetConfiguration(void)
     ledStripStatusModeConfigMutable()->ledConfigs[1] = DEFINE_LED(8, 7, 13, 0, LF(COLOR), LO(LARSON_SCANNER) | LO(THROTTLE), 0);
     ledStripStatusModeConfigMutable()->ledConfigs[2] = DEFINE_LED(9, 7, 11, 0, LF(COLOR), LO(LARSON_SCANNER) | LO(THROTTLE), 0);
 
-    strcpy(pilotConfigMutable()->name, "BeeBrain Lite");
+    strcpy(pilotConfigMutable()->name, "BB Lite PRO");
 
 #if (defined(BEEBRAIN_LITE_PRO_DSM_US) || defined(BEEBRAIN_LITE_PRO_DSM_INTL))
     // DSM version
