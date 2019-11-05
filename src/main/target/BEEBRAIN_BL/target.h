@@ -100,7 +100,6 @@
 #define USE_VTX_RTC6705
 #undef USE_VTX_SMARTAUDIO
 #undef USE_VTX_TRAMP
-#undef USE_VTX_TABLE
 #define RTC6705_CS_PIN                  PA14
 #define RTC6705_SOFT_ON_HW_SPI_INSTANCE            SPI3
 
