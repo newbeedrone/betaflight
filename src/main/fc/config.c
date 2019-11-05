@@ -597,6 +597,8 @@ void validateAndFixGyroConfig(void)
         break;
     case BMI_160_SPI:
         samplingTime = 0.0003125f;
+        gyroConfigMutable()->gyro_sync_denom = 2;
+        pidConfigMutable()->pid_process_denom = 1;
         break;
     default:
         samplingTime = 0.000125f;
@@ -606,6 +608,11 @@ void validateAndFixGyroConfig(void)
         switch (gyroMpuDetectionResult()->sensor) {
         case ICM_20649_SPI:
             samplingTime = 1.0f / 1100.0f;
+            break;
+        case BMI_160_SPI:
+            samplingTime = 0.0003125f;
+            gyroConfigMutable()->gyro_sync_denom = 2;
+            pidConfigMutable()->pid_process_denom = 1;
             break;
         default:
             samplingTime = 0.001f;
