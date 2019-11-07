@@ -98,16 +98,26 @@ void targetConfiguration(void)
     for (uint8_t pidProfileIndex = 0; pidProfileIndex < PID_PROFILE_COUNT; pidProfileIndex++) {
         pidProfile_t *pidProfile = pidProfilesMutable(pidProfileIndex);
 
-        pidProfile->pid[PID_ROLL].P  = 84;
-        pidProfile->pid[PID_ROLL].I  = 50;
-        pidProfile->pid[PID_ROLL].D  = 58;
-        pidProfile->pid[PID_PITCH].P = 87;
-        pidProfile->pid[PID_PITCH].I = 55;
-        pidProfile->pid[PID_PITCH].D = 58;
-        pidProfile->pid[PID_YAW].P   = 110;
-        pidProfile->pid[PID_YAW].I   = 75;
-        pidProfile->pid[PID_YAW].D   = 25;
+        pidProfile->pid[PID_ROLL].P  = 66;
+        pidProfile->pid[PID_ROLL].I  = 40;
+        pidProfile->pid[PID_ROLL].D  = 44;
+        pidProfile->pid[PID_ROLL].F  = 20;
+        pidProfile->pid[PID_PITCH].P = 72;
+        pidProfile->pid[PID_PITCH].I = 45;
+        pidProfile->pid[PID_PITCH].D = 43;
+        pidProfile->pid[PID_PITCH].F = 20;
+        pidProfile->pid[PID_YAW].P   = 95;
+        pidProfile->pid[PID_YAW].I   = 45;
+        pidProfile->pid[PID_YAW].D   = 0;
+        pidProfile->pid[PID_YAW].F   = 0;
+        pidProfile->pid[PID_LEVEL].P = 40;
+        pidProfile->pid[PID_LEVEL].I = 40;
+        pidProfile->pid[PID_LEVEL].D = 40;
         pidProfile->dterm_notch_cutoff = 0;
+        pidProfile->levelAngleLimit  = 85;
+        pidProfile->d_min[FD_ROLL] = 15;
+        pidProfile->d_min[FD_PITCH] = 17;
+        pidProfile->d_min[FD_YAW] = 0;
     }
 
     for (uint8_t rateProfileIndex = 0; rateProfileIndex < CONTROL_RATE_PROFILE_COUNT; rateProfileIndex++) {
@@ -134,7 +144,7 @@ void targetConfiguration(void)
     vtxSettingsConfigMutable()->band = 5;
     vtxSettingsConfigMutable()->channel = 1;
     vtxSettingsConfigMutable()->power = 2;
-#if (defined(BEEBRAIN_LITE_PRO_DSM_US) || defined(BEEBRAIN_LITE_PRO_SFHSS_US) || defined(BEEBRAIN_LITE_PRO_FRSKY_US))
+#if (defined(BEEBRAIN_LITE_PRO_DSM_US) || defined(BEEBRAIN_LITE_PRO_SFHSS_US) || defined(BEEBRAIN_LITE_PRO_FRSKY_US) || defined(BEEBRAIN_LITE_PRO_FRSKYX_US))
     uint16_t vtxTableFrequency[6][8] = {
         { 5865, 5845, 5825, 5805, 5785, 5765, 5745, 5725 }, // Boscam A
         { 5733, 5752, 5771, 5790, 5809, 5828, 5847, 5866 }, // Boscam B
