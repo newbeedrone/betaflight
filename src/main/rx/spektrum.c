@@ -245,10 +245,10 @@ void spektrumBind(rxConfig_t *rxConfig)
         ioTag_t rxPin = serialPinConfig()->ioTagRx[index];
 
         // Take care half-duplex case
-        switch (rxConfig->serialrx_provider) {
+        switch (rxRuntimeConfig.serialrxProvider) {
         case SERIALRX_SRXL:
 #if defined(USE_TELEMETRY_SRXL)
-            if (featureIsEnabled(FEATURE_TELEMETRY) && !telemetryCheckRxPortShared(portConfig)) {
+            if (featureIsEnabled(FEATURE_TELEMETRY) && !telemetryCheckRxPortShared(portConfig, rxRuntimeConfig.serialrxProvider)) {
                 bindPin = txPin;
             }
             break;
@@ -355,12 +355,15 @@ bool spektrumInit(const rxConfig_t *rxConfig, rxRuntimeConfig_t *rxRuntimeConfig
 
     srxlEnabled = false;
 #if defined(USE_TELEMETRY_SRXL)
-    bool portShared = telemetryCheckRxPortShared(portConfig);
+    bool portShared = telemetryCheckRxPortShared(portConfig, rxRuntimeConfig->serialrxProvider);
 #else
     bool portShared = false;
 #endif
 
-    switch (rxConfig->serialrx_provider) {
+    switch (rxRuntimeConfig->serialrxProvider) {
+    default:
+
+        break;
     case SERIALRX_SRXL:
 #if defined(USE_TELEMETRY_SRXL)
         srxlEnabled = (featureIsEnabled(FEATURE_TELEMETRY) && !portShared);

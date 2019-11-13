@@ -30,6 +30,8 @@
 
 #include "build/debug.h"
 
+#include "cli/cli.h"
+
 #include "config/config_eeprom.h"
 #include "config/feature.h"
 
@@ -110,8 +112,8 @@ PG_RESET_TEMPLATE(systemConfig_t, systemConfig,
     .powerOnArmingGraceTime = 5,
     .boardIdentifier = TARGET_BOARD_IDENTIFIER,
     .hseMhz = SYSTEM_HSE_VALUE,  // Not used for non-F4 targets
-    .configured = false,
-    .schedulerOptimizeRate = true,
+    .configurationState = CONFIGURATION_STATE_DEFAULTS_BARE,
+    .schedulerOptimizeRate = SCHEDULER_OPTIMIZE_RATE_AUTO,
 );
 
 uint8_t getCurrentPidProfileIndex(void)
@@ -134,7 +136,7 @@ uint16_t getCurrentMinthrottle(void)
     return motorConfig()->minthrottle;
 }
 
-void resetConfigs(void)
+void resetConfig(void)
 {
     pgResetAll();
 
@@ -145,7 +147,7 @@ void resetConfigs(void)
 
 static void activateConfig(void)
 {
-    schedulerOptimizeRate(systemConfig()->schedulerOptimizeRate);
+    schedulerOptimizeRate(systemConfig()->schedulerOptimizeRate == SCHEDULER_OPTIMIZE_RATE_ON || (systemConfig()->schedulerOptimizeRate == SCHEDULER_OPTIMIZE_RATE_AUTO && motorConfig()->dev.useDshotTelemetry));
     loadPidProfile();
     loadControlRateProfile();
 
@@ -387,6 +389,13 @@ static void validateAndFixConfig(void)
         }
     }
 
+#if defined(USE_DSHOT_TELEMETRY) && defined(USE_DSHOT_BITBANG)
+    if (motorConfig()->dev.motorPwmProtocol == PWM_TYPE_PROSHOT1000 && motorConfig()->dev.useDshotTelemetry &&
+        motorConfig()->dev.useDshotBitbang == DSHOT_BITBANG_ON) {
+        motorConfigMutable()->dev.useDshotBitbang = DSHOT_BITBANG_AUTO;
+    }
+#endif    
+
 // clear features that are not supported.
 // I have kept them all here in one place, some could be moved to sections of code above.
 
@@ -485,7 +494,6 @@ static void validateAndFixConfig(void)
     bool usingDshotProtocol;
     switch (motorConfig()->dev.motorPwmProtocol) {
     case PWM_TYPE_PROSHOT1000:
-    case PWM_TYPE_DSHOT1200:
     case PWM_TYPE_DSHOT600:
     case PWM_TYPE_DSHOT300:
     case PWM_TYPE_DSHOT150:
@@ -502,20 +510,12 @@ static void validateAndFixConfig(void)
     }
 
 #if defined(USE_DSHOT_TELEMETRY)
-    if ((!usingDshotProtocol || motorConfig()->dev.useBurstDshot || !systemConfig()->schedulerOptimizeRate)
+    if ((!usingDshotProtocol || (motorConfig()->dev.useDshotBitbang == DSHOT_BITBANG_OFF && motorConfig()->dev.useBurstDshot == DSHOT_DMAR_ON) || systemConfig()->schedulerOptimizeRate == SCHEDULER_OPTIMIZE_RATE_OFF)
         && motorConfig()->dev.useDshotTelemetry) {
         motorConfigMutable()->dev.useDshotTelemetry = false;
     }
 #endif // USE_DSHOT_TELEMETRY
 #endif // USE_DSHOT
-
-    // Temporary workaround until RPM Filter supports dual-gyro using both sensors
-    // Once support is added remove this block
-#if defined(USE_MULTI_GYRO) && defined(USE_RPM_FILTER)
-    if (gyroConfig()->gyro_to_use == GYRO_CONFIG_USE_GYRO_BOTH && isRpmFilterEnabled()) {
-        gyroConfigMutable()->gyro_to_use = GYRO_CONFIG_USE_GYRO_1;
-    }
-#endif
 
 #if defined(USE_OSD)
     for (int i = 0; i < OSD_TIMER_COUNT; i++) {
@@ -701,19 +701,11 @@ bool readEEPROM(void)
     return success;
 }
 
-static void ValidateAndWriteConfigToEEPROM(bool setConfigured)
+void writeUnmodifiedConfigToEEPROM(void)
 {
     validateAndFixConfig();
 
     suspendRxPwmPpmSignal();
-
-#ifdef USE_CONFIGURATION_STATE
-    if (setConfigured) {
-        systemConfigMutable()->configured = true;
-    }
-#else
-    UNUSED(setConfigured);
-#endif
 
     writeConfigToEEPROM();
 
@@ -723,7 +715,9 @@ static void ValidateAndWriteConfigToEEPROM(bool setConfigured)
 
 void writeEEPROM(void)
 {
-    ValidateAndWriteConfigToEEPROM(true);
+    systemConfigMutable()->configurationState = CONFIGURATION_STATE_CONFIGURED;
+
+    writeUnmodifiedConfigToEEPROM();
 }
 
 void writeEEPROMWithFeatures(uint32_t features)
@@ -731,16 +725,27 @@ void writeEEPROMWithFeatures(uint32_t features)
     featureDisableAll();
     featureEnable(features);
 
-    ValidateAndWriteConfigToEEPROM(true);
+    writeEEPROM();
 }
 
-void resetEEPROM(void)
+bool resetEEPROM(bool useCustomDefaults)
 {
-    resetConfigs();
+#if !defined(USE_CUSTOM_DEFAULTS)
+    UNUSED(useCustomDefaults);
+#else
+    if (useCustomDefaults) {
+        if (!resetConfigToCustomDefaults()) {
+            return false;
+        }
+    } else
+#endif
+    {
+        resetConfig();
+    }
 
-    ValidateAndWriteConfigToEEPROM(false);
+    writeUnmodifiedConfigToEEPROM();
 
-    activateConfig();
+    return true;
 }
 
 void ensureEEPROMStructureIsValid(void)
@@ -748,12 +753,12 @@ void ensureEEPROMStructureIsValid(void)
     if (isEEPROMStructureValid()) {
         return;
     }
-    resetEEPROM();
+    resetEEPROM(false);
 }
 
 void saveConfigAndNotify(void)
 {
-    ValidateAndWriteConfigToEEPROM(true);
+    writeEEPROM();
     readEEPROM();
     beeperConfirmationBeeps(1);
 }
@@ -808,11 +813,7 @@ void changePidProfile(uint8_t pidProfileIndex)
 
 bool isSystemConfigured(void)
 {
-#ifdef USE_CONFIGURATION_STATE
-    return systemConfig()->configured;
-#else
-    return true;
-#endif
+    return systemConfig()->configurationState == CONFIGURATION_STATE_CONFIGURED;
 }
 
 void setRebootRequired(void)

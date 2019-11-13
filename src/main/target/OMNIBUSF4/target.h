@@ -56,15 +56,13 @@
 #define USBD_PRODUCT_STRING "OmnibusF4"
 #endif
 
-#define USE_CUSTOM_DEFAULTS
-
 #define LED0_PIN                PB5
 #define USE_BEEPER
 #define BEEPER_PIN              PB4
 #define BEEPER_INVERTED
 
 #if defined(OMNIBUSF4SD) || defined(DYSF4PRO)
-#define ENABLE_DSHOT_DMAR       true
+#define ENABLE_DSHOT_DMAR       DSHOT_DMAR_ON
 #endif
 
 #ifdef OMNIBUSF4SD

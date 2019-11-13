@@ -161,7 +161,7 @@
 
 // Burst dshot to default off if not configured explicitly by target
 #ifndef ENABLE_DSHOT_DMAR
-#define ENABLE_DSHOT_DMAR false
+#define ENABLE_DSHOT_DMAR DSHOT_DMAR_OFF
 #endif
 
 // Some target doesn't define USE_ADC which USE_ADC_INTERNAL depends on
@@ -226,10 +226,6 @@
 #define USE_RX_XN297
 #endif
 
-#ifdef USE_UNIFIED_TARGET
-#define USE_CONFIGURATION_STATE
-#endif
-
 // Setup crystal frequency on F4 for backward compatibility
 // Should be set to zero for generic targets to ensure USB is working
 // when unconfigured for targets with non-standard crystal.
@@ -288,6 +284,7 @@
 
 #ifndef USE_DSHOT
 #undef USE_DSHOT_TELEMETRY
+#undef USE_DSHOT_BITBANG
 #endif
 
 #ifndef USE_DSHOT_TELEMETRY

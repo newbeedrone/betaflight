@@ -391,7 +391,7 @@ void init(void)
 #endif
 
     if (!readSuccess || !isEEPROMVersionValid() || strncasecmp(systemConfig()->boardIdentifier, TARGET_BOARD_IDENTIFIER, sizeof(TARGET_BOARD_IDENTIFIER))) {
-        resetEEPROM();
+        resetEEPROM(false);
     }
 
     systemState |= SYSTEM_STATE_CONFIG_LOADED;
@@ -442,7 +442,7 @@ void init(void)
             bothButtonsHeld = buttonAPressed() && buttonBPressed();
             if (bothButtonsHeld) {
                 if (--secondsRemaining == 0) {
-                    resetEEPROM();
+                    resetEEPROM(false);
 #ifdef USE_PERSISTENT_OBJECTS
                     persistentObjectWrite(PERSISTENT_OBJECT_RESET_REASON, RESET_NONE);
 #endif
@@ -662,7 +662,11 @@ void init(void)
 
     if (!sensorsAutodetect()) {
         // if gyro was not detected due to whatever reason, notify and don't arm.
-        if (isSystemConfigured()) {
+        if (true
+#if defined(USE_UNIFIED_TARGET)
+            && isSystemConfigured()
+#endif
+            ) {
             indicateFailure(FAILURE_MISSING_ACC, 2);
         }
         setArmingDisabled(ARMING_DISABLED_NO_GYRO);
@@ -914,6 +918,7 @@ void init(void)
 #endif // USE_RCDEVICE
 
 #ifdef USE_MOTOR
+    motorPostInit();
     motorEnable();
 #endif
 

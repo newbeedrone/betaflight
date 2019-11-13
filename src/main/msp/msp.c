@@ -34,6 +34,8 @@
 #include "build/debug.h"
 #include "build/version.h"
 
+#include "cli/cli.h"
+
 #include "common/axis.h"
 #include "common/bitarray.h"
 #include "common/color.h"
@@ -49,6 +51,7 @@
 #include "drivers/bus_i2c.h"
 #include "drivers/camera_control.h"
 #include "drivers/compass/compass.h"
+#include "drivers/dshot.h"
 #include "drivers/flash.h"
 #include "drivers/io.h"
 #include "drivers/max7456.h"
@@ -73,12 +76,13 @@
 #include "fc/rc_modes.h"
 #include "fc/runtime_config.h"
 
-#include "flight/position.h"
 #include "flight/failsafe.h"
 #include "flight/gps_rescue.h"
 #include "flight/imu.h"
 #include "flight/mixer.h"
 #include "flight/pid.h"
+#include "flight/position.h"
+#include "flight/rpm_filter.h"
 #include "flight/servos.h"
 
 #include "io/asyncfatfs/asyncfatfs.h"
@@ -172,6 +176,11 @@ typedef enum {
 
 #define RTC_NOT_SUPPORTED 0xff
 
+typedef enum {
+    DEFAULTS_TYPE_BASE = 0,
+    DEFAULTS_TYPE_CUSTOM,
+} defaultsType_e;
+
 #ifdef USE_VTX_TABLE
 static bool vtxTableNeedsInit = false;
 #endif
@@ -186,6 +195,30 @@ static uint32_t getFeatureMask(void)
     } else {
         return featureConfig()->enabledFeatures;
     }
+}
+
+static int mspDescriptor = 0;
+
+mspDescriptor_t mspDescriptorAlloc(void)
+{
+    return (mspDescriptor_t)mspDescriptor++;
+}
+
+static uint32_t mspArmingDisableFlags = 0;
+
+static void mspArmingDisableByDescriptor(mspDescriptor_t desc)
+{
+    mspArmingDisableFlags |= (1 << desc);
+}
+
+static void mspArmingEnableByDescriptor(mspDescriptor_t desc)
+{
+    mspArmingDisableFlags &= ~(1 << desc);
+}
+
+static bool mspIsMspArmingEnabled(void)
+{
+    return mspArmingDisableFlags == 0;
 }
 
 #ifdef USE_SERIAL_4WAY_BLHELI_INTERFACE
@@ -310,7 +343,7 @@ static void serializeSDCardSummaryReply(sbuf_t *dst)
     uint32_t totalSpace = 0;
 
 #if defined(USE_SDCARD)
-    if (sdcardConfig()->mode) {
+    if (sdcardConfig()->mode != SDCARD_MODE_NONE) {
         flags = MSP_SDCARD_FLAG_SUPPORTED;
 
         // Merge the card and filesystem states together
@@ -523,6 +556,8 @@ static bool mspCommonProcessOutCommand(uint8_t cmdMSP, sbuf_t *dst, mspPostProce
 #define TARGET_HAS_SOFTSERIAL_BIT 1
 #define TARGET_IS_UNIFIED_BIT 2
 #define TARGET_HAS_FLASH_BOOTLOADER_BIT 3
+#define TARGET_SUPPORTS_CUSTOM_DEFAULTS_BIT 4
+#define TARGET_HAS_CUSTOM_DEFAULTS_BIT 5
 
         uint8_t targetCapabilities = 0;
 #ifdef USE_VCP
@@ -537,6 +572,13 @@ static bool mspCommonProcessOutCommand(uint8_t cmdMSP, sbuf_t *dst, mspPostProce
 #if defined(USE_FLASH_BOOT_LOADER)
         targetCapabilities |= 1 << TARGET_HAS_FLASH_BOOTLOADER_BIT;
 #endif
+#if defined(USE_CUSTOM_DEFAULTS)
+        targetCapabilities |= 1 << TARGET_SUPPORTS_CUSTOM_DEFAULTS_BIT;
+        if (hasCustomDefaults()) {
+            targetCapabilities |= 1 << TARGET_HAS_CUSTOM_DEFAULTS_BIT;
+        }
+#endif
+
         sbufWriteU8(dst, targetCapabilities);
 
         // Target name with explicit length
@@ -568,6 +610,9 @@ static bool mspCommonProcessOutCommand(uint8_t cmdMSP, sbuf_t *dst, mspPostProce
 #endif
 
         sbufWriteU8(dst, MCU_TYPE_ID);
+
+        // Added in API version 1.42
+        sbufWriteU8(dst, systemConfig()->configurationState);
 
         break;
     }
@@ -970,7 +1015,7 @@ static bool mspProcessOutCommand(uint8_t cmdMSP, sbuf_t *dst)
     case MSP_MOTOR:
         for (unsigned i = 0; i < 8; i++) {
 #ifdef USE_MOTOR
-            if (i >= MAX_SUPPORTED_MOTORS || !motorIsMotorEnabled(i)) {
+            if (!motorIsEnabled() || i >= MAX_SUPPORTED_MOTORS || !motorIsMotorEnabled(i)) {
                 sbufWriteU16(dst, 0);
                 continue;
             }
@@ -981,6 +1026,55 @@ static bool mspProcessOutCommand(uint8_t cmdMSP, sbuf_t *dst)
 #endif
         }
 
+        break;
+
+    // Added in API version 1.42
+    case MSP_MOTOR_TELEMETRY:
+        sbufWriteU8(dst, getMotorCount());
+        for (unsigned i = 0; i < getMotorCount(); i++) {
+            int rpm = 0;
+            uint16_t invalidPct = 0;
+            uint8_t escTemperature = 0;  // degrees celcius
+            uint16_t escVoltage = 0;     // 0.01V per unit
+            uint16_t escCurrent = 0;     // 0.01A per unit
+            uint16_t escConsumption = 0; // mAh
+
+            bool rpmDataAvailable = false;
+
+#ifdef USE_DSHOT_TELEMETRY
+            if (motorConfig()->dev.useDshotTelemetry) {
+                rpm = (int)getDshotTelemetry(i) * 100 * 2 / motorConfig()->motorPoleCount;
+                rpmDataAvailable = true;
+                invalidPct = 10000; // 100.00%
+#ifdef USE_DSHOT_TELEMETRY_STATS
+                if (isDshotMotorTelemetryActive(i)) {
+                    invalidPct = getDshotTelemetryMotorInvalidPercent(i);
+                }
+#endif
+            }
+#endif
+
+#ifdef USE_ESC_SENSOR
+            if (featureIsEnabled(FEATURE_ESC_SENSOR)) {
+                escSensorData_t *escData = getEscSensorData(i);
+                if (!rpmDataAvailable) {  // We want DSHOT telemetry RPM data (if available) to have precedence
+                    rpm = calcEscRpm(escData->rpm);
+                    rpmDataAvailable = true;
+                }
+                escTemperature = escData->temperature;
+                escVoltage = escData->voltage;
+                escCurrent = escData->current;
+                escConsumption = escData->consumption;
+            }
+#endif
+
+            sbufWriteU32(dst, (rpmDataAvailable ? rpm : 0));
+            sbufWriteU16(dst, invalidPct);
+            sbufWriteU8(dst, escTemperature);
+            sbufWriteU16(dst, escVoltage);
+            sbufWriteU16(dst, escCurrent);
+            sbufWriteU16(dst, escConsumption);
+        }
         break;
 
     case MSP_RC:
@@ -1112,6 +1206,21 @@ static bool mspProcessOutCommand(uint8_t cmdMSP, sbuf_t *dst)
         sbufWriteU16(dst, motorConfig()->minthrottle);
         sbufWriteU16(dst, motorConfig()->maxthrottle);
         sbufWriteU16(dst, motorConfig()->mincommand);
+
+        // API 1.42
+        sbufWriteU8(dst, getMotorCount());
+        sbufWriteU8(dst, motorConfig()->motorPoleCount);
+#ifdef USE_DSHOT_TELEMETRY
+        sbufWriteU8(dst, motorConfig()->dev.useDshotTelemetry);
+#else
+        sbufWriteU8(dst, 0);
+#endif
+
+#ifdef USE_ESC_SENSOR
+        sbufWriteU8(dst, featureIsEnabled(FEATURE_ESC_SENSOR)); // ESC sensor available
+#else
+        sbufWriteU8(dst, 0);
+#endif
         break;
 
 #ifdef USE_MAG
@@ -1121,6 +1230,7 @@ static bool mspProcessOutCommand(uint8_t cmdMSP, sbuf_t *dst)
 #endif
 
 #if defined(USE_ESC_SENSOR)
+    // Deprecated in favor of MSP_MOTOR_TELEMETY as of API version 1.42
     case MSP_ESC_SENSOR_DATA:
         if (featureIsEnabled(FEATURE_ESC_SENSOR)) {
             sbufWriteU8(dst, getMotorCount());
@@ -1471,8 +1581,8 @@ static bool mspProcessOutCommand(uint8_t cmdMSP, sbuf_t *dst)
         sbufWriteU16(dst, 0);
         sbufWriteU16(dst, 0);
 #endif
-#if defined(USE_GYRO_DATA_ANALYSE)
         // Added in MSP API 1.42
+#if defined(USE_GYRO_DATA_ANALYSE)
         sbufWriteU8(dst, gyroConfig()->dyn_notch_range);
         sbufWriteU8(dst, gyroConfig()->dyn_notch_width_percent);
         sbufWriteU16(dst, gyroConfig()->dyn_notch_q);
@@ -1483,6 +1593,15 @@ static bool mspProcessOutCommand(uint8_t cmdMSP, sbuf_t *dst)
         sbufWriteU16(dst, 0);
         sbufWriteU16(dst, 0);
 #endif
+
+#if defined(USE_RPM_FILTER)
+        sbufWriteU8(dst, rpmFilterConfig()->gyro_rpm_notch_harmonics);
+        sbufWriteU8(dst, rpmFilterConfig()->gyro_rpm_notch_min);
+#else
+        sbufWriteU8(dst, 0);
+        sbufWriteU8(dst, 0);
+#endif
+
         break;
     case MSP_PID_ADVANCED:
         sbufWriteU16(dst, 0);
@@ -1581,7 +1700,7 @@ static bool mspProcessOutCommand(uint8_t cmdMSP, sbuf_t *dst)
     case MSP_VTX_CONFIG:
         {
             const vtxDevice_t *vtxDevice = vtxCommonDevice();
-            unsigned vtxStatus;
+            unsigned vtxStatus = 0;
             vtxDevType_e vtxType = VTXDEV_UNKNOWN;
             uint8_t deviceIsReady = 0;
             if (vtxDevice) {
@@ -1653,7 +1772,7 @@ static bool mspProcessOutCommand(uint8_t cmdMSP, sbuf_t *dst)
     return !unsupportedCommand;
 }
 
-static mspResult_e mspFcProcessOutCommandWithArg(uint8_t cmdMSP, sbuf_t *src, sbuf_t *dst, mspPostProcessFnPtr *mspPostProcessFn)
+static mspResult_e mspFcProcessOutCommandWithArg(mspDescriptor_t srcDesc, uint8_t cmdMSP, sbuf_t *src, sbuf_t *dst, mspPostProcessFnPtr *mspPostProcessFn)
 {
 
     switch (cmdMSP) {
@@ -1717,7 +1836,7 @@ static mspResult_e mspFcProcessOutCommandWithArg(uint8_t cmdMSP, sbuf_t *src, sb
                 uint8_t newMSP = sbufReadU8(src);
                 sbufInit(&packetOut.buf, dst->ptr, dst->end);
                 packetIn.cmd = newMSP;
-                mspFcProcessCommand(&packetIn, &packetOut, NULL);
+                mspFcProcessCommand(srcDesc, &packetIn, &packetOut, NULL);
                 uint8_t mspSize = sbufPtr(&packetOut.buf) - dst->ptr;
                 mspSize++; // need to add length information for each MSP
                 bytesRemaining -= mspSize;
@@ -1731,7 +1850,7 @@ static mspResult_e mspFcProcessOutCommandWithArg(uint8_t cmdMSP, sbuf_t *src, sb
                 uint8_t* sizePtr = sbufPtr(&packetOut.buf);
                 sbufWriteU8(&packetOut.buf, 0); // dummy
                 packetIn.cmd = sbufReadU8(src);
-                mspFcProcessCommand(&packetIn, &packetOut, NULL);
+                mspFcProcessCommand(srcDesc, &packetIn, &packetOut, NULL);
                 (*sizePtr) = sbufPtr(&packetOut.buf) - (sizePtr + 1);
             }
             dst->ptr = packetOut.buf.ptr;
@@ -1777,6 +1896,39 @@ static mspResult_e mspFcProcessOutCommandWithArg(uint8_t cmdMSP, sbuf_t *src, sb
         break;
 #endif // USE_VTX_TABLE
 
+    case MSP_RESET_CONF:
+        {
+#if defined(USE_CUSTOM_DEFAULTS)
+            defaultsType_e defaultsType = DEFAULTS_TYPE_CUSTOM;
+#endif
+            if (sbufBytesRemaining(src) >= 1) {
+                // Added in MSP API 1.42
+#if defined(USE_CUSTOM_DEFAULTS)
+                defaultsType = sbufReadU8(src);
+#else
+                sbufReadU8(src);
+#endif
+            }
+
+            bool success = false;
+            if (!ARMING_FLAG(ARMED)) {
+#if defined(USE_CUSTOM_DEFAULTS)
+                success = resetEEPROM(defaultsType == DEFAULTS_TYPE_CUSTOM);
+#else
+                success = resetEEPROM(false);
+#endif
+
+                if (success && mspPostProcessFn) {
+                    rebootMode = MSP_REBOOT_FIRMWARE;
+                    *mspPostProcessFn = mspRebootFn;
+                }
+            }
+
+            // Added in API version 1.42
+            sbufWriteU8(dst, success);
+        }
+
+        break;
     default:
         return MSP_RESULT_CMD_UNKNOWN;
     }
@@ -1806,7 +1958,7 @@ static void mspFcDataFlashReadCommand(sbuf_t *dst, sbuf_t *src)
 }
 #endif
 
-static mspResult_e mspProcessInCommand(uint8_t cmdMSP, sbuf_t *src)
+static mspResult_e mspProcessInCommand(mspDescriptor_t srcDesc, uint8_t cmdMSP, sbuf_t *src)
 {
     uint32_t i;
     uint8_t value;
@@ -1998,6 +2150,16 @@ static mspResult_e mspProcessInCommand(uint8_t cmdMSP, sbuf_t *src)
         motorConfigMutable()->minthrottle = sbufReadU16(src);
         motorConfigMutable()->maxthrottle = sbufReadU16(src);
         motorConfigMutable()->mincommand = sbufReadU16(src);
+
+        // version 1.42
+        if (sbufBytesRemaining(src) >= 2) {
+            motorConfigMutable()->motorPoleCount = sbufReadU8(src);
+#if defined(USE_DSHOT_TELEMETRY)
+            motorConfigMutable()->dev.useDshotTelemetry = sbufReadU8(src);
+#else
+            sbufReadU8(src);
+#endif
+        }
         break;
 
 #ifdef USE_GPS
@@ -2213,7 +2375,7 @@ static mspResult_e mspProcessInCommand(uint8_t cmdMSP, sbuf_t *src)
             sbufReadU16(src);
 #endif
         }
-        if (sbufBytesRemaining(src) >= 6) {
+        if (sbufBytesRemaining(src) >= 8) {
             // Added in MSP API 1.42
 #if defined(USE_GYRO_DATA_ANALYSE)
             gyroConfigMutable()->dyn_notch_range = sbufReadU8(src);
@@ -2225,6 +2387,14 @@ static mspResult_e mspProcessInCommand(uint8_t cmdMSP, sbuf_t *src)
             sbufReadU8(src);
             sbufReadU16(src);
             sbufReadU16(src);
+#endif
+
+#if defined(USE_RPM_FILTER)
+            rpmFilterConfigMutable()->gyro_rpm_notch_harmonics = sbufReadU8(src);
+            rpmFilterConfigMutable()->gyro_rpm_notch_min = sbufReadU8(src);
+#else
+            sbufReadU8(src);
+            sbufReadU8(src);
 #endif
         }
 
@@ -2342,13 +2512,6 @@ static mspResult_e mspProcessInCommand(uint8_t cmdMSP, sbuf_t *src)
 #else
         sbufReadU8(src);
 #endif
-        break;
-
-    case MSP_RESET_CONF:
-        if (!ARMING_FLAG(ARMED)) {
-            resetEEPROM();
-            readEEPROM();
-        }
         break;
 
 #ifdef USE_ACC
@@ -2592,6 +2755,7 @@ static mspResult_e mspProcessInCommand(uint8_t cmdMSP, sbuf_t *src)
                 disableRunawayTakeoff = sbufReadU8(src);
             }
             if (command) {
+                mspArmingDisableByDescriptor(srcDesc);
                 setArmingDisabled(ARMING_DISABLED_MSP);
                 if (ARMING_FLAG(ARMED)) {
                     disarm();
@@ -2600,10 +2764,13 @@ static mspResult_e mspProcessInCommand(uint8_t cmdMSP, sbuf_t *src)
                 runawayTakeoffTemporaryDisable(false);
 #endif
             } else {
-                unsetArmingDisabled(ARMING_DISABLED_MSP);
+                mspArmingEnableByDescriptor(srcDesc);
+                if (mspIsMspArmingEnabled()) {
+                    unsetArmingDisabled(ARMING_DISABLED_MSP);
 #ifdef USE_RUNAWAY_TAKEOFF
-                runawayTakeoffTemporaryDisable(disableRunawayTakeoff);
+                    runawayTakeoffTemporaryDisable(disableRunawayTakeoff);
 #endif
+                }
             }
         }
         break;
@@ -2910,7 +3077,7 @@ static mspResult_e mspProcessInCommand(uint8_t cmdMSP, sbuf_t *src)
     return MSP_RESULT_ACK;
 }
 
-static mspResult_e mspCommonProcessInCommand(uint8_t cmdMSP, sbuf_t *src, mspPostProcessFnPtr *mspPostProcessFn)
+static mspResult_e mspCommonProcessInCommand(mspDescriptor_t srcDesc, uint8_t cmdMSP, sbuf_t *src, mspPostProcessFnPtr *mspPostProcessFn)
 {
     UNUSED(mspPostProcessFn);
     const unsigned int dataSize = sbufBytesRemaining(src);
@@ -3123,7 +3290,7 @@ static mspResult_e mspCommonProcessInCommand(uint8_t cmdMSP, sbuf_t *src, mspPos
 #endif // OSD
 
     default:
-        return mspProcessInCommand(cmdMSP, src);
+        return mspProcessInCommand(srcDesc, cmdMSP, src);
     }
     return MSP_RESULT_ACK;
 }
@@ -3131,7 +3298,7 @@ static mspResult_e mspCommonProcessInCommand(uint8_t cmdMSP, sbuf_t *src, mspPos
 /*
  * Returns MSP_RESULT_ACK, MSP_RESULT_ERROR or MSP_RESULT_NO_REPLY
  */
-mspResult_e mspFcProcessCommand(mspPacket_t *cmd, mspPacket_t *reply, mspPostProcessFnPtr *mspPostProcessFn)
+mspResult_e mspFcProcessCommand(mspDescriptor_t srcDesc, mspPacket_t *cmd, mspPacket_t *reply, mspPostProcessFnPtr *mspPostProcessFn)
 {
     int ret = MSP_RESULT_ACK;
     sbuf_t *dst = &reply->buf;
@@ -3144,7 +3311,7 @@ mspResult_e mspFcProcessCommand(mspPacket_t *cmd, mspPacket_t *reply, mspPostPro
         ret = MSP_RESULT_ACK;
     } else if (mspProcessOutCommand(cmdMSP, dst)) {
         ret = MSP_RESULT_ACK;
-    } else if ((ret = mspFcProcessOutCommandWithArg(cmdMSP, src, dst, mspPostProcessFn)) != MSP_RESULT_CMD_UNKNOWN) {
+    } else if ((ret = mspFcProcessOutCommandWithArg(srcDesc, cmdMSP, src, dst, mspPostProcessFn)) != MSP_RESULT_CMD_UNKNOWN) {
         /* ret */;
 #ifdef USE_SERIAL_4WAY_BLHELI_INTERFACE
     } else if (cmdMSP == MSP_SET_4WAY_IF) {
@@ -3157,7 +3324,7 @@ mspResult_e mspFcProcessCommand(mspPacket_t *cmd, mspPacket_t *reply, mspPostPro
         ret = MSP_RESULT_ACK;
 #endif
     } else {
-        ret = mspCommonProcessInCommand(cmdMSP, src, mspPostProcessFn);
+        ret = mspCommonProcessInCommand(srcDesc, cmdMSP, src, mspPostProcessFn);
     }
     reply->result = ret;
     return ret;
