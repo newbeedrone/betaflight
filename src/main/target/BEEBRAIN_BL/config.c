@@ -74,33 +74,33 @@
 
 void targetConfiguration(void)
 {
-    // for (uint8_t pidProfileIndex = 0; pidProfileIndex < MAX_PROFILE_COUNT; pidProfileIndex++) {
-    //     pidProfile_t *pidProfile = pidProfilesMutable(pidProfileIndex);
+    for (uint8_t pidProfileIndex = 0; pidProfileIndex < PID_PROFILE_COUNT; pidProfileIndex++) {
+        pidProfile_t *pidProfile = pidProfilesMutable(pidProfileIndex);
 
-    //     pidProfile->pid[PID_ROLL].P  = 86;
-    //     pidProfile->pid[PID_ROLL].I  = 50;
-    //     pidProfile->pid[PID_ROLL].D  = 60;
-    //     pidProfile->pid[PID_PITCH].P = 90;
-    //     pidProfile->pid[PID_PITCH].I = 55;
-    //     pidProfile->pid[PID_PITCH].D = 60;
-    //     pidProfile->pid[PID_YAW].P   = 120;
-    //     pidProfile->pid[PID_YAW].I   = 75;
-    //     pidProfile->pid[PID_YAW].D   = 20;
-    //     pidProfile->dterm_notch_cutoff = 0;
-    // }
+        pidProfile->pid[PID_ROLL].P  = 86;
+        pidProfile->pid[PID_ROLL].I  = 50;
+        pidProfile->pid[PID_ROLL].D  = 60;
+        pidProfile->pid[PID_PITCH].P = 90;
+        pidProfile->pid[PID_PITCH].I = 55;
+        pidProfile->pid[PID_PITCH].D = 60;
+        pidProfile->pid[PID_YAW].P   = 120;
+        pidProfile->pid[PID_YAW].I   = 75;
+        pidProfile->pid[PID_YAW].D   = 20;
+        pidProfile->dterm_notch_cutoff = 0;
+    }
 
-    // for (uint8_t rateProfileIndex = 0; rateProfileIndex < CONTROL_RATE_PROFILE_COUNT; rateProfileIndex++) {
-    //     controlRateConfig_t *controlRateConfig = controlRateProfilesMutable(rateProfileIndex);
+    for (uint8_t rateProfileIndex = 0; rateProfileIndex < CONTROL_RATE_PROFILE_COUNT; rateProfileIndex++) {
+        controlRateConfig_t *controlRateConfig = controlRateProfilesMutable(rateProfileIndex);
 
-    //     controlRateConfig->rcRates[FD_YAW] = 100;
-    //     controlRateConfig->rcExpo[FD_ROLL] = 15;
-    //     controlRateConfig->rcExpo[FD_PITCH] = 15;
-    //     controlRateConfig->rcExpo[FD_YAW]  = 15;
-    //     controlRateConfig->rates[FD_ROLL]  = 80;
-    //     controlRateConfig->rates[FD_PITCH] = 80;
-    //     controlRateConfig->rates[FD_YAW] = 80;
-    //     controlRateConfig->dynThrPID = 50;
-    // }
+        controlRateConfig->rcRates[FD_YAW] = 100;
+        controlRateConfig->rcExpo[FD_ROLL] = 15;
+        controlRateConfig->rcExpo[FD_PITCH] = 15;
+        controlRateConfig->rcExpo[FD_YAW]  = 15;
+        controlRateConfig->rates[FD_ROLL]  = 80;
+        controlRateConfig->rates[FD_PITCH] = 80;
+        controlRateConfig->rates[FD_YAW] = 80;
+        controlRateConfig->dynThrPID = 50;
+    }
 
     osdConfigMutable()->item_pos[OSD_CRAFT_NAME]        = OSD_POS(9, 10) | OSD_PROFILE_1_FLAG;
     osdConfigMutable()->item_pos[OSD_MAIN_BATT_VOLTAGE] = OSD_POS(23, 9) | OSD_PROFILE_1_FLAG;
@@ -170,11 +170,11 @@ void targetConfiguration(void)
     strcpy(vtxTableConfigMutable()->powerLabels[2], "100");
     
 
-    // batteryConfigMutable()->batteryCapacity = 250;
-    // batteryConfigMutable()->vbatmincellvoltage = 28;
-    // batteryConfigMutable()->vbatwarningcellvoltage = 32;
+    batteryConfigMutable()->batteryCapacity = 250;
+    batteryConfigMutable()->vbatmincellvoltage = 28;
+    batteryConfigMutable()->vbatwarningcellvoltage = 32;
 
-    // imuConfigMutable()->small_angle = 180;
+    imuConfigMutable()->small_angle = 180;
 
     modeActivationConditionsMutable(0)->modeId           = BOXARM;
     modeActivationConditionsMutable(0)->auxChannelIndex  = AUX1 - NON_AUX_CHANNEL_COUNT;
@@ -219,69 +219,72 @@ void targetConfiguration(void)
     //     channelRangeConfig->max = 1857;
     // }
 
-    // gyroConfigMutable()->gyro_lowpass_type = FILTER_BIQUAD;
-    // gyroConfigMutable()->gyro_lowpass_hz = 150;
-    // gyroConfigMutable()->gyro_lowpass2_hz = 0;
-    // gyroConfigMutable()->yaw_spin_threshold = 1400;
-    // rxConfigMutable()->mincheck = 1010;
-    // rxConfigMutable()->maxcheck = 2000;
-    // rxConfigMutable()->rc_smoothing_type = RC_SMOOTHING_TYPE_FILTER;
-    // rxConfigMutable()->fpvCamAngleDegrees = 12;
-    // rxConfigMutable()->rssi_channel = 9;
-    // motorConfigMutable()->digitalIdleOffsetValue = 1000;
-    // motorConfigMutable()->dev.motorPwmProtocol = PWM_TYPE_DSHOT600;
+    gyroConfigMutable()->gyro_lowpass_type = FILTER_BIQUAD;
+    gyroConfigMutable()->gyro_lowpass_hz = 150;
+    gyroConfigMutable()->gyro_lowpass2_hz = 0;
+    gyroConfigMutable()->yaw_spin_threshold = 1400;
+    rxConfigMutable()->mincheck = 1010;
+    rxConfigMutable()->maxcheck = 2000;
+    rxConfigMutable()->rc_smoothing_type = RC_SMOOTHING_TYPE_FILTER;
+    rxConfigMutable()->fpvCamAngleDegrees = 12;
+    rxConfigMutable()->rssi_channel = 9;
+    //motorConfigMutable()->digitalIdleOffsetValue = 1000;
+    motorConfigMutable()->dev.useBurstDshot = true;
+    motorConfigMutable()->dev.useDshotTelemetry = false;
+    motorConfigMutable()->motorPoleCount = 12;
+    motorConfigMutable()->dev.motorPwmProtocol = PWM_TYPE_DSHOT600;
     batteryConfigMutable()->batteryCapacity = 300;
     batteryConfigMutable()->vbatmaxcellvoltage = 440;
     batteryConfigMutable()->vbatfullcellvoltage = 400;
     batteryConfigMutable()->vbatmincellvoltage = 290;
     batteryConfigMutable()->vbatwarningcellvoltage = 320;
     voltageSensorADCConfigMutable(0)->vbatscale = 114;
-    // mixerConfigMutable()->yaw_motors_reversed = true;
-    // mixerConfigMutable()->crashflip_motor_percent = 50;
-    // imuConfigMutable()->small_angle = 180;
-    // pidConfigMutable()->pid_process_denom = 1;
-    // pidConfigMutable()->runaway_takeoff_prevention = false;
-    // osdConfigMutable()->enabledWarnings &= ~(1 << OSD_WARNING_CORE_TEMPERATURE);
-    // osdConfigMutable()->cap_alarm = 255;
+    mixerConfigMutable()->yaw_motors_reversed = true;
+    mixerConfigMutable()->crashflip_motor_percent = 50;
+    imuConfigMutable()->small_angle = 180;
+    pidConfigMutable()->pid_process_denom = 1;
+    pidConfigMutable()->runaway_takeoff_prevention = false;
+    osdConfigMutable()->enabledWarnings &= ~(1 << OSD_WARNING_CORE_TEMPERATURE);
+    osdConfigMutable()->cap_alarm = 255;
 
-    // pidProfilesMutable(0)->dterm_filter_type = FILTER_BIQUAD;
-    // pidProfilesMutable(0)->dterm_lowpass_hz = 200;
-    // pidProfilesMutable(0)->dterm_lowpass2_hz = 0;
-    // pidProfilesMutable(0)->dterm_notch_cutoff = 0;
-    // pidProfilesMutable(0)->vbatPidCompensation = true;
-    // pidProfilesMutable(0)->itermThrottleThreshold = 200;
-    // pidProfilesMutable(0)->yawRateAccelLimit = 0;
-    // pidProfilesMutable(0)->iterm_relax = ITERM_RELAX_RP;
-    // pidProfilesMutable(0)->iterm_relax_type = ITERM_RELAX_SETPOINT;
-    // pidProfilesMutable(0)->pidSumLimit = 1000;
-    // pidProfilesMutable(0)->pidSumLimitYaw = 1000;
-    // pidProfilesMutable(0)->pid[PID_PITCH].P = 78;
-    // pidProfilesMutable(0)->pid[PID_PITCH].I = 75;
-    // pidProfilesMutable(0)->pid[PID_PITCH].D = 35;
-    // pidProfilesMutable(0)->pid[PID_PITCH].F = 155;
-    // pidProfilesMutable(0)->pid[PID_ROLL].P  = 75;
-    // pidProfilesMutable(0)->pid[PID_ROLL].I  = 70;
-    // pidProfilesMutable(0)->pid[PID_ROLL].D  = 30;
-    // pidProfilesMutable(0)->pid[PID_ROLL].F  = 155;
-    // pidProfilesMutable(0)->pid[PID_YAW].P   = 95;
-    // pidProfilesMutable(0)->pid[PID_YAW].I   = 70;
-    // pidProfilesMutable(0)->pid[PID_YAW].F   = 100;
-    // pidProfilesMutable(0)->pid[PID_LEVEL].P = 100;
-    // pidProfilesMutable(0)->pid[PID_LEVEL].I = 30;
-    // pidProfilesMutable(0)->pid[PID_LEVEL].D = 80;
-    // pidProfilesMutable(0)->levelAngleLimit  = 70;
-    // pidProfilesMutable(0)->horizon_tilt_effect = 80;
-    // pidProfilesMutable(0)->horizon_tilt_expert_mode = true;
+    pidProfilesMutable(0)->dterm_filter_type = FILTER_BIQUAD;
+    pidProfilesMutable(0)->dterm_lowpass_hz = 200;
+    pidProfilesMutable(0)->dterm_lowpass2_hz = 0;
+    pidProfilesMutable(0)->dterm_notch_cutoff = 0;
+    pidProfilesMutable(0)->vbatPidCompensation = true;
+    pidProfilesMutable(0)->itermThrottleThreshold = 200;
+    pidProfilesMutable(0)->yawRateAccelLimit = 0;
+    pidProfilesMutable(0)->iterm_relax = ITERM_RELAX_RP;
+    pidProfilesMutable(0)->iterm_relax_type = ITERM_RELAX_SETPOINT;
+    pidProfilesMutable(0)->pidSumLimit = 1000;
+    pidProfilesMutable(0)->pidSumLimitYaw = 1000;
+    pidProfilesMutable(0)->pid[PID_PITCH].P = 78;
+    pidProfilesMutable(0)->pid[PID_PITCH].I = 75;
+    pidProfilesMutable(0)->pid[PID_PITCH].D = 35;
+    pidProfilesMutable(0)->pid[PID_PITCH].F = 155;
+    pidProfilesMutable(0)->pid[PID_ROLL].P  = 75;
+    pidProfilesMutable(0)->pid[PID_ROLL].I  = 70;
+    pidProfilesMutable(0)->pid[PID_ROLL].D  = 30;
+    pidProfilesMutable(0)->pid[PID_ROLL].F  = 155;
+    pidProfilesMutable(0)->pid[PID_YAW].P   = 95;
+    pidProfilesMutable(0)->pid[PID_YAW].I   = 70;
+    pidProfilesMutable(0)->pid[PID_YAW].F   = 100;
+    pidProfilesMutable(0)->pid[PID_LEVEL].P = 100;
+    pidProfilesMutable(0)->pid[PID_LEVEL].I = 30;
+    pidProfilesMutable(0)->pid[PID_LEVEL].D = 80;
+    pidProfilesMutable(0)->levelAngleLimit  = 70;
+    pidProfilesMutable(0)->horizon_tilt_effect = 80;
+    pidProfilesMutable(0)->horizon_tilt_expert_mode = true;
 
-    // controlRateProfilesMutable(0)->rcRates[FD_YAW] = 207;
-    // controlRateProfilesMutable(0)->rates[FD_ROLL] = 80;
-    // controlRateProfilesMutable(0)->rates[FD_PITCH] = 80;
-    // controlRateProfilesMutable(0)->rates[FD_YAW] = 25;
-    // controlRateProfilesMutable(0)->rcExpo[FD_ROLL] = 0;
-    // controlRateProfilesMutable(0)->rcExpo[FD_PITCH] = 0;
-    // controlRateProfilesMutable(0)->rcExpo[FD_YAW]  = 0;
-    // controlRateProfilesMutable(0)->dynThrPID = 60;
-    // controlRateProfilesMutable(0)->tpa_breakpoint = 1750;
+    controlRateProfilesMutable(0)->rcRates[FD_YAW] = 207;
+    controlRateProfilesMutable(0)->rates[FD_ROLL] = 80;
+    controlRateProfilesMutable(0)->rates[FD_PITCH] = 80;
+    controlRateProfilesMutable(0)->rates[FD_YAW] = 25;
+    controlRateProfilesMutable(0)->rcExpo[FD_ROLL] = 0;
+    controlRateProfilesMutable(0)->rcExpo[FD_PITCH] = 0;
+    controlRateProfilesMutable(0)->rcExpo[FD_YAW]  = 0;
+    controlRateProfilesMutable(0)->dynThrPID = 60;
+    controlRateProfilesMutable(0)->tpa_breakpoint = 1750;
 
     ledStripStatusModeConfigMutable()->ledConfigs[0] = DEFINE_LED(7, 7,  8, 0, LF(COLOR), LO(LARSON_SCANNER) | LO(THROTTLE), 0);
     ledStripStatusModeConfigMutable()->ledConfigs[1] = DEFINE_LED(8, 7, 13, 0, LF(COLOR), LO(LARSON_SCANNER) | LO(THROTTLE), 0);
