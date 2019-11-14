@@ -141,7 +141,7 @@
 #define BEEPER_INVERTED
 
 #define USE_ESCSERIAL
-#define ENABLE_DSHOT_DMAR               true
+#define ENABLE_DSHOT_DMAR               DSHOT_DMAR_ON
 
 #define DEFAULT_FEATURES                (FEATURE_OSD | FEATURE_TELEMETRY | FEATURE_LED_STRIP)
 
