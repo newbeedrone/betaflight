@@ -20,8 +20,8 @@
 
 #pragma once
 
-#define TARGET_BOARD_IDENTIFIER         "BBLP" // BeeBrain Lite Pro
-#define USBD_PRODUCT_STRING             "BeeBrain Lite PRO"
+#define TARGET_BOARD_IDENTIFIER         "BBPRO" // BeeBrain Pro
+#define USBD_PRODUCT_STRING             "BeeBrain Pro"
 
 #define USE_TARGET_CONFIG
 #define TARGET_PREINIT
@@ -71,14 +71,14 @@
 #define GYRO_1_ALIGN                    CW90_DEG
 
 // *************** RX ******************************
-#if (defined(BEEBRAIN_LITE_PRO_DSM_US) || defined(BEEBRAIN_LITE_PRO_DSM_INTL))
+#if (defined(BEEBRAIN_PRO_DSM_US) || defined(BEEBRAIN_PRO_DSM_INTL))
     #define SERIALRX_PROVIDER           SERIALRX_SPEKTRUM2048
     #undef  USE_SPEKTRUM_REAL_RSSI
     #undef  USE_SPEKTRUM_FAKE_RSSI
     #define DEFAULT_RX_FEATURE          FEATURE_RX_SERIAL
     #define SERIALRX_UART               SERIAL_PORT_USART2
     #define RX_CHANNELS_TAER
-#elif (defined(BEEBRAIN_LITE_PRO_SFHSS_US) || defined(BEEBRAIN_LITE_PRO_SFHSS_INTL))
+#elif (defined(BEEBRAIN_PRO_SFHSS_US) || defined(BEEBRAIN_PRO_SFHSS_INTL))
     #define USE_RX_SPI
     #define RX_SPI_INSTANCE             SPI2
     #define RX_NSS_PIN                  SPI2_NSS_PIN
@@ -108,10 +108,10 @@
     #define RX_SPI_BIND_PIN             PC15
     #define RX_CC2500_SPI_LNA_EN_PIN    NONE
     #define DEFAULT_RX_FEATURE          FEATURE_RX_SPI
-#if (defined(BEEBRAIN_LITE_PRO_FRSKY_US) || defined(BEEBRAIN_LITE_PRO_FRSKY_INTL))
+#if (defined(BEEBRAIN_PRO_FRSKY_US) || defined(BEEBRAIN_PRO_FRSKY_INTL))
     #define RX_SPI_DEFAULT_PROTOCOL     RX_SPI_FRSKY_D
 #else
-    #define RX_SPI_DEFAULT_PROTOCOL     RX_SPI_FRSKY_D 
+    #define RX_SPI_DEFAULT_PROTOCOL     RX_SPI_FRSKY_X
 #endif
     #define USE_RX_FRSKY_SPI_TELEMETRY
     #define USE_RX_CC2500_SPI_DIVERSITY
@@ -139,7 +139,7 @@
 #define RTC6705_POWER_PIN               PA6
 #define RTC6705_POWER_PIN_HIGH_ENABLE
 #define USE_RTC6705_PITMODE_CTRL
-#if (defined(BEEBRAIN_LITE_PRO_DSM_US) || defined(BEEBRAIN_LITE_PRO_SFHSS_US) || defined(BEEBRAIN_LITE_PRO_FRSKY_US) || defined(BEEBRAIN_LITE_PRO_FRSKYX_US))
+#if (defined(BEEBRAIN_PRO_DSM_US) || defined(BEEBRAIN_PRO_SFHSS_US) || defined(BEEBRAIN_PRO_FRSKY_US) || defined(BEEBRAIN_PRO_FRSKYX_US))
 #define USE_VTX_LOCK_FREQ
 #endif
 

@@ -11,7 +11,7 @@ TARGET_SRC  =                                       \
              drivers/vtx_rtc6705_soft_spi.c			\
 			 drivers/flash_m25p16.c
 
-ifeq ($(TARGET), BEEBRAIN_LITE_PRO_FRSKY_INTL)
+ifeq ($(TARGET), BEEBRAIN_PRO_FRSKY_INTL)
 TARGET_SRC += drivers/rx/rx_cc2500.c                \
               rx/cc2500_common.c                    \
               rx/cc2500_sfhss.c                     \
@@ -20,7 +20,7 @@ TARGET_SRC += drivers/rx/rx_cc2500.c                \
               rx/cc2500_frsky_x.c
 endif
 
-ifeq ($(TARGET), BEEBRAIN_LITE_PRO_FRSKY_US)
+ifeq ($(TARGET), BEEBRAIN_PRO_FRSKY_US)
 TARGET_SRC += drivers/rx/rx_cc2500.c                \
               rx/cc2500_common.c                    \
               rx/cc2500_sfhss.c                     \
@@ -29,7 +29,7 @@ TARGET_SRC += drivers/rx/rx_cc2500.c                \
               rx/cc2500_frsky_x.c
 endif
 
-ifeq ($(TARGET), BEEBRAIN_LITE_PRO_SFHSS_INTL)
+ifeq ($(TARGET), BEEBRAIN_PRO_SFHSS_INTL)
 TARGET_SRC += drivers/rx/rx_cc2500.c                \
               rx/cc2500_common.c                    \
               rx/cc2500_sfhss.c                     \
@@ -38,7 +38,7 @@ TARGET_SRC += drivers/rx/rx_cc2500.c                \
               rx/cc2500_frsky_x.c
 endif
 
-ifeq ($(TARGET), BEEBRAIN_LITE_PRO_SFHSS_US)
+ifeq ($(TARGET), BEEBRAIN_PRO_SFHSS_US)
 TARGET_SRC += drivers/rx/rx_cc2500.c                \
               rx/cc2500_common.c                    \
               rx/cc2500_sfhss.c                     \

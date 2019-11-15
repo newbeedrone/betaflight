@@ -75,7 +75,7 @@
 
 #define BRUSHED_MOTORS_PWM_RATE 25000           // 25kHz
 
-#if (defined(BEEBRAIN_LITE_PRO_DSM_US) || defined(BEEBRAIN_LITE_PRO_DSM_INTL))
+#if (defined(BEEBRAIN_PRO_DSM_US) || defined(BEEBRAIN_PRO_DSM_INTL))
 #define BB_LITE_RSSI_CH_IDX     9
 #endif
 
@@ -144,7 +144,7 @@ void targetConfiguration(void)
     vtxSettingsConfigMutable()->band = 5;
     vtxSettingsConfigMutable()->channel = 1;
     vtxSettingsConfigMutable()->power = 2;
-#if (defined(BEEBRAIN_LITE_PRO_DSM_US) || defined(BEEBRAIN_LITE_PRO_SFHSS_US) || defined(BEEBRAIN_LITE_PRO_FRSKY_US) || defined(BEEBRAIN_LITE_PRO_FRSKYX_US))
+#if (defined(BEEBRAIN_PRO_DSM_US) || defined(BEEBRAIN_PRO_SFHSS_US) || defined(BEEBRAIN_PRO_FRSKY_US) || defined(BEEBRAIN_PRO_FRSKYX_US))
     uint16_t vtxTableFrequency[6][8] = {
         { 5865, 5845, 5825, 5805, 5785, 5765, 5745, 5725 }, // Boscam A
         { 5733, 5752, 5771, 5790, 5809, 5828, 5847, 5866 }, // Boscam B
@@ -235,9 +235,9 @@ void targetConfiguration(void)
     ledStripStatusModeConfigMutable()->ledConfigs[1] = DEFINE_LED(8, 7, 13, 0, LF(COLOR), LO(LARSON_SCANNER) | LO(THROTTLE), 0);
     ledStripStatusModeConfigMutable()->ledConfigs[2] = DEFINE_LED(9, 7, 11, 0, LF(COLOR), LO(LARSON_SCANNER) | LO(THROTTLE), 0);
 
-    strcpy(pilotConfigMutable()->name, "BB Lite PRO");
+    strcpy(pilotConfigMutable()->name, "Beebrain Pro");
 
-#if (defined(BEEBRAIN_LITE_PRO_DSM_US) || defined(BEEBRAIN_LITE_PRO_DSM_INTL))
+#if (defined(BEEBRAIN_PRO_DSM_US) || defined(BEEBRAIN_PRO_DSM_INTL))
     // DSM version
     rxConfigMutable()->rssi_channel = BB_LITE_RSSI_CH_IDX;
     rxFailsafeChannelConfig_t *channelFailsafeConfig = rxFailsafeChannelConfigsMutable(BB_LITE_RSSI_CH_IDX - 1);
