@@ -114,7 +114,8 @@ void targetConfiguration(void)
     vtxSettingsConfigMutable()->band = 5;
     vtxSettingsConfigMutable()->channel = 8;
     vtxSettingsConfigMutable()->power = 2;
-#if (defined(MOCKINGBIRD_DSM_US) || defined(MOCKINGBIRD_FRSKY_US) || defined(MOCKINGBIRD_SFHSS_US))
+#if defined(BEEBRAIN_BL_6000_SBUS_US) || defined (BEEBRAIN_BL_6000_DSM_US) || defined (BEEBRAIN_BL_6000_CRSF_US) || \
+    defined(BEEBRAIN_BL_6500_SBUS_US) || defined (BEEBRAIN_BL_6500_DSM_US) || defined (BEEBRAIN_BL_6500_CRSF_US) 
     uint16_t vtxTableFrequency[6][8] = {
         { 5865, 5845, 5825, 5805, 5785, 5765, 5745, 5725 }, // Boscam A
         { 5733, 5752, 5771, 5790, 5809, 5828, 5847, 5866 }, // Boscam B
