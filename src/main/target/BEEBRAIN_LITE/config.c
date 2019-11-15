@@ -216,8 +216,8 @@ void targetConfiguration(void)
     
 
     batteryConfigMutable()->batteryCapacity = 250;
-    batteryConfigMutable()->vbatmincellvoltage = 28;
-    batteryConfigMutable()->vbatwarningcellvoltage = 32;
+    batteryConfigMutable()->vbatmincellvoltage = 280;
+    batteryConfigMutable()->vbatwarningcellvoltage = 320;
 
     imuConfigMutable()->small_angle = 180;
 
