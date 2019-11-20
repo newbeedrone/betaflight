@@ -135,9 +135,6 @@
 #define RTC6705_POWER_PIN               PA6
 #define RTC6705_POWER_PIN_HIGH_ENABLE
 #define USE_RTC6705_PITMODE_CTRL
-#if (defined(MOCKINGBIRD_DSM_US) || defined(MOCKINGBIRD_FRSKY_US) || defined(MOCKINGBIRD_SFHSS_US))
-#define USE_VTX_LOCK_FREQ
-#endif
 
 // *************** BARO ****************************
 #define USE_BARO

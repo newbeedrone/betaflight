@@ -135,10 +135,6 @@
 #define RTC6705_POWER_PIN               PA6
 #define RTC6705_POWER_PIN_HIGH_ENABLE
 #define USE_RTC6705_PITMODE_CTRL
-#if (defined(BEEBRAIN_LITED_US) || defined(BEEBRAIN_LITESF_US) || defined(BEEBRAIN_LITE_US))
-#define USE_VTX_LOCK_FREQ
-#endif
-
 // *************** BARO ****************************
 #define USE_BARO
 #define USE_BARO_BMP280
