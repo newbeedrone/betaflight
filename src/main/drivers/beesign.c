@@ -44,7 +44,6 @@
 #include "io/vtx_tramp.h"
 #include "io/vtx_control.h"
 #include "io/vtx.h"
-#include "io/vtx_string.h"
 #include "io/vtx_beesign.h"
 
 static uint8_t receiveBuffer[BEESIGN_FM_MAX_LEN];

@@ -38,7 +38,6 @@
 
 #include "fc/config.h"
 
-#include "io/vtx_string.h"
 #include "io/vtx_beesign.h"
 #include "io/vtx.h"
 
