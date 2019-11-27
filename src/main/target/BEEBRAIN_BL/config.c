@@ -166,8 +166,8 @@ void targetConfiguration(void)
     vtxTableConfigMutable()->powerValues[0] = 0;
     vtxTableConfigMutable()->powerValues[1] = 1;
     vtxTableConfigMutable()->powerValues[2] = 2;
-    strcpy(vtxTableConfigMutable()->powerLabels[0], "5");
-    strcpy(vtxTableConfigMutable()->powerLabels[1], "25");
+    strcpy(vtxTableConfigMutable()->powerLabels[0], "5  ");
+    strcpy(vtxTableConfigMutable()->powerLabels[1], "25 ");
     strcpy(vtxTableConfigMutable()->powerLabels[2], "100");
     
 

@@ -109,11 +109,6 @@
 #define RTC6705_POWER_PIN               PA8
 #define RTC6705_POWER_PIN_HIGH_ENABLE
 
-#if defined(BEEBRAIN_BL_6000_SBUS_US) || defined (BEEBRAIN_BL_6000_DSM_US) || defined (BEEBRAIN_BL_6000_CRSF_US) || \
-    defined(BEEBRAIN_BL_6500_SBUS_US) || defined (BEEBRAIN_BL_6500_DSM_US) || defined (BEEBRAIN_BL_6500_CRSF_US) 
-#define USE_VTX_LOCK_FREQ
-#endif
-
 // *************** ADC *****************************
 #define USE_ADC
 #define ADC_INSTANCE                    ADC1
