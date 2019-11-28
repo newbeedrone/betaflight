@@ -143,7 +143,7 @@ void targetConfiguration(void)
 
     vtxSettingsConfigMutable()->band = 5;
     vtxSettingsConfigMutable()->channel = 1;
-    vtxSettingsConfigMutable()->power = 2;
+    vtxSettingsConfigMutable()->power = 3;
 #if (defined(BEEBRAIN_PRO_DSM_US) || defined(BEEBRAIN_PRO_SFHSS_US) || defined(BEEBRAIN_PRO_FRSKY_US) || defined(BEEBRAIN_PRO_FRSKYX_US))
     uint16_t vtxTableFrequency[6][8] = {
         { 5865, 5845, 5825, 5805, 5785, 5765, 5745, 5725 }, // Boscam A
