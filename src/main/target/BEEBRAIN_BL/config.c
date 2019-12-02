@@ -113,7 +113,7 @@ void targetConfiguration(void)
 
     vtxSettingsConfigMutable()->band = 5;
     vtxSettingsConfigMutable()->channel = 8;
-    vtxSettingsConfigMutable()->power = 1;
+    vtxSettingsConfigMutable()->power = 2;
 #if defined(BEEBRAIN_BL_SBUS_US) || defined (BEEBRAIN_BL_DSM_US) || defined (BEEBRAIN_BL_CRSF_US)
     uint16_t vtxTableFrequency[6][8] = {
         { 5865, 5845, 5825, 5805, 5785, 5765, 5745, 5725 }, // Boscam A
@@ -209,8 +209,8 @@ void targetConfiguration(void)
     for (uint8_t rxRangeIndex = 0; rxRangeIndex < NON_AUX_CHANNEL_COUNT; rxRangeIndex++) {
         rxChannelRangeConfig_t *channelRangeConfig = rxChannelRangeConfigsMutable(rxRangeIndex);
 
-        channelRangeConfig->min = 1070;
-        channelRangeConfig->max = 1928;
+        channelRangeConfig->min = 1062;
+        channelRangeConfig->max = 1936;
     }
 
     gyroConfigMutable()->gyro_lowpass_type = FILTER_PT1;
@@ -227,21 +227,21 @@ void targetConfiguration(void)
     motorConfigMutable()->digitalIdleOffsetValue = 1000;
     motorConfigMutable()->dev.useBurstDshot = true;
     motorConfigMutable()->dev.useDshotTelemetry = false;
-    motorConfigMutable()->motorPoleCount = 12;
+    motorConfigMutable()->motorPoleCount = 14;
     motorConfigMutable()->dev.motorPwmProtocol = PWM_TYPE_DSHOT600;
     batteryConfigMutable()->batteryCapacity = 300;
     batteryConfigMutable()->vbatmaxcellvoltage = 450;
     batteryConfigMutable()->vbatfullcellvoltage = 400;
     batteryConfigMutable()->vbatmincellvoltage = 290;
     batteryConfigMutable()->vbatwarningcellvoltage = 320;
-    voltageSensorADCConfigMutable(0)->vbatscale = 110;
+    voltageSensorADCConfigMutable(0)->vbatscale = 114;
     mixerConfigMutable()->yaw_motors_reversed = false;
     mixerConfigMutable()->crashflip_motor_percent = 0;
     imuConfigMutable()->small_angle = 180;
     pidConfigMutable()->pid_process_denom = 1;
     pidConfigMutable()->runaway_takeoff_prevention = true;
     //osdConfigMutable()->enabledWarnings &= ~(1 << OSD_WARNING_CORE_TEMPERATURE);
-    osdConfigMutable()->cap_alarm = 2200;
+    osdConfigMutable()->cap_alarm = 255;
 
     pidProfilesMutable(0)->dterm_filter_type = FILTER_PT1;
     pidProfilesMutable(0)->dyn_lpf_dterm_min_hz = 56;
@@ -249,35 +249,32 @@ void targetConfiguration(void)
     pidProfilesMutable(0)->dterm_lowpass_hz = 150;
     pidProfilesMutable(0)->dterm_lowpass2_hz = 120;
     pidProfilesMutable(0)->dterm_notch_cutoff = 0;
-    pidProfilesMutable(0)->vbatPidCompensation = true;
-    pidProfilesMutable(0)->iterm_rotation = true;
+    pidProfilesMutable(0)->vbatPidCompensation = false;
     pidProfilesMutable(0)->itermThrottleThreshold = 250;
     pidProfilesMutable(0)->yawRateAccelLimit = 0;
-    pidProfilesMutable(0)->iterm_relax = ITERM_RELAX_RPY;
-    pidProfilesMutable(0)->iterm_relax_type = ITERM_RELAX_GYRO;
+    pidProfilesMutable(0)->iterm_relax = ITERM_RELAX_RP;
+    pidProfilesMutable(0)->iterm_relax_type = ITERM_RELAX_SETPOINT;
     pidProfilesMutable(0)->pidSumLimit = 500;
     pidProfilesMutable(0)->pidSumLimitYaw = 400;
-    pidProfilesMutable(0)->pid[PID_PITCH].P = 55;
-    pidProfilesMutable(0)->pid[PID_PITCH].I = 62;
+    pidProfilesMutable(0)->pid[PID_PITCH].P = 50;
+    pidProfilesMutable(0)->pid[PID_PITCH].I = 68;
     pidProfilesMutable(0)->pid[PID_PITCH].D = 38;
     pidProfilesMutable(0)->pid[PID_PITCH].F = 20;
     pidProfilesMutable(0)->pid[PID_ROLL].P  = 58;
-    pidProfilesMutable(0)->pid[PID_ROLL].I  = 57;
+    pidProfilesMutable(0)->pid[PID_ROLL].I  = 59;
     pidProfilesMutable(0)->pid[PID_ROLL].D  = 35;
     pidProfilesMutable(0)->pid[PID_ROLL].F  = 20;
     pidProfilesMutable(0)->pid[PID_YAW].P   = 48;
     pidProfilesMutable(0)->pid[PID_YAW].I   = 55;
-    pidProfilesMutable(0)->pid[PID_YAW].D   = 0;
+    pidProfilesMutable(0)->pid[PID_YAW].D   = 13;
     pidProfilesMutable(0)->pid[PID_YAW].F   = 0;
     pidProfilesMutable(0)->pid[PID_LEVEL].P = 70;
     pidProfilesMutable(0)->pid[PID_LEVEL].I = 70;
-    pidProfilesMutable(0)->pid[PID_LEVEL].D = 100;
+    pidProfilesMutable(0)->pid[PID_LEVEL].D = 40;
     pidProfilesMutable(0)->levelAngleLimit  = 85;
     pidProfilesMutable(0)->horizon_tilt_effect = 75;
-    pidProfilesMutable(0)->d_min[FD_ROLL] = 20;
-    pidProfilesMutable(0)->d_min[FD_PITCH] = 18;
-    pidProfilesMutable(0)->d_min_gain = 25;
-    pidProfilesMutable(0)->d_min_advance = 1;
+    pidProfilesMutable(0)->d_min[FD_ROLL] = 29;
+    pidProfilesMutable(0)->d_min[FD_PITCH] = 22;
     pidProfilesMutable(0)->horizon_tilt_expert_mode = false;
 
     controlRateProfilesMutable(0)->rcRates[FD_YAW] = 100;
