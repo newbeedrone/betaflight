@@ -21,6 +21,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <ctype.h>
+#include <string.h>
+#include <drivers/vtx_table.h>
 
 #include "platform.h"
 
@@ -52,14 +54,15 @@ static uint8_t porModeStr[10] =     {"  POR MODE"};
 static uint8_t porModeFREQStr[10] = {"      5584"};
 
 static OSD_TAB_t bsEntryVtxMode =         {&bs_vtxmode, BEESIGN_VTX_MODE_COUNT - 1, &bsModeNames[0]};
-static OSD_TAB_t bsEntryVtxBand =         {&bs_vtxBand, BEESIGN_BAND_COUNT - 1, &vtx58BandNames[1]};
-static OSD_UINT8_t bsEntryVtxChannel =    {&bs_vtxChannel, 1, VTX_SETTINGS_CHANNEL_COUNT, 1};
+static OSD_TAB_t bsEntryVtxBand;
+static OSD_TAB_t bsEntryVtxChannel;
 static OSD_UINT16_t bsEntryVtxFreq =      {&bs_vtxFreq, BEESIGN_MIN_FREQUENCY_MHZ, BEESIGN_MAX_FREQUENCY_MHZ, 1};
 static OSD_UINT16_t bsShowVtxFreq =       {&bs_showFreq, BEESIGN_MIN_FREQUENCY_MHZ, BEESIGN_MAX_FREQUENCY_MHZ, 0};
-static OSD_TAB_t bsEntryVtxPower =        {&bs_vtxPower, BEESIGN_POWER_COUNT - BEESIGN_MIN_POWER, &bsPowerNames[BEESIGN_MIN_POWER]};
+static OSD_TAB_t bsEntryVtxPower;
 
 CMS_Menu cmsx_menuVtxBeesign; // Forward
 static long bsCmsConfigMode(const OSD_Entry *self);
+static long bs_Vtx_onEnter(void);
 
 static void bs_Vtx_ConfigRead(void)
 {
@@ -68,19 +71,19 @@ static void bs_Vtx_ConfigRead(void)
         if (vtxSettingsConfig()->band == 0) {
             bs_vtxBand = 0;
         } else {
-            bs_vtxBand = vtxSettingsConfig()->band - 1;
+            bs_vtxBand = vtxSettingsConfig()->band;
         }
-        bs_showFreq = vtx58frequencyTable[bs_vtxBand][bs_vtxChannel-1];
-        bs_vtxFreq = vtx58frequencyTable[bs_vtxBand][bs_vtxChannel-1];
+        bs_showFreq = vtxSettingsConfig()->freq;
+        bs_vtxFreq = vtxSettingsConfig()->freq;
     } else {
         bs_vtxBand = vtxSettingsConfig()->band;
         bs_vtxFreq = vtxSettingsConfig()->freq;
     }
-    if (vtxSettingsConfig()->power > 1) {
-        bs_vtxPower = vtxSettingsConfig()->power - BEESIGN_MIN_POWER;
-    } else {
-        bs_vtxPower = 0;
-    }
+    // if (vtxSettingsConfig()->power > 1) {
+        bs_vtxPower = vtxSettingsConfig()->power;
+    // } else {
+    //     bs_vtxPower = 0;
+    // }
 
 }
 
@@ -89,7 +92,7 @@ static long bsCmsConfigBandByGvar(displayPort_t *pDisp, const void *self)
     UNUSED(pDisp);
     UNUSED(self);
 
-    bs_showFreq = vtx58frequencyTable[bs_vtxBand][bs_vtxChannel-1];
+    bs_showFreq = beesignTable[bs_vtxBand][bs_vtxChannel-1];
 
     return 0;
 }
@@ -100,9 +103,9 @@ static long bsCmsConfigRaceSave(displayPort_t *pDisp, const void *self)
     UNUSED(self);
 
     bsSetVtxMode(BEESIGN_VTX_RACE_MODE);
-    vtxSettingsConfigMutable()->band = bs_vtxBand + 1;
+    vtxSettingsConfigMutable()->band = bs_vtxBand;
     vtxSettingsConfigMutable()->channel = bs_vtxChannel;
-    vtxSettingsConfigMutable()->power = bs_vtxPower + BEESIGN_MIN_POWER;
+    vtxSettingsConfigMutable()->power = bs_vtxPower;
     vtxSettingsConfigMutable()->freq = bs_showFreq;
 
     saveConfigAndNotify();
@@ -117,7 +120,7 @@ static long bsCmsConfigManualSave(displayPort_t *pDisp, const void *self)
     bsSetVtxMode(BEESIGN_VTX_MANUAL_MODE);
     vtxSettingsConfigMutable()->band = 0;
     vtxSettingsConfigMutable()->channel = bs_vtxChannel;
-    vtxSettingsConfigMutable()->power = bs_vtxPower + BEESIGN_MIN_POWER;
+    vtxSettingsConfigMutable()->power = bs_vtxPower;
     vtxSettingsConfigMutable()->freq = bs_vtxFreq;
 
     saveConfigAndNotify();
@@ -132,7 +135,7 @@ static long bsCmsConfigPorSave(displayPort_t *pDisp, const void *self)
     bsSetVtxMode(BEESIGN_VTX_POR_MODE);
     vtxSettingsConfigMutable()->band = 0;
     vtxSettingsConfigMutable()->channel = bs_vtxChannel;
-    vtxSettingsConfigMutable()->power = VTX_PWR_PIT + BEESIGN_MIN_POWER;
+    vtxSettingsConfigMutable()->power = VTX_PWR_PIT;
     vtxSettingsConfigMutable()->freq = BEESIGN_POR_FREQUENCY_MHZ;
 
     saveConfigAndNotify();
@@ -161,7 +164,7 @@ CMS_Menu cmsx_menuVtxBsMode = {
     .GUARD_text = "VTXBS",
     .GUARD_type = OME_MENU,
 #endif
-    .onEnter = NULL,
+    .onEnter = bs_Vtx_onEnter,
     .onExit= bsCmsConfigMode,
     .entries = bsCmsMenuModeEntries
 };
@@ -171,7 +174,7 @@ static OSD_Entry bsCmsMenuRaceModeEntries[] =
     {"--- BEESIGN RACE---", OME_Label, NULL, NULL, 0},
     {"MODE",        OME_Submenu,    cmsMenuChange,          &cmsx_menuVtxBsMode,    0},
     {"BAND",        OME_TAB,        bsCmsConfigBandByGvar,  &bsEntryVtxBand,        0},
-    {"CHANNEL",     OME_UINT8,      bsCmsConfigBandByGvar,  &bsEntryVtxChannel,     0},
+    {"CHANNEL",     OME_TAB,        bsCmsConfigBandByGvar,  &bsEntryVtxChannel,     0},
     {"POWER",       OME_TAB,        NULL,                   &bsEntryVtxPower,       0},
     {"(FREQ)",      OME_UINT16,     NULL,                   &bsShowVtxFreq,         DYNAMIC },
     {"SAVE",        OME_Funcall,    bsCmsConfigRaceSave,    NULL,                   0},
@@ -227,6 +230,17 @@ static long bs_Vtx_onEnter(void)
 {
     bs_vtxmode = bsDevice.mode;
     bsCmsConfigMode(NULL);
+    bsEntryVtxBand.val = &bs_vtxBand;
+    bsEntryVtxBand.max = vtxTableBandCount;
+    bsEntryVtxBand.names = vtxTableBandNames;
+
+    bsEntryVtxChannel.val = &bs_vtxChannel;
+    bsEntryVtxChannel.max = vtxTableChannelCount;
+    bsEntryVtxChannel.names = vtxTableChannelNames;
+
+    bsEntryVtxPower.val = &bs_vtxPower;
+    bsEntryVtxPower.max = vtxTablePowerLevels;
+    bsEntryVtxPower.names = vtxTablePowerLabels;
     return 0;
 }
 

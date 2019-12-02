@@ -57,6 +57,7 @@
 #include "drivers/max7456_symbols.h"
 #include "drivers/sdcard.h"
 #include "drivers/time.h"
+#include "drivers/beesign.h"
 
 #include "fc/rc_controls.h"
 #include "fc/rc_modes.h"
@@ -307,12 +308,35 @@ void pgResetFn_osdConfig(osdConfig_t *osdConfig)
 
 static void osdDrawLogo(int x, int y)
 {
-    // display logo and help
-    int fontOffset = 160;
-    for (int row = 0; row < 4; row++) {
-        for (int column = 0; column < 24; column++) {
-            if (fontOffset <= SYM_END_OF_FONT)
-                displayWriteChar(osdDisplayPort, x + column, y + row, fontOffset++);
+    if (checkBeesignSerialPort()) {
+        uint8_t column;
+        uint16_t fontOffset = 0xC4;
+        for (column = 0; column < 6; column++) {
+            displayWriteChar(osdDisplayPort, x + column, y, fontOffset++);
+        }
+        for (column = 7; column < 24; column++) {
+            displayWriteChar(osdDisplayPort, x + column, y, 0xC0);
+        }
+        for (column = 0; column < 24; column++) {
+            displayWriteChar(osdDisplayPort, x + column, y + 1, fontOffset++);
+        }
+        for (column = 0; column < 24; column++) {
+            displayWriteChar(osdDisplayPort, x + column, y + 2, fontOffset++);
+        }
+        for (column = 0; column < 6; column++) {
+            displayWriteChar(osdDisplayPort, x + column, y + 3, fontOffset++);
+        }
+        for (column = 7; column < 24; column++) {
+            displayWriteChar(osdDisplayPort, x + column, y + 3, 0xC0);
+        }
+    } else {
+        // display logo and help
+        int fontOffset = 160;
+        for (int row = 0; row < 4; row++) {
+            for (int column = 0; column < 24; column++) {
+                if (fontOffset <= SYM_END_OF_FONT)
+                    displayWriteChar(osdDisplayPort, x + column, y + row, fontOffset++);
+            }
         }
     }
 }
@@ -336,15 +360,29 @@ void osdInit(displayPort_t *osdDisplayPortToUse)
 
     displayClearScreen(osdDisplayPort);
 
-    osdDrawLogo(3, 1);
+    if (checkBeesignSerialPort()) {
+        osdDrawLogo(1, 0);
+    } else {
+        osdDrawLogo(3, 1);
+    }
 
     char string_buffer[30];
     tfp_sprintf(string_buffer, "V%s", FC_VERSION_STRING);
-    displayWrite(osdDisplayPort, 20, 6, string_buffer);
+    if (checkBeesignSerialPort()) {
+        displayWrite(osdDisplayPort, 18, 5, string_buffer);
+    } else {
+        displayWrite(osdDisplayPort, 20, 6, string_buffer);
+    }
 #ifdef USE_CMS
-    displayWrite(osdDisplayPort, 7, 8,  CMS_STARTUP_HELP_TEXT1);
-    displayWrite(osdDisplayPort, 11, 9, CMS_STARTUP_HELP_TEXT2);
-    displayWrite(osdDisplayPort, 11, 10, CMS_STARTUP_HELP_TEXT3);
+    if (checkBeesignSerialPort()) {
+        displayWrite(osdDisplayPort, 7, 7,  CMS_STARTUP_HELP_TEXT1);
+        displayWrite(osdDisplayPort, 11, 8, CMS_STARTUP_HELP_TEXT2);
+        displayWrite(osdDisplayPort, 11, 9, CMS_STARTUP_HELP_TEXT3);
+    } else {
+        displayWrite(osdDisplayPort, 7, 8,  CMS_STARTUP_HELP_TEXT1);
+        displayWrite(osdDisplayPort, 11, 9, CMS_STARTUP_HELP_TEXT2);
+        displayWrite(osdDisplayPort, 11, 10, CMS_STARTUP_HELP_TEXT3);
+    }
 #endif
 
 #ifdef USE_RTC_TIME

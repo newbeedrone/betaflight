@@ -43,7 +43,6 @@
 #include "io/vtx_tramp.h"
 #include "io/vtx_control.h"
 #include "io/vtx.h"
-#include "io/vtx_string.h"
 #include "io/vtx_beesign.h"
 
 #if defined(USE_CMS) || defined(USE_VTX_COMMON)
@@ -65,12 +64,6 @@ const char * const bsModeNames[] = {
 static const vtxVTable_t bsVTable;    // Forward
 static vtxDevice_t vtxBeesign = {
     .vTable = &bsVTable,
-    .capability.bandCount = BEESIGN_BAND_COUNT,
-    .capability.channelCount = BEESIGN_CHANNEL_COUNT,
-    .capability.powerCount = BEESIGN_POWER_COUNT,
-    .bandNames = (char **)vtx58BandNames,
-    .channelNames = (char **)vtx58ChannelNames,
-    .powerNames = (char **)bsPowerNames,
 };
 #endif
 
@@ -161,15 +154,15 @@ static bool vtxBSGetPowerIndex(const vtxDevice_t *vtxDevice, uint8_t *pIndex)
     return true;
 }
 
-static bool vtxBSGetPitMode(const vtxDevice_t *vtxDevice, uint8_t *pOnOff)
+static bool vtxBSGetPitMode(const vtxDevice_t *vtxDevice, unsigned *status)
 {
     if (!vtxBSIsReady(vtxDevice)) {
         return false;
     }
     if (bsDevice.power == VTX_PWR_PIT + BEESIGN_MIN_POWER) {
-        *pOnOff = 1;
+        *status = 1;
     } else {
-        *pOnOff = 0;
+        *status = 0;
     }
     return true;
 }
@@ -204,7 +197,7 @@ static const vtxVTable_t bsVTable = {
     .setFrequency = vtxBSSetFreq,
     .getBandAndChannel = vtxBSGetBandAndChannel,
     .getPowerIndex = vtxBSGetPowerIndex,
-    .getPitMode = vtxBSGetPitMode,
+    .getStatus = vtxBSGetPitMode,
     .getFrequency = vtxBSGetFreq,
 };
 #endif // VTX_COMMON

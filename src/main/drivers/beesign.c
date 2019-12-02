@@ -65,6 +65,14 @@ static serialPort_t *beesignSerialPort = NULL;
                                     crc = (crc & 1) ? ((crc >> 1) ^ POLY) : (crc >> 1);     \
                                 } while (0)
 
+const uint16_t beesignTable[5][8] =
+{
+    { 5865, 5845, 5825, 5805, 5785, 5765, 5745, 5725 }, // Boscam A
+    { 5733, 5752, 5771, 5790, 5809, 5828, 5847, 5866 }, // Boscam B
+    { 5705, 5685, 5665, 5645, 5885, 5905, 5925, 5945 }, // Boscam E
+    { 5740, 5760, 5780, 5800, 5820, 5840, 5860, 5880 }, // FatShark
+    { 5658, 5695, 5732, 5769, 5806, 5843, 5880, 5917 }, // RaceBand
+};
 beeSignDevice_t bsDevice = {
     .version = 1,
     .channel = -1,
@@ -243,7 +251,7 @@ void bsSetBandAndChannel(uint8_t band, uint8_t channel)
 {
     uint8_t deviceChannel = BS_BANDCHAN_TO_DEVICE_CHVAL(band, channel);
     bsDevice.channel = deviceChannel;
-    bsDevice.freq = vtx58frequencyTable[band][channel];
+    bsDevice.freq = beesignTable[band][channel];
     beesignSend(BEESIGN_V_SET_CHAN, 1, &deviceChannel);
 }
 
