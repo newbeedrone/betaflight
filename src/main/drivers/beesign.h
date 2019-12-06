@@ -36,6 +36,9 @@
 #define BEESIGN_CHANNEL_COUNT       (BEESIGN_MAX_CHANNEL - BEESIGN_MIN_CHANNEL + 1)
 #define BEESIGN_ERROR_CHANNEL       0xff
 
+#define BEESIGN_CMD_ADD_BUFF            0
+#define BEESIGN_CMD_SEND                1
+
 #define VTX_PWR_25                  0
 #define VTX_PWR_100                 1
 #define VTX_PWR_200                 2
@@ -182,6 +185,7 @@ extern const uint16_t beesignTable[5][8];
 extern beeSignDevice_t bsDevice;
 
 bool beesignInit(void);
+uint8_t beesignSendCmd(void);
 bool checkBeesignSerialPort(void);
 
 void bsSetVTxUnlock(void);

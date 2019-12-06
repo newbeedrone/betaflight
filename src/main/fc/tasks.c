@@ -45,6 +45,7 @@
 #include "drivers/transponder_ir.h"
 #include "drivers/usb_io.h"
 #include "drivers/vtx_common.h"
+#include "drivers/beesign.h"
 
 #include "fc/config.h"
 #include "fc/core.h"
@@ -331,6 +332,10 @@ void fcTasksInit(void)
     setTaskEnabled(TASK_PINIOBOX, true);
 #endif
 
+#ifdef USE_BEESIGN
+    setTaskEnabled(TASK_BEESIGN, true);
+#endif
+
 #ifdef USE_CMS
 #ifdef USE_MSP_DISPLAYPORT
     setTaskEnabled(TASK_CMS, true);
@@ -463,6 +468,9 @@ cfTask_t cfTasks[TASK_COUNT] = {
 
 #ifdef USE_PINIOBOX
     [TASK_PINIOBOX] = DEFINE_TASK("PINIOBOX", NULL, NULL, pinioBoxUpdate, TASK_PERIOD_HZ(20), TASK_PRIORITY_IDLE),
+#endif
+#ifdef USE_BEESIGN
+    [TASK_BEESIGN] = DEFINE_TASK("beesign", NULL, NULL, beesignSendCmd, TASK_PERIOD_HZ(20), TASK_PRIORITY_LOW),
 #endif
 
 #ifdef USE_RANGEFINDER
