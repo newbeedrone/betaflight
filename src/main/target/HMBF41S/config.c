@@ -160,12 +160,7 @@ void targetConfiguration(void)
     modeActivationConditionsMutable(2)->auxChannelIndex  = AUX2 - NON_AUX_CHANNEL_COUNT;
     modeActivationConditionsMutable(2)->range.startStep  = CHANNEL_VALUE_TO_STEP(1300);
     modeActivationConditionsMutable(2)->range.endStep    = CHANNEL_VALUE_TO_STEP(1700);
-
-    modeActivationConditionsMutable(3)->modeId           = BOXFPVANGLEMIX;
-    modeActivationConditionsMutable(3)->auxChannelIndex  = AUX2 - NON_AUX_CHANNEL_COUNT;
-    modeActivationConditionsMutable(3)->range.startStep  = CHANNEL_VALUE_TO_STEP(900);
-    modeActivationConditionsMutable(3)->range.endStep    = CHANNEL_VALUE_TO_STEP(1300);
-
+    
     modeActivationConditionsMutable(4)->modeId           = BOXFLIPOVERAFTERCRASH;
     modeActivationConditionsMutable(4)->auxChannelIndex  = AUX3 - NON_AUX_CHANNEL_COUNT;
     modeActivationConditionsMutable(4)->range.startStep  = CHANNEL_VALUE_TO_STEP(900);
