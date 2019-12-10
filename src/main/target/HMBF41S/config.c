@@ -88,6 +88,62 @@ void targetConfiguration(void)
     batteryConfigMutable()->vbatmincellvoltage = 28;
     batteryConfigMutable()->vbatwarningcellvoltage = 32;
 
+    vtxSettingsConfigMutable()->band = 5;
+    vtxSettingsConfigMutable()->channel = 8;
+    vtxSettingsConfigMutable()->power = 2;
+#if defined(HMBF41S_FRSKY_US)
+    uint16_t vtxTableFrequency[6][8] = {
+        { 5865, 5845, 5825, 5805, 5785, 5765, 5745, 5725 }, // Boscam A
+        { 5733, 5752, 5771, 5790, 5809, 5828, 5847, 5866 }, // Boscam B
+        { 5705, 5685, 5665,    0, 5885, 5905,    0,    0 }, // Boscam E
+        { 5740, 5760, 5780, 5800, 5820, 5840, 5860, 5880 }, // FatShark
+        { 5658, 5695, 5732, 5769, 5806, 5843, 5880, 5917 }, // RaceBand
+        { 5732, 5765, 5828, 5840, 5866, 5740,    0,    0 }, // IMD6
+    };
+#else 
+    uint16_t vtxTableFrequency[6][8] = {
+        { 5865, 5845, 5825, 5805, 5785, 5765, 5745, 5725 }, // Boscam A
+        { 5733, 5752, 5771, 5790, 5809, 5828, 5847, 5866 }, // Boscam B
+        { 5705, 5685, 5665, 5645, 5885, 5905, 5925, 5945 }, // Boscam E
+        { 5740, 5760, 5780, 5800, 5820, 5840, 5860, 5880 }, // FatShark
+        { 5658, 5695, 5732, 5769, 5806, 5843, 5880, 5917 }, // RaceBand
+        { 5732, 5765, 5828, 5840, 5866, 5740,    0,    0 }, // IMD6
+    };
+#endif
+    const char * vtxTableBandNames[6] = {
+            "BOSCAM A",
+            "BOSCAM B",
+            "BOSCAM E",
+            "FATSHARK",
+            "RACEBAND",
+            "IMD6"
+    };
+    char vtxTableBandLetters[7] = "ABEFRI";
+    vtxTableConfigMutable()->bands = 6;
+    vtxTableConfigMutable()->channels = 8;
+    for (uint8_t i = 0; i < 6; i++) {
+        for (uint8_t j = 0; j < 8; j++) {
+            vtxTableConfigMutable()->frequency[i][j] = vtxTableFrequency[i][j];
+        }
+    }
+    for (uint8_t i = 0; i < 6; i++) {
+        strcpy(vtxTableConfigMutable()->bandNames[i], vtxTableBandNames[i]);
+        vtxTableConfigMutable()->bandLetters[i] = vtxTableBandLetters[i];
+    }
+    strcpy(vtxTableConfigMutable()->channelNames[0], "1");
+    strcpy(vtxTableConfigMutable()->channelNames[1], "2");
+    strcpy(vtxTableConfigMutable()->channelNames[2], "3");
+    strcpy(vtxTableConfigMutable()->channelNames[3], "4");
+    strcpy(vtxTableConfigMutable()->channelNames[4], "5");
+    strcpy(vtxTableConfigMutable()->channelNames[5], "6");
+    strcpy(vtxTableConfigMutable()->channelNames[6], "7");
+    strcpy(vtxTableConfigMutable()->channelNames[7], "8");
+    vtxTableConfigMutable()->powerLevels = 2;
+    vtxTableConfigMutable()->powerValues[0] = 0;
+    vtxTableConfigMutable()->powerValues[1] = 1;
+    strcpy(vtxTableConfigMutable()->powerLabels[0], "5  ");
+    strcpy(vtxTableConfigMutable()->powerLabels[1], "25 ");
+
     imuConfigMutable()->small_angle = 180;
 
     modeActivationConditionsMutable(0)->modeId           = BOXARM;
