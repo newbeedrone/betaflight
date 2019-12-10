@@ -57,14 +57,8 @@
 // *************** Gyro & ACC **********************
 #define USE_GYRO
 #define USE_ACC
-#if defined(BEEBRAIN_BL_6000_SBUS_INTL) || defined (BEEBRAIN_BL_6000_DSM_INTL) || defined (BEEBRAIN_BL_6000_CRSF_INTL) || \
-    defined(BEEBRAIN_BL_6000_SBUS_US)   || defined (BEEBRAIN_BL_6000_DSM_US)   || defined (BEEBRAIN_BL_6000_CRSF_US)
 #define USE_GYRO_SPI_MPU6000
 #define USE_ACC_SPI_MPU6000
-#else
-#define USE_GYRO_SPI_MPU6500
-#define USE_ACC_SPI_MPU6500
-#endif
 
 #define GYRO_1_CS_PIN                   PA4
 #define GYRO_1_SPI_INSTANCE             SPI3
@@ -78,12 +72,12 @@
 // *************** RX ******************************
 #define DEFAULT_RX_FEATURE              FEATURE_RX_SERIAL
 #define SERIALRX_UART                   SERIAL_PORT_USART2
-#if defined(BEEBRAIN_BL_6000_SBUS_INTL) || defined (BEEBRAIN_BL_6500_SBUS_INTL) || \
-    defined(BEEBRAIN_BL_6000_SBUS_US)   || defined (BEEBRAIN_BL_6500_SBUS_INTL)
+#if defined(BEEBRAIN_BL_SBUS_INTL) || \
+    defined(BEEBRAIN_BL_SBUS_US)
 #define SERIALRX_PROVIDER               SERIALRX_SBUS
 #define RX_CHANNELS_AETR
-#elif   defined(BEEBRAIN_BL_6000_CRSF_INTL) || defined (BEEBRAIN_BL_6500_CRSF_INTL) || \
-        defined(BEEBRAIN_BL_6000_CRSF_US)   || defined (BEEBRAIN_BL_6500_CRSF_INTL)
+#elif   defined(BEEBRAIN_BL_CRSF_INTL) || \
+        defined(BEEBRAIN_BL_CRSF_US)
 #define SERIALRX_PROVIDER               SERIALRX_CRSF
 #define RX_CHANNELS_AETR
 #else

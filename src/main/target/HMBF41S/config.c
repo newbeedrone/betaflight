@@ -329,13 +329,13 @@ void targetConfiguration(void)
     do {
         // T8SG
         uint8_t defaultTXHopTable[50] = {0,30,60,91,120,150,180,210,5,35,65,95,125,155,185,215,10,40,70,100,130,160,190,221,15,45,75,105,135,165,195,225,20,50,80,110,140,170,200,230,25,55,85,115,145,175,205,0,0,0};
-        rxCc2500SpiConfigMutable()->bindOffset  = -42;
-        rxCc2500SpiConfigMutable()->bindTxId[0] = 0;
-        rxCc2500SpiConfigMutable()->bindTxId[1] = 191;
+        rxCc2500SpiConfigMutable()->bindOffset  = 33;
+        rxCc2500SpiConfigMutable()->bindTxId[0] = 198;
+        rxCc2500SpiConfigMutable()->bindTxId[1] = 185;
         for (uint8_t i = 0; i < 50; i++) {
             rxCc2500SpiConfigMutable()->bindHopData[i] = defaultTXHopTable[i];
         }
     } while (0);
-
+    serialConfigMutable()->portConfigs[findSerialPortIndexByIdentifier(SERIAL_PORT_USART2)].functionMask = FUNCTION_MSP;
 }
 #endif
