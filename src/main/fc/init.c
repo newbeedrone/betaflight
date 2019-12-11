@@ -744,7 +744,7 @@ void init(void)
     rxInit();
 
 #ifdef USE_VTX_BEESIGN
-    beesignInit();
+    bool use_beesign_flg = beesignInit();
 #endif
 
 /*
@@ -764,13 +764,18 @@ void init(void)
     if (featureIsEnabled(FEATURE_OSD)) {
 #if defined(USE_OSD_BEESIGN)
         // If there is a beesign for the OSD then use it
-        osdDisplayPort = beesignDisplayPortInit(vcdProfile());
-#elif defined(USE_MAX7456)
-        // If there is a max7456 chip for the OSD then use it
-        osdDisplayPort = max7456DisplayPortInit(vcdProfile());
-#elif defined(USE_CMS) && defined(USE_MSP_DISPLAYPORT) && defined(USE_OSD_OVER_MSP_DISPLAYPORT) // OSD over MSP; not supported (yet)
-        osdDisplayPort = displayPortMspInit();
+        if (use_beesign_flg) {
+            osdDisplayPort = beesignDisplayPortInit(vcdProfile());
+        } else 
 #endif
+        {
+#if defined(USE_MAX7456)
+            // If there is a max7456 chip for the OSD then use it
+            osdDisplayPort = max7456DisplayPortInit(vcdProfile());
+#elif defined(USE_CMS) && defined(USE_MSP_DISPLAYPORT) && defined(USE_OSD_OVER_MSP_DISPLAYPORT) // OSD over MSP; not supported (yet)
+            osdDisplayPort = displayPortMspInit();
+#endif
+        }
         // osdInit  will register with CMS by itself.
         osdInit(osdDisplayPort);
     }
