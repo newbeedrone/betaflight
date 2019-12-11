@@ -21,6 +21,7 @@
 #pragma once
 
 #include <stdint.h>
+#include "time.h"
 
 #define BEESIGN_MIN_BAND        1
 #define BEESIGN_MAX_BAND        5
@@ -186,6 +187,7 @@ extern beeSignDevice_t bsDevice;
 
 bool beesignInit(void);
 uint8_t beesignSendCmd(void);
+void beesignUpdate(timeUs_t currentTimeUs);
 bool checkBeesignSerialPort(void);
 
 void bsSetVTxUnlock(void);

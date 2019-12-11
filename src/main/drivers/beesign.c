@@ -592,4 +592,9 @@ bool checkBeesignSerialPort(void) {
     return true;
 }
 
+void beesignUpdate(timeUs_t currentTimeUs) {
+    UNUSED(currentTimeUs);
+    beesignSendCmd();
+}
+
 #endif // USE_VTX_BEESIGN
