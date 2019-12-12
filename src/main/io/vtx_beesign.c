@@ -183,7 +183,7 @@ bool beesignVtxInit(void) {
         return false;
     }
     vtxCommonSetDevice(&vtxBeesign);
-    // bsSetVTxUnlock();
+    bsSetVTxUnlock();
     return true;
 }
 
