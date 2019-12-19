@@ -949,7 +949,7 @@ void osdUpdate(timeUs_t currentTimeUs)
 #endif
 #define STATS_FREQ_DENOM    50
 
-    if (counter % DRAW_FREQ_DENOM == 0) {
+    if (counter % 10 == 0) {
         osdRefresh(currentTimeUs);
         showVisualBeeper = false;
     } else {

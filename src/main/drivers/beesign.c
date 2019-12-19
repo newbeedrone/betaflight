@@ -46,12 +46,12 @@
 #include "io/vtx.h"
 #include "io/vtx_beesign.h"
 
-#define BEESIGN_CMD_BUFF_SIZE           512
+#define BEESIGN_CMD_BUFF_SIZE           (8192*2)
 
 static uint8_t beesignCmdQueue[BEESIGN_CMD_BUFF_SIZE];
 static uint8_t *beesignBuffPointer = beesignCmdQueue;
 static uint8_t *beesignSendPointer = beesignCmdQueue;
-static uint8_t beesignCmdCount;
+static uint16_t beesignCmdCount;
 static uint8_t receiveBuffer[BEESIGN_FM_MAX_LEN];
 static uint8_t receiveFrame[BEESIGN_FM_MAX_LEN];
 static uint8_t receiveFrameValid = 0;
@@ -513,6 +513,7 @@ void bsDisplay(void) {
             if (i - buffStartPos + 1 >= BEESIGN_CHARS_PER_LINE) {
                 seriaBuff[0] = buffStartPos;
                 beesignSend(BEESIGN_O_SET_DISPLAY, i - buffStartPos + 2, seriaBuff, BEESIGN_CMD_ADD_BUFF);
+                beesignSend(BEESIGN_O_SET_DISPLAY, i - buffStartPos + 2, seriaBuff, BEESIGN_CMD_ADD_BUFF);
                 buffStartPos = 0xFF;
             }
             buffEndPos = i;
@@ -524,6 +525,7 @@ void bsDisplay(void) {
                 } else {
                     seriaBuff[0] = buffStartPos;
                     beesignSend(BEESIGN_O_SET_DISPLAY, buffEndPos - buffStartPos + 2, seriaBuff, BEESIGN_CMD_ADD_BUFF);
+                    beesignSend(BEESIGN_O_SET_DISPLAY, buffEndPos - buffStartPos + 2, seriaBuff, BEESIGN_CMD_ADD_BUFF);
                     buffStartPos = 0xFF;
                 }
                 
@@ -532,6 +534,7 @@ void bsDisplay(void) {
     }
     if (buffStartPos != 0xFF) {
         seriaBuff[0] = buffStartPos;
+        beesignSend(BEESIGN_O_SET_DISPLAY, buffEndPos - buffStartPos + 2, seriaBuff, BEESIGN_CMD_ADD_BUFF);
         beesignSend(BEESIGN_O_SET_DISPLAY, buffEndPos - buffStartPos + 2, seriaBuff, BEESIGN_CMD_ADD_BUFF);
         buffStartPos = 0xFF;
     }
