@@ -74,7 +74,7 @@ void targetConfiguration(void)
     motorConfigMutable()->dev.motorPwmProtocol = PWM_TYPE_DSHOT600;
     pinioConfigMutable()->config[0] = PINIO_CONFIG_OUT_INVERTED | PINIO_CONFIG_MODE_OUT_PP;
     pinioBoxConfigMutable()->permanentId[0] = 40;
-    currentSensorADCConfigMutable()->scale = 255;
+    currentSensorADCConfigMutable()->scale = 245;
 
     modeActivationConditionsMutable(0)->modeId           = BOXARM;
     modeActivationConditionsMutable(0)->auxChannelIndex  = AUX1 - NON_AUX_CHANNEL_COUNT;
@@ -96,7 +96,7 @@ void targetConfiguration(void)
     osdConfigMutable()->item_pos[OSD_CRAFT_NAME]        = OSD_POS(10,  11) | OSD_PROFILE_1_FLAG;
     osdConfigMutable()->item_pos[OSD_MAIN_BATT_VOLTAGE] = OSD_POS(20, 10) | OSD_PROFILE_1_FLAG;
     osdConfigMutable()->item_pos[OSD_ITEM_TIMER_2]      = OSD_POS(2,  10) | OSD_PROFILE_1_FLAG;
-    osdConfigMutable()->item_pos[OSD_VTX_CHANNEL]       = OSD_POS(3,  11) | OSD_PROFILE_1_FLAG;
+    osdConfigMutable()->item_pos[OSD_VTX_CHANNEL]       = OSD_POS(2,  11) | OSD_PROFILE_1_FLAG;
     osdConfigMutable()->item_pos[OSD_CURRENT_DRAW]      = OSD_POS(19, 11) | OSD_PROFILE_1_FLAG;
     osdConfigMutable()->item_pos[OSD_WARNINGS]          = OSD_POS(9,  7) | OSD_PROFILE_1_FLAG;
     serialConfigMutable()->portConfigs[findSerialPortIndexByIdentifier(SERIALMSP_UART)].functionMask = FUNCTION_MSP;
