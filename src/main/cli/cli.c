@@ -1446,7 +1446,7 @@ static void cliSerialPassthrough(char *cmdline)
 
             *port = openSerialPort(ports[i].id, FUNCTION_NONE, NULL, NULL,
                                             ports[i].baud, ports[i].mode,
-                                            SERIAL_NOT_INVERTED);
+                                            SERIAL_NOT_INVERTED|SERIAL_BIDIR);
             if (!*port) {
                 cliPrintLinef("Port%d could not be opened.", portIndex);
                 return;
