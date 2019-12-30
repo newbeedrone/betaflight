@@ -942,14 +942,23 @@ void osdUpdate(timeUs_t currentTimeUs)
 #endif
 
     // redraw values in buffer
-#ifdef USE_MAX7456
-#define DRAW_FREQ_DENOM 5
-#else
-#define DRAW_FREQ_DENOM 10 // MWOSD @ 115200 baud (
-#endif
+// #ifdef USE_MAX7456
+// #define DRAW_FREQ_DENOM 5
+// #else
+// #define DRAW_FREQ_DENOM 10 // MWOSD @ 115200 baud (
+// #endif
 #define STATS_FREQ_DENOM    50
-
-    if (counter % 10 == 0) {
+uint8_t DRAW_FREQ_DENOM;
+    if (checkBeesignSerialPort()) {
+        DRAW_FREQ_DENOM = 5;
+    } else {
+        #ifdef USE_MAX7456
+            DRAW_FREQ_DENOM = 5;
+        #else
+            DRAW_FREQ_DENOM = 10; // MWOSD @ 115200 baud (
+        #endif
+    }
+    if (counter % DRAW_FREQ_DENOM == 0) {
         osdRefresh(currentTimeUs);
         showVisualBeeper = false;
     } else {
