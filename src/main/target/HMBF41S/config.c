@@ -74,14 +74,14 @@
 
 void targetConfiguration(void)
 {
-    osdConfigMutable()->item_pos[OSD_CRAFT_NAME]        = OSD_POS(9, 10) | OSD_PROFILE_1_FLAG;
-    osdConfigMutable()->item_pos[OSD_MAIN_BATT_VOLTAGE] = OSD_POS(23, 9) | OSD_PROFILE_1_FLAG;
-    osdConfigMutable()->item_pos[OSD_ITEM_TIMER_2]      = OSD_POS(2,  9) | OSD_PROFILE_1_FLAG;
-    osdConfigMutable()->item_pos[OSD_FLYMODE]           = OSD_POS(17, 9) | OSD_PROFILE_1_FLAG;
-    osdConfigMutable()->item_pos[OSD_VTX_CHANNEL]       = OSD_POS(9,  9) | OSD_PROFILE_1_FLAG;
-    osdConfigMutable()->item_pos[OSD_RSSI_VALUE]        = OSD_POS(2, 10) | OSD_PROFILE_1_FLAG;
-    osdConfigMutable()->item_pos[OSD_WARNINGS]          = OSD_POS(9, 10);
-    osdConfigMutable()->item_pos[OSD_CURRENT_DRAW]      = OSD_POS(22,10) | OSD_PROFILE_1_FLAG;
+    osdConfigMutable()->item_pos[OSD_CRAFT_NAME]        = OSD_POS(6, 9) | OSD_PROFILE_1_FLAG;
+    osdConfigMutable()->item_pos[OSD_MAIN_BATT_VOLTAGE] = OSD_POS(19, 8) | OSD_PROFILE_1_FLAG;
+    osdConfigMutable()->item_pos[OSD_ITEM_TIMER_2]      = OSD_POS(0,  8) | OSD_PROFILE_1_FLAG;
+    osdConfigMutable()->item_pos[OSD_FLYMODE]           = OSD_POS(14, 8) | OSD_PROFILE_1_FLAG;
+    osdConfigMutable()->item_pos[OSD_VTX_CHANNEL]       = OSD_POS(7,  8) | OSD_PROFILE_1_FLAG;
+    osdConfigMutable()->item_pos[OSD_RSSI_VALUE]        = OSD_POS(0, 9) | OSD_PROFILE_1_FLAG;
+    osdConfigMutable()->item_pos[OSD_WARNINGS]          = OSD_POS(7, 9);
+    osdConfigMutable()->item_pos[OSD_CURRENT_DRAW]      = OSD_POS(18,9) | OSD_PROFILE_1_FLAG;
     
 
     batteryConfigMutable()->batteryCapacity = 250;
@@ -178,7 +178,6 @@ void targetConfiguration(void)
     rxConfigMutable()->maxcheck = 1900;
     rxConfigMutable()->rc_smoothing_type = RC_SMOOTHING_TYPE_FILTER;
     rxConfigMutable()->fpvCamAngleDegrees = 0;
-    rxConfigMutable()->rssi_channel = 9;
     motorConfigMutable()->digitalIdleOffsetValue = 1000;
     motorConfigMutable()->dev.useBurstDshot = true;
     motorConfigMutable()->dev.useDshotTelemetry = false;
@@ -250,16 +249,23 @@ void targetConfiguration(void)
     ledStripStatusModeConfigMutable()->ledConfigs[2] = DEFINE_LED(9,  7, 11, 0, LF(COLOR), LO(LARSON_SCANNER) | LO(THROTTLE), 0);
     ledStripStatusModeConfigMutable()->ledConfigs[3] = DEFINE_LED(10, 7, 4,  0, LF(COLOR), LO(LARSON_SCANNER) | LO(THROTTLE), 0);
 
-    do {
-        // T8SG
-        uint8_t defaultTXHopTable[50] = {0,30,60,91,120,150,180,210,5,35,65,95,125,155,185,215,10,40,70,100,130,160,190,221,15,45,75,105,135,165,195,225,20,50,80,110,140,170,200,230,25,55,85,115,145,175,205,0,0,0};
-        rxCc2500SpiConfigMutable()->bindOffset  = 33;
-        rxCc2500SpiConfigMutable()->bindTxId[0] = 198;
-        rxCc2500SpiConfigMutable()->bindTxId[1] = 185;
-        for (uint8_t i = 0; i < 50; i++) {
-            rxCc2500SpiConfigMutable()->bindHopData[i] = defaultTXHopTable[i];
-        }
-    } while (0);
-    serialConfigMutable()->portConfigs[findSerialPortIndexByIdentifier(SERIAL_PORT_USART2)].functionMask = FUNCTION_MSP;
+    // do {
+    //     // T8SG
+    //     uint8_t defaultTXHopTable[50] = {0,30,60,91,120,150,180,210,5,35,65,95,125,155,185,215,10,40,70,100,130,160,190,221,15,45,75,105,135,165,195,225,20,50,80,110,140,170,200,230,25,55,85,115,145,175,205,0,0,0};
+    //     rxCc2500SpiConfigMutable()->bindOffset  = 33;
+    //     rxCc2500SpiConfigMutable()->bindTxId[0] = 198;
+    //     rxCc2500SpiConfigMutable()->bindTxId[1] = 185;
+    //     for (uint8_t i = 0; i < 50; i++) {
+    //         rxCc2500SpiConfigMutable()->bindHopData[i] = defaultTXHopTable[i];
+    //     }
+    // } while (0);
+    serialConfigMutable()->portConfigs[findSerialPortIndexByIdentifier(SERIAL_PORT_USART1)].functionMask = FUNCTION_VTX_BEESIGN;
+    rxConfigMutable()->rssi_channel = 9;
+    for (uint8_t rxRangeIndex = 0; rxRangeIndex < NON_AUX_CHANNEL_COUNT; rxRangeIndex++) {
+        rxChannelRangeConfig_t *channelRangeConfig = rxChannelRangeConfigsMutable(rxRangeIndex);
+
+        channelRangeConfig->min = 1160;
+        channelRangeConfig->max = 1840;
+    }
 }
 #endif
