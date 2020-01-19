@@ -74,6 +74,7 @@
 
 void targetConfiguration(void)
 {
+#ifdef USE_OSD_BEESIGN
     osdConfigMutable()->item_pos[OSD_CRAFT_NAME]        = OSD_POS(6, 9) | OSD_PROFILE_1_FLAG;
     osdConfigMutable()->item_pos[OSD_MAIN_BATT_VOLTAGE] = OSD_POS(19, 8) | OSD_PROFILE_1_FLAG;
     osdConfigMutable()->item_pos[OSD_ITEM_TIMER_2]      = OSD_POS(0,  8) | OSD_PROFILE_1_FLAG;
@@ -82,7 +83,16 @@ void targetConfiguration(void)
     osdConfigMutable()->item_pos[OSD_RSSI_VALUE]        = OSD_POS(0, 9) | OSD_PROFILE_1_FLAG;
     osdConfigMutable()->item_pos[OSD_WARNINGS]          = OSD_POS(7, 9);
     osdConfigMutable()->item_pos[OSD_CURRENT_DRAW]      = OSD_POS(18,9) | OSD_PROFILE_1_FLAG;
-    
+#else
+    osdConfigMutable()->item_pos[OSD_CRAFT_NAME]        = OSD_POS(9, 10) | OSD_PROFILE_1_FLAG;
+    osdConfigMutable()->item_pos[OSD_MAIN_BATT_VOLTAGE] = OSD_POS(23, 9) | OSD_PROFILE_1_FLAG;
+    osdConfigMutable()->item_pos[OSD_ITEM_TIMER_2]      = OSD_POS(2,  9) | OSD_PROFILE_1_FLAG;
+    osdConfigMutable()->item_pos[OSD_FLYMODE]           = OSD_POS(17, 9) | OSD_PROFILE_1_FLAG;
+    osdConfigMutable()->item_pos[OSD_VTX_CHANNEL]       = OSD_POS(9,  9) | OSD_PROFILE_1_FLAG;
+    osdConfigMutable()->item_pos[OSD_RSSI_VALUE]        = OSD_POS(2, 10) | OSD_PROFILE_1_FLAG;
+    osdConfigMutable()->item_pos[OSD_WARNINGS]          = OSD_POS(9, 10);
+    osdConfigMutable()->item_pos[OSD_CURRENT_DRAW]      = OSD_POS(22,10) | OSD_PROFILE_1_FLAG;
+#endif 
 
     batteryConfigMutable()->batteryCapacity = 250;
     batteryConfigMutable()->vbatmincellvoltage = 28;
@@ -260,12 +270,12 @@ void targetConfiguration(void)
     //     }
     // } while (0);
     serialConfigMutable()->portConfigs[findSerialPortIndexByIdentifier(SERIAL_PORT_USART1)].functionMask = FUNCTION_VTX_BEESIGN;
-    rxConfigMutable()->rssi_channel = 9;
-    for (uint8_t rxRangeIndex = 0; rxRangeIndex < NON_AUX_CHANNEL_COUNT; rxRangeIndex++) {
-        rxChannelRangeConfig_t *channelRangeConfig = rxChannelRangeConfigsMutable(rxRangeIndex);
+    // rxConfigMutable()->rssi_channel = 9;
+    // for (uint8_t rxRangeIndex = 0; rxRangeIndex < NON_AUX_CHANNEL_COUNT; rxRangeIndex++) {
+    //     rxChannelRangeConfig_t *channelRangeConfig = rxChannelRangeConfigsMutable(rxRangeIndex);
 
-        channelRangeConfig->min = 1160;
-        channelRangeConfig->max = 1840;
-    }
+    //     channelRangeConfig->min = 1160;
+    //     channelRangeConfig->max = 1840;
+    // }
 }
 #endif
