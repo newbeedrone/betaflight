@@ -110,7 +110,7 @@ static bool isSynced(const displayPort_t *displayPort)
 
 static void resync(displayPort_t *displayPort)
 {
-    bsDisplayAllScreen();
+    bsDisplay();
     UNUSED(displayPort);
     displayPort->rows = BEESIGN_LINES_PER_SCREEN;
     displayPort->cols = BEESIGN_CHARS_PER_LINE;
