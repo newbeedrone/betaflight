@@ -31,7 +31,7 @@
 #define BEESIGN_VTX_RACE_MODE           0
 #define BEESIGN_VTX_MANUAL_MODE         1
 #define BEESIGN_VTX_POR_MODE            2
-#define BEESIGN_VTX_MODE_COUNT          3
+#define BEESIGN_VTX_MODE_COUNT          1
 
 #define BEESIGN_BAND_COUNT          (BEESIGN_MAX_BAND - BEESIGN_MIN_BAND + 1)
 #define BEESIGN_CHANNEL_COUNT       (BEESIGN_MAX_CHANNEL - BEESIGN_MIN_CHANNEL + 1)
@@ -201,9 +201,11 @@ void bsSetPower(uint8_t index);
 void bsSetVtxMode(uint8_t mode);
 void bsSetFreq(uint16_t freq);
 
+void bsCloseOsd(void);
 void bsSetOsdMode(uint8_t mode);
 void bsSetOsdHosOffset(uint8_t offset);
 void bsSetOsdVosOffset(uint8_t offset);
+void bsCleanScreen(void);
 void bsClearScreenBuff(void);
 void bsWriteBuffChar(uint8_t x, uint8_t y, uint8_t c);
 void bsWriteBuffRow(uint8_t x, uint8_t y, const char *buff);
