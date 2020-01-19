@@ -126,7 +126,11 @@ static void vtxBSSetPowerIndex(vtxDevice_t *vtxDevice, uint8_t index)
 static void vtxBSSetFreq(vtxDevice_t *vtxDevice, uint16_t freq)
 {
     UNUSED(vtxDevice);
-    if (bsValidateFreq(freq)) {
+    if (bsValidateFreq(freq) 
+#ifndef USE_OSD_BEESIGN
+&& freq != bsDevice.freq
+#endif
+) {
         bsSetFreq(freq);
     }
 }
