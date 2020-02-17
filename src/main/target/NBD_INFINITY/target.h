@@ -24,6 +24,8 @@
 
 #define USE_TARGET_CONFIG
 
+#define ENABLE_DSHOT_DMAR       DSHOT_DMAR_ON
+
 #define LED0_PIN                  PC0
 
 #define USE_BEEPER
