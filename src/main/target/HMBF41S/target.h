@@ -105,7 +105,8 @@
 #define MAX7456_SPI_CS_PIN              SPI3_NSS_PIN
 
 #define USE_BEESIGN
-#define USE_OSD_BEESIGN
+// #define USE_OSD_BEESIGN
+#define USE_BEESIGN_UART                SERIAL_PORT_USART1
 
 // *************** ADC *****************************
 #define USE_ADC
