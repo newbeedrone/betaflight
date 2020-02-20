@@ -601,10 +601,14 @@ void bsUpdateCharacterFont(uint8_t id, uint8_t *data) {
 
 bool beesignInit(void)
 {
+#if defined(USE_BEESIGN_UART)
+    beesignSerialPort = openSerialPort(USE_BEESIGN_UART, FUNCTION_VTX_BEESIGN, NULL, NULL, 115200, MODE_RXTX, SERIAL_BIDIR);
+#else
     serialPortConfig_t *portConfig = findSerialPortConfig(FUNCTION_VTX_BEESIGN);
     if (portConfig) {
-        beesignSerialPort = openSerialPort(portConfig->identifier, FUNCTION_NONE, NULL, NULL, 115200, MODE_RXTX, SERIAL_BIDIR);
+        beesignSerialPort = openSerialPort(portConfig->identifier, FUNCTION_VTX_BEESIGN, NULL, NULL, 115200, MODE_RXTX, SERIAL_BIDIR);
     }
+#endif
     if(!beesignSerialPort) {
         return false;
     }
