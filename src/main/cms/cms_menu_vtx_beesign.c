@@ -73,6 +73,9 @@ static void bs_Vtx_ConfigRead(void)
         } else {
             bs_vtxBand = vtxSettingsConfig()->band;
         }
+        if (vtxSettingsConfig()->freq == 0){
+            vtxSettingsConfigMutable()->freq = vtxCommonLookupFrequency(vtxCommonDevice(), bs_vtxBand, bs_vtxChannel);
+        }
         bs_showFreq = vtxSettingsConfig()->freq;
         bs_vtxFreq = vtxSettingsConfig()->freq;
     } else {
@@ -92,7 +95,7 @@ static long bsCmsConfigBandByGvar(displayPort_t *pDisp, const void *self)
     UNUSED(pDisp);
     UNUSED(self);
 
-    bs_showFreq = beesignTable[bs_vtxBand][bs_vtxChannel-1];
+    bs_showFreq =  vtxCommonLookupFrequency(vtxCommonDevice(), bs_vtxBand, bs_vtxChannel);
 
     return 0;
 }
