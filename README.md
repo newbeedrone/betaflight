@@ -1,3 +1,22 @@
+# Hummingbird F4 Brushless
+This reqo is base on Beebrain Brushless.
+
+### Changelog form betaflight
+
+* Add beesign.
+* Remove Beebrain BL MPU6500 target (MPU6500 has problem with 2S).
+* Fix RTC6705 read band and channle bug in cms_menu_vtx_rtc6705.c.
+* Fix RTC6705 always set frequency when use VTX_TABLE.
+* Add led blinking in bind when use sfhss adn frsky.
+* add Hummingbird F4 Brushless target.
+* PID setting for Betaflight 4.1.
+* Add support BMI160.
+* Change 6705 power driver for Beebrain BL.
+* Change use soft SPI on hardware SPI pin.
+* Change MAX7456 driver to support NBD7456.
+* Add bl target.
+
+
 ![Important Notice: Betaflight 4.0 will be the last release to include support for STM32F3 based flight controllers. (This includes all boards with 'F3' in the name.)](docs/assets/images/stm32f3_retirement_notice.svg)
 
 (Please see the [note](https://github.com/betaflight/betaflight#end-of-active-development-for-stm32f3-based-flight-controllers) below.)
