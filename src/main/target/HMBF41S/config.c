@@ -173,8 +173,8 @@ void targetConfiguration(void)
     
     modeActivationConditionsMutable(4)->modeId           = BOXFLIPOVERAFTERCRASH;
     modeActivationConditionsMutable(4)->auxChannelIndex  = AUX3 - NON_AUX_CHANNEL_COUNT;
-    modeActivationConditionsMutable(4)->range.startStep  = CHANNEL_VALUE_TO_STEP(900);
-    modeActivationConditionsMutable(4)->range.endStep    = CHANNEL_VALUE_TO_STEP(1300);
+    modeActivationConditionsMutable(4)->range.startStep  = CHANNEL_VALUE_TO_STEP(1700);
+    modeActivationConditionsMutable(4)->range.endStep    = CHANNEL_VALUE_TO_STEP(2100);
 
     strcpy(pilotConfigMutable()->name, "Humming Bird");
 
