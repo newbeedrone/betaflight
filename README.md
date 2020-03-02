@@ -3,6 +3,11 @@ This reqo is base on Beebrain Brushless.
 
 ### Changelog form betaflight
 
+
+* Fixed OSD bug when changing settings Betaflight Configurator
+* Fixed freeze when VTX_TR selected on OSD
+* Fixed OSD VTX showing wrong frequency on Raceband 
+* Fixed turtle mode switch direction
 * Add beesign.
 * Remove Beebrain BL MPU6500 target (MPU6500 has problem with 2S).
 * Fix RTC6705 read band and channle bug in cms_menu_vtx_rtc6705.c.
