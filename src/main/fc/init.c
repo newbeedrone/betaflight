@@ -124,6 +124,7 @@
 #include "io/vtx_smartaudio.h"
 #include "io/vtx_tramp.h"
 
+#include "msc/emfat_file.h"
 #ifdef USE_PERSISTENT_MSC_RTC
 #include "msc/usbd_storage.h"
 #endif
@@ -169,7 +170,6 @@
 #include "sensors/esc_sensor.h"
 #include "sensors/gyro.h"
 #include "sensors/initialisation.h"
-#include "sensors/sensors.h"
 
 #include "telemetry/telemetry.h"
 
@@ -214,6 +214,41 @@ static IO_t busSwitchResetPin        = IO_NONE;
 }
 #endif
 
+bool requiresSpiLeadingEdge(SPIDevice device)
+{
+#if defined(CONFIG_IN_SDCARD) || defined(CONFIG_IN_EXTERNAL_FLASH)
+#if !defined(SDCARD_SPI_INSTANCE) && !defined(RX_SPI_INSTANCE)
+    UNUSED(device);
+#endif
+#if defined(SDCARD_SPI_INSTANCE)
+    if (device == spiDeviceByInstance(SDCARD_SPI_INSTANCE)) {
+        return true;
+    }
+#endif
+#if defined(RX_SPI_INSTANCE)
+    if (device == spiDeviceByInstance(RX_SPI_INSTANCE)) {
+        return true;
+    }
+#endif
+#else
+#if !defined(USE_SDCARD) && !defined(USE_RX_SPI)
+    UNUSED(device);
+#endif
+#if defined(USE_SDCARD)
+    if (device == SPI_CFG_TO_DEV(sdcardConfig()->device)) {
+        return true;
+    }
+#endif
+#if defined(USE_RX_SPI)
+    if (device == SPI_CFG_TO_DEV(rxSpiConfig()->spibus)) {
+        return true;
+    }
+#endif
+#endif // CONFIG_IN_SDCARD || CONFIG_IN_EXTERNAL_FLASH
+
+    return false;
+}
+
 static void configureSPIAndQuadSPI(void)
 {
 #ifdef USE_SPI
@@ -226,22 +261,22 @@ static void configureSPIAndQuadSPI(void)
     spiPreinit();
 
 #ifdef USE_SPI_DEVICE_1
-    spiInit(SPIDEV_1);
+    spiInit(SPIDEV_1, requiresSpiLeadingEdge(SPIDEV_1));
 #endif
 #ifdef USE_SPI_DEVICE_2
-    spiInit(SPIDEV_2);
+    spiInit(SPIDEV_2, requiresSpiLeadingEdge(SPIDEV_2));
 #endif
 #ifdef USE_SPI_DEVICE_3
-    spiInit(SPIDEV_3);
+    spiInit(SPIDEV_3, requiresSpiLeadingEdge(SPIDEV_3));
 #endif
 #ifdef USE_SPI_DEVICE_4
-    spiInit(SPIDEV_4);
+    spiInit(SPIDEV_4, requiresSpiLeadingEdge(SPIDEV_4));
 #endif
 #ifdef USE_SPI_DEVICE_5
-    spiInit(SPIDEV_5);
+    spiInit(SPIDEV_5, requiresSpiLeadingEdge(SPIDEV_5));
 #endif
 #ifdef USE_SPI_DEVICE_6
-    spiInit(SPIDEV_6);
+    spiInit(SPIDEV_6, requiresSpiLeadingEdge(SPIDEV_6));
 #endif
 #endif // USE_SPI
 
@@ -254,12 +289,13 @@ static void configureSPIAndQuadSPI(void)
 #endif // USE_QUAD_SPI
 }
 
+#ifdef USE_SDCARD
 void sdCardAndFSInit()
 {
     sdcard_init(sdcardConfig());
     afatfs_init();
 }
-
+#endif
 
 void init(void)
 {
@@ -507,7 +543,7 @@ void init(void)
     busSwitchInit();
 #endif
 
-#if defined(USE_UART)
+#if defined(USE_UART) && !defined(SIMULATOR_BUILD)
     uartPinConfigure(serialPinConfig());
 #endif
 
@@ -581,6 +617,16 @@ void init(void)
  *  so there is no bottleneck in reading and writing data */
     mscInit();
     if (mscCheckBoot() || mscCheckButton()) {
+        ledInit(statusLedConfig());
+
+#if defined(USE_FLASHFS) && defined(USE_FLASH_CHIP)
+        // If the blackbox device is onboard flash, then initialize and scan
+        // it to identify the log files *before* starting the USB device to
+        // prevent timeouts of the mass storage device.
+        if (blackboxConfig()->device == BLACKBOX_DEVICE_FLASH) {
+            emfat_init_files();
+        }
+#endif
         if (mscStart() == 0) {
              mscWaitForButton();
         } else {
@@ -768,18 +814,22 @@ void init(void)
             osdDisplayPort = beesignDisplayPortInit(vcdProfile());
         } else 
 #endif
-        {
+
 #if defined(USE_MAX7456)
-            // If there is a max7456 chip for the OSD then use it
-            osdDisplayPort = max7456DisplayPortInit(vcdProfile());
-#elif defined(USE_CMS) && defined(USE_MSP_DISPLAYPORT) && defined(USE_OSD_OVER_MSP_DISPLAYPORT) // OSD over MSP; not supported (yet)
-            osdDisplayPort = displayPortMspInit();
+        // If there is a max7456 chip for the OSD configured and detectd then use it.
+        osdDisplayPort = max7456DisplayPortInit(vcdProfile());
 #endif
+
+#if defined(USE_CMS) && defined(USE_MSP_DISPLAYPORT) && defined(USE_OSD_OVER_MSP_DISPLAYPORT)
+        if (!osdDisplayPort) {
+            osdDisplayPort = displayPortMspInit();
         }
-        // osdInit  will register with CMS by itself.
+#endif
+
+        // osdInit will register with CMS by itself.
         osdInit(osdDisplayPort);
     }
-#endif
+#endif // USE_OSD
 
 #if defined(USE_CMS) && defined(USE_MSP_DISPLAYPORT)
     // If BFOSD is not active, then register MSP_DISPLAYPORT as a CMS device.
@@ -865,7 +915,7 @@ void init(void)
 
 #ifdef USE_ACC
     if (mixerConfig()->mixerMode == MIXER_GIMBAL) {
-        accSetCalibrationCycles(CALIBRATING_ACC_CYCLES);
+        accStartCalibration();
     }
 #endif
     gyroStartCalibration(false);
@@ -948,6 +998,8 @@ void init(void)
 #endif
 
     setArmingDisabled(ARMING_DISABLED_BOOT_GRACE_TIME);
+
+    initializeUnusedPins();
 
     fcTasksInit();
 

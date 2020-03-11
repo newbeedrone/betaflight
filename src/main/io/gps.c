@@ -416,9 +416,16 @@ void gpsInitUblox(void)
             }
 
             if (gpsData.messageState == GPS_MESSAGE_STATE_INIT) {
-
                 if (gpsData.state_position < sizeof(ubloxInit)) {
-                    serialWrite(gpsPort, ubloxInit[gpsData.state_position]);
+                    if (gpsData.state_position < sizeof(ubloxAirborne)) {
+#if defined(GPS_UBLOX_MODE_PEDESTRIAN)
+                        serialWrite(gpsPort, ubloxInit[gpsData.state_position]);
+#else
+                        serialWrite(gpsPort, ubloxAirborne[gpsData.state_position]);
+#endif
+                    } else {
+                        serialWrite(gpsPort, ubloxInit[gpsData.state_position]);
+                    }
                     gpsData.state_position++;
                 } else {
                     gpsData.state_position = 0;
@@ -449,7 +456,7 @@ void gpsInitUblox(void)
                 }
             }
 
-            if (gpsData.messageState >= GPS_MESSAGE_STATE_INITIALIZED) {
+            if (gpsData.messageState >= GPS_MESSAGE_STATE_ENTRY_COUNT) {
                 // ublox should be initialised, try receiving
                 gpsSetState(GPS_RECEIVING_DATA);
             }
@@ -530,21 +537,6 @@ void gpsUpdate(timeUs_t currentTimeUs)
                 // remove GPS from capability
                 sensorsClear(SENSOR_GPS);
                 gpsSetState(GPS_LOST_COMMUNICATION);
-#if !defined(GPS_UBLOX_MODE_PEDESTRIAN)
-            } else {
-                if ((gpsData.messageState == GPS_MESSAGE_STATE_IDLE) && STATE(GPS_FIX)) {
-                    gpsData.messageState = GPS_MESSAGE_STATE_AIRBORNE;
-                    gpsData.state_position = 0;
-                }
-                if (gpsData.messageState == GPS_MESSAGE_STATE_AIRBORNE) {
-                    if (gpsData.state_position < sizeof(ubloxAirborne)) {
-                        serialWrite(gpsPort, ubloxAirborne[gpsData.state_position]);
-                        gpsData.state_position++;
-                    } else {
-                        gpsData.messageState = GPS_MESSAGE_STATE_ENTRY_COUNT;
-                    }
-                }
-#endif
             }
             break;
     }
@@ -1132,10 +1124,16 @@ static bool UBLOX_parse_gps(void)
         if (GPS_numCh > 16)
             GPS_numCh = 16;
         for (i = 0; i < GPS_numCh; i++) {
-            GPS_svinfo_chn[i]= _buffer.svinfo.channel[i].chn;
-            GPS_svinfo_svid[i]= _buffer.svinfo.channel[i].svid;
-            GPS_svinfo_quality[i]=_buffer.svinfo.channel[i].quality;
-            GPS_svinfo_cno[i]= _buffer.svinfo.channel[i].cno;
+            GPS_svinfo_chn[i] = _buffer.svinfo.channel[i].chn;
+            GPS_svinfo_svid[i] = _buffer.svinfo.channel[i].svid;
+            GPS_svinfo_quality[i] =_buffer.svinfo.channel[i].quality;
+            GPS_svinfo_cno[i] = _buffer.svinfo.channel[i].cno;
+        }
+        for (i = GPS_numCh; i < 16; i++) {
+            GPS_svinfo_chn[i] = 0;
+            GPS_svinfo_svid[i] = 0;
+            GPS_svinfo_quality[i] = 0;
+            GPS_svinfo_cno[i] = 0;
         }
         GPS_svInfoReceivedCount++;
         break;
