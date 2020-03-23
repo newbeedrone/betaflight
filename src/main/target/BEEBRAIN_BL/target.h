@@ -57,39 +57,36 @@
 // *************** Gyro & ACC **********************
 #define USE_GYRO
 #define USE_ACC
-#if defined(BEEBRAIN_BL_6000_SBUS_INTL) || defined (BEEBRAIN_BL_6000_DSM_INTL) || defined (BEEBRAIN_BL_6000_CRSF_INTL) || \
-    defined(BEEBRAIN_BL_6000_SBUS_US)   || defined (BEEBRAIN_BL_6000_DSM_US)   || defined (BEEBRAIN_BL_6000_CRSF_US)
-#define USE_GYRO_SPI_MPU6000
-#define USE_ACC_SPI_MPU6000
-#else
-#define USE_GYRO_SPI_MPU6500
-#define USE_ACC_SPI_MPU6500
-#endif
+#define USE_SPI_GYRO
+#define USE_ACCGYRO_BMI160
+#define BMI160_SPI_DIVISOR      16
 
 #define GYRO_1_CS_PIN                   PA4
 #define GYRO_1_SPI_INSTANCE             SPI3
 
 #define USE_EXTI
+#define USE_GYRO_EXTI
 #define GYRO_1_EXTI_PIN                 PB0
 #define USE_MPU_DATA_READY_SIGNAL
 
-#define GYRO_1_ALIGN                    CW90_DEG
+#define GYRO_1_ALIGN                    CW0_DEG
 
 // *************** RX ******************************
-#define DEFAULT_RX_FEATURE              FEATURE_RX_SERIAL
-#define SERIALRX_UART                   SERIAL_PORT_USART2
-#if defined(BEEBRAIN_BL_6000_SBUS_INTL) || defined (BEEBRAIN_BL_6500_SBUS_INTL) || \
-    defined(BEEBRAIN_BL_6000_SBUS_US)   || defined (BEEBRAIN_BL_6500_SBUS_INTL)
-#define SERIALRX_PROVIDER               SERIALRX_SBUS
-#define RX_CHANNELS_AETR
-#elif   defined(BEEBRAIN_BL_6000_CRSF_INTL) || defined (BEEBRAIN_BL_6500_CRSF_INTL) || \
-        defined(BEEBRAIN_BL_6000_CRSF_US)   || defined (BEEBRAIN_BL_6500_CRSF_INTL)
-#define SERIALRX_PROVIDER               SERIALRX_CRSF
-#define RX_CHANNELS_AETR
-#else
-#define SERIALRX_PROVIDER               SERIALRX_SPEKTRUM2048
-#define RX_CHANNELS_TAER
-#endif
+#define DJTS
+#define USE_RX_SPI
+#define RX_SPI_INSTANCE             SPI2
+#define RX_NSS_PIN                  SPI2_NSS_PIN
+#define RX_SPI_EXTI_PIN             PB2
+#define RX_SPI_LED_PIN              PA13
+#define RX_CC2500_SPI_ANT_SEL_PIN   PA7
+#define RX_SPI_BIND_PIN             PC15
+#define DEFAULT_RX_FEATURE          FEATURE_RX_SPI
+#define RX_SPI_DEFAULT_PROTOCOL     RX_SPI_FRSKY_D
+#define USE_RX_FRSKY_SPI_TELEMETRY
+#define USE_RX_CC2500_SPI_DIVERSITY
+#define USE_RX_FRSKY_SPI_D
+#define USE_RX_FRSKY_SPI_X
+#define USE_RX_SFHSS_SPI
 
 // *************** OSD *****************************
 #define USE_MAX7456
@@ -106,13 +103,6 @@
 #define USE_VTX_RTC6705_SOFTSPI
 #define RTC6705_SPI_MOSI_PIN            SPI3_MOSI_PIN
 #define RTC6705_SPICLK_PIN              SPI3_SCK_PIN
-#define RTC6705_POWER_PIN               PA8
-#define RTC6705_POWER_PIN_HIGH_ENABLE
-
-#if defined(BEEBRAIN_BL_6000_SBUS_US) || defined (BEEBRAIN_BL_6000_DSM_US) || defined (BEEBRAIN_BL_6000_CRSF_US) || \
-    defined(BEEBRAIN_BL_6500_SBUS_US) || defined (BEEBRAIN_BL_6500_DSM_US) || defined (BEEBRAIN_BL_6500_CRSF_US) 
-#define USE_VTX_LOCK_FREQ
-#endif
 
 // *************** ADC *****************************
 #define USE_ADC
@@ -128,8 +118,12 @@
 // *************** FLASH ***************************
 #define USE_FLASHFS
 #define USE_FLASH_M25P16
-#define FLASH_CS_PIN                    SPI2_NSS_PIN
-#define FLASH_SPI_INSTANCE              SPI2
+#define USE_FLASH_W25M
+#define USE_FLASH_W25M512
+#define USE_FLASH_W25N01G
+#define USE_FLASH_W25M02G
+#define FLASH_CS_PIN                    PB10
+#define FLASH_SPI_INSTANCE              SPI3
 #define ENABLE_BLACKBOX_LOGGING_ON_SPIFLASH_BY_DEFAULT
 
 // *************** OTHERS **************************
@@ -137,7 +131,7 @@
 #define LED1_PIN                        PC14
 
 #define USE_BEEPER
-#define BEEPER_PIN                      PB10
+#define BEEPER_PIN                      NONE
 #define BEEPER_INVERTED
 
 #define USE_ESCSERIAL

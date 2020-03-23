@@ -1,1 +1,0 @@
-# BEEBRAIN_BL_6500_DSM_INTL is used mou6500, dsm receiver and vtx not lock
