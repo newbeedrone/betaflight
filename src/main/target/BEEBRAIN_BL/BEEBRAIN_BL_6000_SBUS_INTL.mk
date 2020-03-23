@@ -1,1 +1,0 @@
-# BEEBRAIN_BL_6000_SBUS_INTL is used mou6000, sbus receiver and vtx not lock

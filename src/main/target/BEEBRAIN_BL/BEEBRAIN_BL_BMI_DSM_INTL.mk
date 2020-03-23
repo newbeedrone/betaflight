@@ -1,0 +1,1 @@
+# BEEBRAIN_BL_BMI160_DSM_INTL is used BMI160, dsm receiver and vtx not lock
