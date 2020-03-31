@@ -244,7 +244,12 @@ void fcTasksInit(void)
 #endif
 
     if (sensors(SENSOR_GYRO)) {
+#ifdef NBD_USE_BMI160
+        // Set the task period below the actual looptime, as the gyro interrupt kicks-off the scheduler
+        rescheduleTask(TASK_GYROPID, gyro.targetLooptime - 10);
+#else
         rescheduleTask(TASK_GYROPID, gyro.targetLooptime);
+#endif
         setTaskEnabled(TASK_GYROPID, true);
     }
 
