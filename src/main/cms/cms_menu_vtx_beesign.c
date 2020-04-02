@@ -94,7 +94,17 @@ static long bsCmsConfigBandByGvar(displayPort_t *pDisp, const void *self)
 {
     UNUSED(pDisp);
     UNUSED(self);
+    if (bs_vtxBand == 0) {
+        bs_vtxBand = 1;
+    }
 
+    if (bs_vtxChannel == 0) {
+        bs_vtxChannel = 1;
+    }
+    
+    if (bs_vtxPower == 0) {
+        bs_vtxPower = 1;
+    }
     bs_showFreq =  vtxCommonLookupFrequency(vtxCommonDevice(), bs_vtxBand, bs_vtxChannel);
 
     return 0;
@@ -179,7 +189,7 @@ static OSD_Entry bsCmsMenuRaceModeEntries[] =
     {"BAND",        OME_TAB,        bsCmsConfigBandByGvar,  &bsEntryVtxBand,        0},
     {"CHANNEL",     OME_TAB,        bsCmsConfigBandByGvar,  &bsEntryVtxChannel,     0},
     {"POWER",       OME_TAB,        NULL,                   &bsEntryVtxPower,       0},
-    {"(FREQ)",      OME_UINT16,     NULL,                   &bsShowVtxFreq,         DYNAMIC },
+    {"(FREQ)",      OME_UINT16,     bsCmsConfigBandByGvar,  &bsShowVtxFreq,         DYNAMIC },
     {"SAVE",        OME_Funcall,    bsCmsConfigRaceSave,    NULL,                   0},
     {"BACK",        OME_Back,       NULL,                   NULL,                   0},
     {NULL,          OME_END,        NULL,                   NULL,                   0}
