@@ -112,7 +112,7 @@ void targetConfiguration(void)
     osdConfigMutable()->item_pos[OSD_CURRENT_DRAW]      = OSD_POS(22,10) | OSD_PROFILE_1_FLAG;
 
     vtxSettingsConfigMutable()->band = 5;
-    vtxSettingsConfigMutable()->channel = 8;
+    vtxSettingsConfigMutable()->channel = 1;
     vtxSettingsConfigMutable()->power = 2;
 #if defined(BEEBRAIN_BL_BMI_FRSKY_US) || defined (BEEBRAIN_BL_BMI_DSM_US)
     uint16_t vtxTableFrequency[6][8] = {
@@ -123,7 +123,7 @@ void targetConfiguration(void)
         { 5658, 5695, 5732, 5769, 5806, 5843, 5880, 5917 }, // RaceBand
         { 5732, 5765, 5828, 5840, 5866, 5740,    0,    0 }, // IMD6
     };
-#else 
+#else
     uint16_t vtxTableFrequency[6][8] = {
         { 5865, 5845, 5825, 5805, 5785, 5765, 5745, 5725 }, // Boscam A
         { 5733, 5752, 5771, 5790, 5809, 5828, 5847, 5866 }, // Boscam B
@@ -161,11 +161,13 @@ void targetConfiguration(void)
     strcpy(vtxTableConfigMutable()->channelNames[5], "6");
     strcpy(vtxTableConfigMutable()->channelNames[6], "7");
     strcpy(vtxTableConfigMutable()->channelNames[7], "8");
-    vtxTableConfigMutable()->powerLevels = 2;
+    vtxTableConfigMutable()->powerLevels = 3;
     vtxTableConfigMutable()->powerValues[0] = 0;
     vtxTableConfigMutable()->powerValues[1] = 1;
-    strcpy(vtxTableConfigMutable()->powerLabels[0], "5");
-    strcpy(vtxTableConfigMutable()->powerLabels[1], "25");
+    vtxTableConfigMutable()->powerValues[2] = 2;
+    strcpy(vtxTableConfigMutable()->powerLabels[0], "OFF");
+    strcpy(vtxTableConfigMutable()->powerLabels[1], "MIN");
+    strcpy(vtxTableConfigMutable()->powerLabels[2], "MAX");
     
 
     batteryConfigMutable()->batteryCapacity = 250;
