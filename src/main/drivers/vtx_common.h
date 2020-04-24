@@ -35,7 +35,7 @@
 
 #endif
 
-#if defined(USE_VTX_SMARTAUDIO) || defined(USE_VTX_TRAMP)
+#if defined(USE_VTX_SMARTAUDIO) || defined(USE_VTX_TRAMP) || defined(USE_VTX_BEESIGN)
 
 #define VTX_SETTINGS_FREQCMD
 
@@ -51,6 +51,7 @@ typedef enum {
     // 2 reserved
     VTXDEV_SMARTAUDIO  = 3,
     VTXDEV_TRAMP       = 4,
+    VTXDEV_BEESIGN     = 5,
     VTXDEV_UNKNOWN     = 0xFF,
 } vtxDevType_e;
 
@@ -87,6 +88,21 @@ enum {
     VTX_STATUS_PIT_MODE = 1 << 0,
     VTX_STATUS_LOCKED = 1 << 1,
 };
+// BesSing "---", 25, 100, 200, 400, 800 mW
+#define VTX_BS_POWER_OFF         0
+#define VTX_BS_POWER_25          1
+#define VTX_BS_POWER_100         2
+#define VTX_BS_POWER_200         3
+#define VTX_BS_POWER_400         4
+#define VTX_BS_POWER_600         5
+
+
+typedef struct vtxDeviceCapability_s {
+    uint8_t bandCount;
+    uint8_t channelCount;
+    uint8_t powerCount;
+    uint8_t filler;
+} vtxDeviceCapability_t;
 
 struct vtxVTable_s;
 typedef struct vtxDevice_s {

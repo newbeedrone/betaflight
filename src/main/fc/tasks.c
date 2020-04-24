@@ -45,6 +45,7 @@
 #include "drivers/transponder_ir.h"
 #include "drivers/usb_io.h"
 #include "drivers/vtx_common.h"
+#include "drivers/beesign.h"
 
 #include "fc/config.h"
 #include "fc/core.h"
@@ -336,6 +337,10 @@ void fcTasksInit(void)
     setTaskEnabled(TASK_PINIOBOX, true);
 #endif
 
+#ifdef USE_BEESIGN
+    setTaskEnabled(TASK_BEESIGN, true);
+#endif
+
 #ifdef USE_CMS
 #ifdef USE_MSP_DISPLAYPORT
     setTaskEnabled(TASK_CMS, true);
@@ -345,7 +350,7 @@ void fcTasksInit(void)
 #endif
 
 #ifdef USE_VTX_CONTROL
-#if defined(USE_VTX_RTC6705) || defined(USE_VTX_SMARTAUDIO) || defined(USE_VTX_TRAMP)
+#if defined(USE_VTX_RTC6705) || defined(USE_VTX_SMARTAUDIO) || defined(USE_VTX_TRAMP)  || defined(USE_VTX_BEESIGN)
     setTaskEnabled(TASK_VTXCTRL, true);
 #endif
 #endif
@@ -447,7 +452,7 @@ cfTask_t cfTasks[TASK_COUNT] = {
 #endif
 
 #ifdef USE_CMS
-    [TASK_CMS] = DEFINE_TASK("CMS", NULL, NULL, cmsHandler, TASK_PERIOD_HZ(60), TASK_PRIORITY_LOW),
+    [TASK_CMS] = DEFINE_TASK("CMS", NULL, NULL, cmsHandler, TASK_PERIOD_HZ(30), TASK_PRIORITY_LOW),
 #endif
 
 #ifdef USE_VTX_CONTROL
@@ -468,6 +473,9 @@ cfTask_t cfTasks[TASK_COUNT] = {
 
 #ifdef USE_PINIOBOX
     [TASK_PINIOBOX] = DEFINE_TASK("PINIOBOX", NULL, NULL, pinioBoxUpdate, TASK_PERIOD_HZ(20), TASK_PRIORITY_IDLE),
+#endif
+#ifdef USE_BEESIGN
+    [TASK_BEESIGN] = DEFINE_TASK("BEESIGN", NULL, NULL, beesignUpdate, TASK_PERIOD_HZ(60), TASK_PRIORITY_LOW),
 #endif
 
 #ifdef USE_RANGEFINDER

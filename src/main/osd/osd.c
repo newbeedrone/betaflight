@@ -57,6 +57,7 @@
 #include "drivers/max7456_symbols.h"
 #include "drivers/sdcard.h"
 #include "drivers/time.h"
+#include "drivers/beesign.h"
 
 #include "fc/rc_controls.h"
 #include "fc/rc_modes.h"
@@ -307,12 +308,38 @@ void pgResetFn_osdConfig(osdConfig_t *osdConfig)
 
 static void osdDrawLogo(int x, int y)
 {
-    // display logo and help
-    int fontOffset = 160;
-    for (int row = 0; row < 4; row++) {
-        for (int column = 0; column < 24; column++) {
-            if (fontOffset <= SYM_END_OF_FONT)
-                displayWriteChar(osdDisplayPort, x + column, y + row, fontOffset++);
+#ifdef USE_OSD_BEESIGN
+    if (checkBeesignSerialPort()) {
+        uint8_t column;
+        uint16_t fontOffset = 0xC4;
+        for (column = 0; column < 6; column++) {
+            displayWriteChar(osdDisplayPort, x + column, y, fontOffset++);
+        }
+        for (column = 7; column < 24; column++) {
+            displayWriteChar(osdDisplayPort, x + column, y, 0xC0);
+        }
+        for (column = 0; column < 24; column++) {
+            displayWriteChar(osdDisplayPort, x + column, y + 1, fontOffset++);
+        }
+        for (column = 0; column < 24; column++) {
+            displayWriteChar(osdDisplayPort, x + column, y + 2, fontOffset++);
+        }
+        for (column = 0; column < 6; column++) {
+            displayWriteChar(osdDisplayPort, x + column, y + 3, fontOffset++);
+        }
+        for (column = 7; column < 24; column++) {
+            displayWriteChar(osdDisplayPort, x + column, y + 3, 0xC0);
+        }
+    } else 
+#endif
+    {
+        // display logo and help
+        int fontOffset = 160;
+        for (int row = 0; row < 4; row++) {
+            for (int column = 0; column < 24; column++) {
+                if (fontOffset <= SYM_END_OF_FONT)
+                    displayWriteChar(osdDisplayPort, x + column, y + row, fontOffset++);
+            }
         }
     }
 }
@@ -334,17 +361,39 @@ void osdInit(displayPort_t *osdDisplayPortToUse)
 
     osdResetAlarms();
 
-    displayClearScreen(osdDisplayPort);
-
-    osdDrawLogo(3, 1);
+    displayCleanScreen(osdDisplayPort);
+#ifdef USE_OSD_BEESIGN
+    if (checkBeesignSerialPort()) {
+        osdDrawLogo(1, 0);
+    } else 
+#endif
+    {
+        osdDrawLogo(3, 1);
+    }
 
     char string_buffer[30];
     tfp_sprintf(string_buffer, "V%s", FC_VERSION_STRING);
-    displayWrite(osdDisplayPort, 20, 6, string_buffer);
+#ifdef USE_OSD_BEESIGN
+    if (checkBeesignSerialPort()) {
+        displayWrite(osdDisplayPort, 18, 5, string_buffer);
+    } else 
+#endif
+    {
+        displayWrite(osdDisplayPort, 20, 6, string_buffer);
+    }
 #ifdef USE_CMS
-    displayWrite(osdDisplayPort, 7, 8,  CMS_STARTUP_HELP_TEXT1);
-    displayWrite(osdDisplayPort, 11, 9, CMS_STARTUP_HELP_TEXT2);
-    displayWrite(osdDisplayPort, 11, 10, CMS_STARTUP_HELP_TEXT3);
+#ifdef USE_OSD_BEESIGN
+    if (checkBeesignSerialPort()) {
+        displayWrite(osdDisplayPort, 7, 7,  CMS_STARTUP_HELP_TEXT1);
+        displayWrite(osdDisplayPort, 11, 8, CMS_STARTUP_HELP_TEXT2);
+        displayWrite(osdDisplayPort, 11, 9, CMS_STARTUP_HELP_TEXT3);
+    } else 
+#endif
+    {
+        displayWrite(osdDisplayPort, 7, 8,  CMS_STARTUP_HELP_TEXT1);
+        displayWrite(osdDisplayPort, 11, 9, CMS_STARTUP_HELP_TEXT2);
+        displayWrite(osdDisplayPort, 11, 10, CMS_STARTUP_HELP_TEXT3);
+    }
 #endif
 
 #ifdef USE_RTC_TIME
@@ -507,9 +556,18 @@ static void osdGetBlackboxStatusString(char * buff)
 
 static void osdDisplayStatisticLabel(uint8_t y, const char * text, const char * value)
 {
-    displayWrite(osdDisplayPort, 2, y, text);
-    displayWrite(osdDisplayPort, 20, y, ":");
-    displayWrite(osdDisplayPort, 22, y, value);
+#ifdef USE_OSD_BEESIGN
+    if (checkBeesignSerialPort()) {
+        displayWrite(osdDisplayPort, 0, y, text);
+        displayWrite(osdDisplayPort, 17, y, ":");
+        displayWrite(osdDisplayPort, 19, y, value);
+    } else 
+#endif
+    {
+        displayWrite(osdDisplayPort, 2, y, text);
+        displayWrite(osdDisplayPort, 20, y, ":");
+        displayWrite(osdDisplayPort, 22, y, value);
+    }
 }
 
 /*
@@ -540,8 +598,14 @@ static bool osdDisplayStat(int statistic, uint8_t displayRow)
         if (!success) {
             tfp_sprintf(buff, "NO RTC");
         }
-
-        displayWrite(osdDisplayPort, 2, displayRow, buff);
+#ifdef USE_OSD_BEESIGN
+        if (checkBeesignSerialPort()){
+            displayWrite(osdDisplayPort, 0, displayRow, buff);
+        } else 
+#endif
+        {
+            displayWrite(osdDisplayPort, 2, displayRow, buff);
+        }
         return true;
     }
 
@@ -742,7 +806,14 @@ static uint8_t osdShowStats(int statsRowCount)
     }
 
     if (displayLabel) {
-        displayWrite(osdDisplayPort, 2, top++, "  --- STATS ---");
+#ifdef USE_OSD_BEESIGN
+        if (checkBeesignSerialPort()) {
+            displayWrite(osdDisplayPort, 0, top++, "  --- STATS ---");
+        } else 
+#endif
+        {
+            displayWrite(osdDisplayPort, 2, top++, "  --- STATS ---");
+        }
     }
 
     for (int i = 0; i < OSD_STAT_COUNT; i++) {
@@ -764,15 +835,20 @@ static void osdRefreshStats(void)
         osdStatsRowCount = osdShowStats(0);
         // Then clear the screen and commence with normal stats display which will
         // determine if the heading should be displayed and also center the content vertically.
-        displayClearScreen(osdDisplayPort);
+        displayCleanScreen(osdDisplayPort);
     }
     osdShowStats(osdStatsRowCount);
 }
 
 static void osdShowArmed(void)
 {
+#ifdef USE_OSD_BEESIGN
+    displayCleanScreen(osdDisplayPort);
+    displayWrite(osdDisplayPort, 9, 4, "ARMED");
+#else
     displayClearScreen(osdDisplayPort);
     displayWrite(osdDisplayPort, 12, 7, "ARMED");
+#endif
 }
 
 STATIC_UNIT_TESTED void osdRefresh(timeUs_t currentTimeUs)
@@ -904,13 +980,25 @@ void osdUpdate(timeUs_t currentTimeUs)
 #endif
 
     // redraw values in buffer
-#ifdef USE_MAX7456
-#define DRAW_FREQ_DENOM 5
-#else
-#define DRAW_FREQ_DENOM 10 // MWOSD @ 115200 baud (
-#endif
+// #ifdef USE_MAX7456
+// #define DRAW_FREQ_DENOM 5
+// #else
+// #define DRAW_FREQ_DENOM 10 // MWOSD @ 115200 baud (
+// #endif
 #define STATS_FREQ_DENOM    50
-
+uint8_t DRAW_FREQ_DENOM;
+#ifdef USE_OSD_BEESIGN
+    if (checkBeesignSerialPort()) {
+        DRAW_FREQ_DENOM = 10;
+    } else 
+#endif
+    {
+        #ifdef USE_MAX7456
+            DRAW_FREQ_DENOM = 5;
+        #else
+            DRAW_FREQ_DENOM = 10; // MWOSD @ 115200 baud (
+        #endif
+    }
     if (counter % DRAW_FREQ_DENOM == 0) {
         osdRefresh(currentTimeUs);
         showVisualBeeper = false;

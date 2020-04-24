@@ -801,7 +801,9 @@ long cmsMenuExit(displayPort_t *pDisplay, const void *ptr)
 
     displayRelease(pDisplay);
     currentCtx.menu = NULL;
-
+#ifdef USE_OSD_BEESIGN
+    displayCleanScreen(pDisplay);
+#endif
     if ((exitType == CMS_EXIT_SAVEREBOOT) || (exitType == CMS_POPUP_SAVEREBOOT) || (exitType == CMS_POPUP_EXITREBOOT)) {
         displayClearScreen(pDisplay);
         displayWrite(pDisplay, 5, 3, "REBOOTING...");
@@ -1233,8 +1235,9 @@ static void cmsUpdate(uint32_t currentTimeUs)
                 }
             }
         }
-
-        cmsDrawMenu(pCurrentDisplay, currentTimeUs);
+        if (currentCtx.menu != NULL){
+            cmsDrawMenu(pCurrentDisplay, currentTimeUs);
+        }
 
         if (currentTimeMs > lastCmsHeartBeatMs + 500) {
             // Heart beat for external CMS display device @ 500msec

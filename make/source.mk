@@ -138,9 +138,11 @@ COMMON_SRC = \
             cms/cms_menu_osd.c \
             cms/cms_menu_power.c \
             cms/cms_menu_saveexit.c \
+            cms/cms_menu_vtx_beesign.c\
             cms/cms_menu_vtx_rtc6705.c \
             cms/cms_menu_vtx_smartaudio.c \
             cms/cms_menu_vtx_tramp.c \
+            drivers/beesign.c \
             drivers/display_ug2864hsweg01.c \
             drivers/light_ws2811strip.c \
             drivers/rangefinder/rangefinder_hcsr04.c \
@@ -149,6 +151,7 @@ COMMON_SRC = \
             drivers/vtx_common.c \
             drivers/vtx_table.c \
             io/dashboard.c \
+            io/displayport_beesign.c \
             io/displayport_max7456.c \
             io/displayport_msp.c \
             io/displayport_oled.c \
@@ -178,6 +181,7 @@ COMMON_SRC = \
             telemetry/ibus_shared.c \
             sensors/esc_sensor.c \
             io/vtx.c \
+            io/vtx_beesign.c \
             io/vtx_rtc6705.c \
             io/vtx_smartaudio.c \
             io/vtx_tramp.c \
@@ -277,6 +281,7 @@ SIZE_OPTIMISED_SRC := $(SIZE_OPTIMISED_SRC) \
             drivers/barometer/barometer_ms5611.c \
             drivers/barometer/barometer_lps.c \
             drivers/barometer/barometer_qmp6988.c \
+            drivers/beesign.c \
             drivers/bus_i2c_config.c \
             drivers/bus_spi_config.c \
             drivers/bus_spi_pinconfig.c \
@@ -327,6 +332,7 @@ SIZE_OPTIMISED_SRC := $(SIZE_OPTIMISED_SRC) \
             cms/cms_menu_osd.c \
             cms/cms_menu_power.c \
             cms/cms_menu_saveexit.c \
+            cms/cms_menu_vtx_beesign.c\
             cms/cms_menu_vtx_rtc6705.c \
             cms/cms_menu_vtx_smartaudio.c \
             cms/cms_menu_vtx_tramp.c \

@@ -7,6 +7,7 @@ This reqo is base on Beebrain Brushless.
 * Fixed freeze when VTX_TR selected on OSD
 * Fixed OSD VTX showing wrong frequency on Raceband 
 * Fixed turtle mode switch direction
+* Add beesign.
 * Remove Beebrain BL MPU6500 target (MPU6500 has problem with 2S).
 * Fix RTC6705 read band and channle bug in cms_menu_vtx_rtc6705.c.
 * Fix RTC6705 always set frequency when use VTX_TABLE.

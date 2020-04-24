@@ -74,6 +74,8 @@
 #define USE_ACCGYRO_BMI160
 #define BMI160_SPI_DIVISOR      16
 
+#define GYRO_1_ALIGN                    CW90_DEG
+
 #define GYRO_1_CS_PIN                   PA4
 #define GYRO_1_SPI_INSTANCE             SPI3
 
@@ -82,7 +84,9 @@
 #define GYRO_1_EXTI_PIN                 PB0
 #define USE_MPU_DATA_READY_SIGNAL
 
-#define GYRO_1_ALIGN                    CW90_DEG
+// #define USE_SPI_GYRO
+// #define USE_ACCGYRO_BMI160
+// #define BMI160_SPI_DIVISOR      16
 
 // *************** RX ******************************
 #define DJTS
@@ -104,10 +108,24 @@
 #define USE_RX_FRSKY_SPI_X
 #define USE_RX_SFHSS_SPI
 
+// #define USE_TRANSPONDER
+// #define DEFAULT_RX_FEATURE      FEATURE_RX_SERIAL
+// #define SERIALRX_UART           SERIAL_PORT_USART2
+// #define RX_CHANNELS_TAER
+// #define SERIALRX_PROVIDER       SERIALRX_SPEKTRUM2048
+
 // *************** OSD *****************************
 #define USE_MAX7456
 #define MAX7456_SPI_INSTANCE            SPI3
 #define MAX7456_SPI_CS_PIN              SPI3_NSS_PIN
+
+#undef USE_VTX_TRAMP
+#undef USE_VTX_SMARTAUDIO
+#define USE_BEESIGN
+#if defined(HMBF41S_FRSKY_BS_OSD_ON_VTX_US) || defined(HMBF41S_FRSKY_BS_OSD_ON_VTX_INTL)
+#define USE_OSD_BEESIGN
+#endif
+#define USE_BEESIGN_UART                SERIAL_PORT_USART1
 
 // *************** ADC *****************************
 #define USE_ADC
