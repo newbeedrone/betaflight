@@ -104,6 +104,8 @@
 #define USE_VTX_RTC6705_SOFTSPI
 #define RTC6705_SPI_MOSI_PIN            SPI3_MOSI_PIN
 #define RTC6705_SPICLK_PIN              SPI3_SCK_PIN
+#define RTC6705_POWER_PIN               PA8
+#define RTC6705_POWER_PIN_HIGH_ENABLE
 
 // *************** ADC *****************************
 #define USE_ADC
@@ -132,7 +134,7 @@
 #define LED1_PIN                        PC14
 
 #define USE_BEEPER
-#define BEEPER_PIN                      NONE
+#define BEEPER_PIN                      PB10
 #define BEEPER_INVERTED
 
 #define USE_ESCSERIAL

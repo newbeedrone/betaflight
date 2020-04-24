@@ -112,9 +112,9 @@ void targetConfiguration(void)
     osdConfigMutable()->item_pos[OSD_CURRENT_DRAW]      = OSD_POS(22,10) | OSD_PROFILE_1_FLAG;
 
     vtxSettingsConfigMutable()->band = 5;
-    vtxSettingsConfigMutable()->channel = 1;
-    vtxSettingsConfigMutable()->power = 2;
-#if defined(BEEBRAIN_BL_BMI_FRSKY_US) || defined (BEEBRAIN_BL_BMI_DSM_US)
+    vtxSettingsConfigMutable()->channel = 8;
+    vtxSettingsConfigMutable()->power = 1;
+#if defined(BEEBRAIN_BL_SBUS_US) || defined (BEEBRAIN_BL_DSM_US) || defined (BEEBRAIN_BL_CRSF_US)
     uint16_t vtxTableFrequency[6][8] = {
         { 5865, 5845, 5825, 5805, 5785, 5765, 5745, 5725 }, // Boscam A
         { 5733, 5752, 5771, 5790, 5809, 5828, 5847, 5866 }, // Boscam B
@@ -123,7 +123,7 @@ void targetConfiguration(void)
         { 5658, 5695, 5732, 5769, 5806, 5843, 5880, 5917 }, // RaceBand
         { 5732, 5765, 5828, 5840, 5866, 5740,    0,    0 }, // IMD6
     };
-#else
+#else 
     uint16_t vtxTableFrequency[6][8] = {
         { 5865, 5845, 5825, 5805, 5785, 5765, 5745, 5725 }, // Boscam A
         { 5733, 5752, 5771, 5790, 5809, 5828, 5847, 5866 }, // Boscam B
@@ -165,9 +165,9 @@ void targetConfiguration(void)
     vtxTableConfigMutable()->powerValues[0] = 0;
     vtxTableConfigMutable()->powerValues[1] = 1;
     vtxTableConfigMutable()->powerValues[2] = 2;
-    strcpy(vtxTableConfigMutable()->powerLabels[0], "OFF");
-    strcpy(vtxTableConfigMutable()->powerLabels[1], "MIN");
-    strcpy(vtxTableConfigMutable()->powerLabels[2], "MAX");
+    strcpy(vtxTableConfigMutable()->powerLabels[0], "5  ");
+    strcpy(vtxTableConfigMutable()->powerLabels[1], "25 ");
+    strcpy(vtxTableConfigMutable()->powerLabels[2], "100");
     
 
     batteryConfigMutable()->batteryCapacity = 250;
@@ -191,13 +191,39 @@ void targetConfiguration(void)
     modeActivationConditionsMutable(2)->range.startStep  = CHANNEL_VALUE_TO_STEP(1300);
     modeActivationConditionsMutable(2)->range.endStep    = CHANNEL_VALUE_TO_STEP(1700);
 
-    modeActivationConditionsMutable(4)->modeId           = BOXFLIPOVERAFTERCRASH;
-    modeActivationConditionsMutable(4)->auxChannelIndex  = AUX3 - NON_AUX_CHANNEL_COUNT;
-    modeActivationConditionsMutable(4)->range.startStep  = CHANNEL_VALUE_TO_STEP(1700);
-    modeActivationConditionsMutable(4)->range.endStep    = CHANNEL_VALUE_TO_STEP(2100);
+    modeActivationConditionsMutable(3)->modeId           = BOXFLIPOVERAFTERCRASH;
+    modeActivationConditionsMutable(3)->auxChannelIndex  = AUX3 - NON_AUX_CHANNEL_COUNT;
+    modeActivationConditionsMutable(3)->range.startStep  = CHANNEL_VALUE_TO_STEP(1700);
+    modeActivationConditionsMutable(3)->range.endStep    = CHANNEL_VALUE_TO_STEP(2100);
+    // ledStripConfigMutable()->ledConfigs[0] = DEFINE_LED(0, 0,  1, 0, LF(COLOR), 0, 0);
+    // ledStripConfigMutable()->ledConfigs[1] = DEFINE_LED(1, 0, 10, 0, LF(COLOR), LO(LARSON_SCANNER), 0);
+    // ledStripConfigMutable()->ledConfigs[2] = DEFINE_LED(2, 0,  2, 0, LF(COLOR), LO(LARSON_SCANNER), 0);
 
     strcpy(pilotConfigMutable()->name, "BeeBrain BL");
 
+    // rxConfigMutable()->rssi_channel = BB_LITE_RSSI_CH_IDX;
+    // rxFailsafeChannelConfig_t *channelFailsafeConfig = rxFailsafeChannelConfigsMutable(BB_LITE_RSSI_CH_IDX - 1);
+    // channelFailsafeConfig->mode = RX_FAILSAFE_MODE_SET;
+    // channelFailsafeConfig->step = CHANNEL_VALUE_TO_RXFAIL_STEP(1000);
+
+    for (uint8_t rxRangeIndex = 0; rxRangeIndex < NON_AUX_CHANNEL_COUNT; rxRangeIndex++) {
+        rxChannelRangeConfig_t *channelRangeConfig = rxChannelRangeConfigsMutable(rxRangeIndex);
+
+        channelRangeConfig->min = 1070;
+        channelRangeConfig->max = 1928;
+    }
+
+    gyroConfigMutable()->gyro_lowpass_type = FILTER_PT1;
+    gyroConfigMutable()->gyro_lowpass_hz = 200;
+    gyroConfigMutable()->gyro_lowpass2_hz = 200;
+    gyroConfigMutable()->yaw_spin_threshold = 1950;
+    gyroConfigMutable()->dyn_lpf_gyro_min_hz = 160;
+    gyroConfigMutable()->dyn_lpf_gyro_max_hz = 400;
+    rxConfigMutable()->mincheck = 1075;
+    rxConfigMutable()->maxcheck = 1900;
+    rxConfigMutable()->rc_smoothing_type = RC_SMOOTHING_TYPE_FILTER;
+    rxConfigMutable()->fpvCamAngleDegrees = 0;
+    rxConfigMutable()->rssi_channel = 9;
     motorConfigMutable()->digitalIdleOffsetValue = 1000;
     motorConfigMutable()->dev.useBurstDshot = true;
     motorConfigMutable()->dev.useDshotTelemetry = false;

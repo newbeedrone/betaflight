@@ -449,23 +449,23 @@ bool max7456Init(const max7456Config_t *max7456Config, const vcdProfile_t *pVcdP
 
     __spiBusTransactionBegin(busdev);
 
-    uint8_t osdm = max7456Send(MAX7456ADD_OSDM|MAX7456ADD_READ, 0xff);
+    // uint8_t osdm = max7456Send(MAX7456ADD_OSDM|MAX7456ADD_READ, 0xff);
 
-    if (osdm != 0x1B) {
-        IOConfigGPIO(busdev->busdev_u.spi.csnPin, IOCFG_IPU);
-        return false;
-    }
+    // if (osdm != 0x1B) {
+    //     IOConfigGPIO(busdev->busdev_u.spi.csnPin, IOCFG_IPU);
+    //     return false;
+    // }
 
-    __spiBusTransactionEnd(busdev);
+    // __spiBusTransactionEnd(busdev);
 
-    // At this point, we can claim the ownership of the CS pin
+    // // At this point, we can claim the ownership of the CS pin
 
-    IOInit(busdev->busdev_u.spi.csnPin, OWNER_OSD_CS, 0);
+    // IOInit(busdev->busdev_u.spi.csnPin, OWNER_OSD_CS, 0);
 
-    // Detect device type by writing and reading CA[8] bit at CMAL[6].
-    // This is a bit for accessing second half of character glyph storage, supported only by AT variant.
+    // // Detect device type by writing and reading CA[8] bit at CMAL[6].
+    // // This is a bit for accessing second half of character glyph storage, supported only by AT variant.
 
-    __spiBusTransactionBegin(busdev);
+    // __spiBusTransactionBegin(busdev);
 
     max7456Send(MAX7456ADD_CMAL, (1 << 6)); // CA[8] bit
 
