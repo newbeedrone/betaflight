@@ -74,7 +74,7 @@
 #define USE_ACCGYRO_BMI160
 #define BMI160_SPI_DIVISOR      16
 
-#define GYRO_1_ALIGN                    CW90_DEG
+#define GYRO_1_ALIGN                    CW0_DEG
 
 #define GYRO_1_CS_PIN                   PA4
 #define GYRO_1_SPI_INSTANCE             SPI3
