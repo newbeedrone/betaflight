@@ -193,13 +193,14 @@ bool checkBeesignSerialPort(void);
 void bsSetVTxUnlock(void);
 void bsSetVTxLock(void);
 
-void bsReceiveFramer(uint8_t ch);
+void bsReceiveFrame(uint8_t ch);
 bool bsValidateFreq(uint16_t freq);
 bool bsValidateBandAndChannel(uint8_t band, uint8_t channel);
 void bsSetBandAndChannel(uint8_t band, uint8_t channel);
 void bsSetPower(uint8_t index);
 void bsSetVtxMode(uint8_t mode);
 void bsSetFreq(uint16_t freq);
+void bsGetVtxState(void);
 
 void bsCloseOsd(void);
 void bsSetOsdMode(uint8_t mode);
