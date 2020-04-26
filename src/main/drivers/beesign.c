@@ -132,8 +132,8 @@ static uint8_t BSProcessResponse(uint8_t type ,uint8_t *pRcvFrame)
                 case BEESIGN_V_GET_STATUS | BEESIGN_TYPE_MASK_FM:
                     bsDevice.channel = BEESIGN_PKT_DATA(pRcvFrame, 0);
                     bsDevice.freq = (uint16_t)BEESIGN_PKT_DATA(pRcvFrame, 2) + (BEESIGN_PKT_DATA(pRcvFrame, 1) << 8);
-                    bsDevice.power = BEESIGN_PKT_DATA(pRcvFrame, 0);
-                    bsDevice.mode = BEESIGN_PKT_DATA(pRcvFrame, 0);
+                    bsDevice.power = BEESIGN_PKT_DATA(pRcvFrame, 3) + 1;
+                    bsDevice.mode = BEESIGN_PKT_DATA(pRcvFrame, 4);
                     break;
                 case BEESIGN_O_GET_STATUS | BEESIGN_TYPE_MASK_FM:
 
@@ -153,7 +153,7 @@ static uint8_t BSProcessResponse(uint8_t type ,uint8_t *pRcvFrame)
     return 1;
 }
 
-void bsReceiveFramer(uint8_t ch) {
+void bsReceiveFrame(uint8_t ch) {
     static bsState_e state = BS_STATE_HDR;
     static uint8_t idx;
     static uint8_t len;
@@ -353,12 +353,13 @@ void bsSetBandAndChannel(uint8_t band, uint8_t channel)
 {
     uint8_t vtxSaveData = 0;
     uint8_t deviceChannel = BS_BANDCHAN_TO_DEVICE_CHVAL(band, channel);
-    bsDevice.channel = deviceChannel;
-    bsDevice.freq = beesignTable[band][channel];
+    // bsDevice.channel = deviceChannel;
+    // bsDevice.freq = beesignTable[band][channel];
     beesignSend(BEESIGN_V_SET_CHAN, 1, &deviceChannel, BEESIGN_CMD_ADD_BUFF);
 #ifndef USE_OSD_BEESIGN
     beesignSend(BEESIGN_M_SAVE_SETTING, 1, &vtxSaveData, BEESIGN_CMD_ADD_BUFF);
 #endif
+    bsGetVtxState();
 }
 
 void bsSetPower(uint8_t index)
@@ -367,23 +368,25 @@ void bsSetPower(uint8_t index)
     if (index > BEESIGN_POWER_COUNT) {
         return;
     }
-    bsDevice.power = index;
+    // bsDevice.power = index;
     index -= 1;
     beesignSend(BEESIGN_V_SET_PWR, 1, &index, BEESIGN_CMD_ADD_BUFF);
 #ifndef USE_OSD_BEESIGN
     beesignSend(BEESIGN_M_SAVE_SETTING, 1, &vtxSaveData, BEESIGN_CMD_ADD_BUFF);
 #endif
+    bsGetVtxState();
 }
 
 void bsSetVtxMode(uint8_t mode)
 {
     uint8_t vtxSaveData = 0;
     if (mode > 2) return;
-    bsDevice.mode = mode;
+    // bsDevice.mode = mode;
     beesignSend(BEESIGN_V_SET_MODE, 1, &mode, BEESIGN_CMD_ADD_BUFF);
 #ifndef USE_OSD_BEESIGN
     beesignSend(BEESIGN_M_SAVE_SETTING, 1, &vtxSaveData, BEESIGN_CMD_ADD_BUFF);
 #endif
+    bsGetVtxState();
 }
 
 bool bsValidateFreq(uint16_t freq)
@@ -397,12 +400,13 @@ void bsSetFreq(uint16_t freq)
     uint8_t vtxSaveData = 0;
     buf[0] = (freq >> 8) & 0xff;
     buf[1] = freq & 0xff;
-    bsDevice.freq = freq;
-    bsDevice.channel = BEESIGN_ERROR_CHANNEL;
+    // bsDevice.freq = freq;
+    // bsDevice.channel = BEESIGN_ERROR_CHANNEL;
     beesignSend(BEESIGN_V_SET_FREQ, 2, buf, BEESIGN_CMD_ADD_BUFF);
 #ifndef USE_OSD_BEESIGN
     beesignSend(BEESIGN_M_SAVE_SETTING, 1, &vtxSaveData, BEESIGN_CMD_ADD_BUFF);
 #endif
+    bsGetVtxState();
 }
 
 void bsGetVtxState(void) {
@@ -602,11 +606,11 @@ void bsUpdateCharacterFont(uint8_t id, uint8_t *data) {
 bool beesignInit(void)
 {
 #if defined(USE_BEESIGN_UART)
-    beesignSerialPort = openSerialPort(USE_BEESIGN_UART, FUNCTION_VTX_BEESIGN, NULL, NULL, 115200, MODE_RXTX, SERIAL_BIDIR);
+    beesignSerialPort = openSerialPort(USE_BEESIGN_UART, FUNCTION_VTX_BEESIGN, NULL, NULL, 115200, MODE_RXTX, SERIAL_BIDIR | SERIAL_BIDIR_PP | SERIAL_BIDIR_NOPULL);
 #else
     serialPortConfig_t *portConfig = findSerialPortConfig(FUNCTION_VTX_BEESIGN);
     if (portConfig) {
-        beesignSerialPort = openSerialPort(portConfig->identifier, FUNCTION_VTX_BEESIGN, NULL, NULL, 115200, MODE_RXTX, SERIAL_BIDIR);
+        beesignSerialPort = openSerialPort(portConfig->identifier, FUNCTION_VTX_BEESIGN, NULL, NULL, 115200, MODE_RXTX, SERIAL_BIDIR | SERIAL_BIDIR_PP | SERIAL_BIDIR_NOPULL);
     }
 #endif
     if(!beesignSerialPort) {
@@ -638,6 +642,10 @@ void beesignUpdate(timeUs_t currentTimeUs) {
         beesignSendNextCounterPoint += beesignSendCmd() / 8 + 2;       // send command and get next send time
     }
 #else 
+    while (serialRxBytesWaiting(beesignSerialPort) > 0) {
+        const uint8_t ch = serialRead(beesignSerialPort);
+        bsReceiveFrame(ch);
+    }
     beesignSendCmd(); 
 #endif
     // send every line to prevent data loss
