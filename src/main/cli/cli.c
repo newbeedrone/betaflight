@@ -1461,10 +1461,10 @@ static void cliSerialPassthrough(char *cmdline)
             // leave the mode unchanged. serialPassthrough() handles one-way ports.
             // Set the baud rate if specified
             if (ports[i].baud) {
-                cliPrintf("Port%d is already open, setting baud = %d.\n\r", portIndex, ports[i].baud);
+                cliPrintf("Port%d is already open, setting baud = %d.\r\n", portIndex, ports[i].baud);
                 serialSetBaudRate(*port, ports[i].baud);
             } else {
-                cliPrintf("Port%d is already open, baud = %d.\n\r", portIndex, (*port)->baudRate);
+                cliPrintf("Port%d is already open, baud = %d.\r\n", portIndex, (*port)->baudRate);
             }
 
             if (ports[i].mode && (*port)->mode != ports[i].mode) {
@@ -3787,16 +3787,13 @@ static void executeEscInfoCommand(uint8_t escIndex)
 
     startEscDataRead(escInfoBuffer, ESC_INFO_BLHELI32_EXPECTED_FRAME_SIZE);
 
-    dshotCommandWrite(escIndex, getMotorCount(), DSHOT_CMD_ESC_INFO, true);
+    dshotCommandWrite(escIndex, getMotorCount(), DSHOT_CMD_ESC_INFO, DSHOT_CMD_TYPE_BLOCKING);
 
     delay(10);
 
     printEscInfo(escInfoBuffer, getNumberEscBytesRead());
 }
 #endif // USE_ESC_SENSOR && USE_ESC_SENSOR_INFO
-
-
-// XXX Review dshotprog command under refactored motor handling
 
 static void cliDshotProg(char *cmdline)
 {
@@ -3838,7 +3835,7 @@ static void cliDshotProg(char *cmdline)
                     }
 
                     if (command != DSHOT_CMD_ESC_INFO) {
-                        dshotCommandWrite(escIndex, getMotorCount(), command, true);
+                        dshotCommandWrite(escIndex, getMotorCount(), command, DSHOT_CMD_TYPE_BLOCKING);
                     } else {
 #if defined(USE_ESC_SENSOR) && defined(USE_ESC_SENSOR_INFO)
                         if (featureIsEnabled(FEATURE_ESC_SENSOR)) {
@@ -6518,7 +6515,7 @@ static void processCharacterInteractive(const char c)
         }
         if (!bufferIndex || pstart != pend) {
             /* Print list of ambiguous matches */
-            cliPrint("\r\033[K");
+            cliPrint("\r\n\033[K");
             for (cmd = pstart; cmd <= pend; cmd++) {
                 cliPrint(cmd->name);
                 cliWrite('\t');

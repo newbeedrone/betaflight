@@ -346,6 +346,16 @@ void initEscEndpoints(void)
     rcCommandThrottleRange = PWM_RANGE_MAX - PWM_RANGE_MIN;
 }
 
+// Initialize pidProfile related mixer settings
+void mixerInitProfile(void)
+{
+#ifdef USE_DYN_IDLE
+    idleMinMotorRps = currentPidProfile->idle_min_rpm * 100.0f / 60.0f;
+    idleMaxIncrease = currentPidProfile->idle_max_increase * 0.001f;
+    idleP = currentPidProfile->idle_p * 0.0001f;
+#endif
+}
+
 void mixerInit(mixerMode_e mixerMode)
 {
     currentMixerMode = mixerMode;
@@ -356,12 +366,12 @@ void mixerInit(mixerMode_e mixerMode)
         mixerTricopterInit();
     }
 #endif
+
 #ifdef USE_DYN_IDLE
-    idleMinMotorRps = currentPidProfile->idle_min_rpm * 100.0f / 60.0f;
-    idleMaxIncrease = currentPidProfile->idle_max_increase * 0.001f;
     idleThrottleOffset = motorConfig()->digitalIdleOffsetValue * 0.0001f;
-    idleP = currentPidProfile->idle_p * 0.0001f;
 #endif
+
+    mixerInitProfile();
 }
 
 #ifdef USE_LAUNCH_CONTROL
@@ -593,9 +603,10 @@ static void calculateThrottleAndCurrentMotorEndpoints(timeUs_t currentTimeUs)
         }
     } else {
         throttle = rcCommand[THROTTLE] - PWM_RANGE_MIN + throttleAngleCorrection;
+        float appliedMotorOutputLow = motorOutputLow;
 #ifdef USE_DYN_IDLE
         if (idleMinMotorRps > 0.0f) {
-            motorOutputLow = DSHOT_MIN_THROTTLE;
+            appliedMotorOutputLow = DSHOT_MIN_THROTTLE;
             const float maxIncrease = isAirmodeActivated() ? idleMaxIncrease : 0.04f;
             const float minRps = rpmMinMotorFrequency();
             const float targetRpsChangeRate = (idleMinMotorRps - minRps) * currentPidProfile->idle_adjustment_speed;
@@ -609,11 +620,13 @@ static void calculateThrottleAndCurrentMotorEndpoints(timeUs_t currentTimeUs)
             DEBUG_SET(DEBUG_DYN_IDLE, 1, targetRpsChangeRate);
             DEBUG_SET(DEBUG_DYN_IDLE, 2, error);
             DEBUG_SET(DEBUG_DYN_IDLE, 3, minRps);
-            
+        } else {
+            motorRangeMinIncrease = 0;
+            oldMinRps = 0;
         }
 #endif
         currentThrottleInputRange = rcCommandThrottleRange;
-        motorRangeMin = motorOutputLow + motorRangeMinIncrease * (motorOutputHigh - motorOutputLow);
+        motorRangeMin = appliedMotorOutputLow + motorRangeMinIncrease * (motorOutputHigh - appliedMotorOutputLow);
         motorRangeMax = motorOutputHigh;
         motorOutputMin = motorRangeMin;
         motorOutputRange = motorOutputHigh - motorOutputMin;
@@ -648,7 +661,7 @@ static void applyFlipOverAfterCrashModeToMotors(void)
             signYaw = 0;
         }
 
-        float cosPhi = (stickDeflectionPitchAbs + stickDeflectionRollAbs) / (sqrtf(2.0f) * stickDeflectionLength);
+        const float cosPhi = (stickDeflectionLength > 0) ? (stickDeflectionPitchAbs + stickDeflectionRollAbs) / (sqrtf(2.0f) * stickDeflectionLength) : 0;
         const float cosThreshold = sqrtf(3.0f)/2.0f; // cos(PI/6.0f)
 
         if (cosPhi < cosThreshold) {

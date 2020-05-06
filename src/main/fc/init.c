@@ -101,6 +101,7 @@
 #include "io/asyncfatfs/asyncfatfs.h"
 #include "io/beeper.h"
 #include "io/dashboard.h"
+#include "io/displayport_crsf.h"
 #include "io/displayport_max7456.h"
 #include "io/displayport_msp.h"
 #include "io/displayport_srxl.h"
@@ -285,12 +286,24 @@ static void configureSPIAndQuadSPI(void)
 }
 
 #ifdef USE_SDCARD
-void sdCardAndFSInit()
+static void sdCardAndFSInit()
 {
     sdcard_init(sdcardConfig());
     afatfs_init();
 }
 #endif
+
+static void swdPinsInit(void)
+{
+    IO_t io = IOGetByTag(DEFIO_TAG_E(PA13)); // SWDIO
+    if (IOGetOwner(io) == OWNER_FREE) {
+        IOInit(io, OWNER_SWD, 0);
+    }
+    io = IOGetByTag(DEFIO_TAG_E(PA14)); // SWCLK
+    if (IOGetOwner(io) == OWNER_FREE) {
+        IOInit(io, OWNER_SWD, 0);
+    }
+}
 
 void init(void)
 {
@@ -821,6 +834,10 @@ void init(void)
         cmsDisplayPortRegister(displayPortMspInit());
 #endif
 
+#if defined(USE_CMS) && defined(USE_CRSF_CMS_TELEMETRY)
+    cmsDisplayPortRegister(displayPortCrsfInit());
+#endif
+
 #ifdef USE_DASHBOARD
     // Dashbord will register with CMS by itself.
     if (featureIsEnabled(FEATURE_DASHBOARD)) {
@@ -979,7 +996,9 @@ void init(void)
 
     setArmingDisabled(ARMING_DISABLED_BOOT_GRACE_TIME);
 
-    initializeUnusedPins();
+    swdPinsInit();
+
+    unusedPinsInit();
 
     fcTasksInit();
 

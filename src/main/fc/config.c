@@ -514,6 +514,14 @@ static void validateAndFixConfig(void)
         && motorConfig()->dev.useDshotTelemetry) {
         motorConfigMutable()->dev.useDshotTelemetry = false;
     }
+
+#if defined(USE_DYN_IDLE)
+    if (!isRpmFilterEnabled()) {
+        for (unsigned i = 0; i < PID_PROFILE_COUNT; i++) {
+            pidProfilesMutable(i)->idle_min_rpm = 0;
+        }
+    }
+#endif // USE_DYN_IDLE
 #endif // USE_DSHOT_TELEMETRY
 #endif // USE_DSHOT
 
@@ -799,6 +807,7 @@ void changePidProfile(uint8_t pidProfileIndex)
 
         pidInit(currentPidProfile);
         initEscEndpoints();
+        mixerInitProfile();
     }
 
     beeperConfirmationBeeps(pidProfileIndex + 1);
