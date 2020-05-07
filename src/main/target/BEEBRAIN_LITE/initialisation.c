@@ -32,7 +32,7 @@
 
 #include "io/vtx.h"
 
-#include "fc/config.h"
+#include "config/config.h"
 
 void targetPreInit(void)
 {

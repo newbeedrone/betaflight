@@ -35,7 +35,7 @@
 #include "drivers/pwm_esc_detect.h"
 #include "drivers/pwm_output.h"
 
-#include "fc/config.h"
+#include "config/config.h"
 #include "fc/controlrate_profile.h"
 #include "fc/rc_modes.h"
 #include "fc/rc_controls.h"
@@ -148,13 +148,13 @@ void targetConfiguration(void)
         controlRateConfig->dynThrPID = 55;
     }
 
-    osdConfigMutable()->item_pos[OSD_CRAFT_NAME]        = OSD_POS(9, 10) | OSD_PROFILE_1_FLAG;
-    osdConfigMutable()->item_pos[OSD_MAIN_BATT_VOLTAGE] = OSD_POS(23, 9) | OSD_PROFILE_1_FLAG;
-    osdConfigMutable()->item_pos[OSD_ITEM_TIMER_2]      = OSD_POS(2,  9) | OSD_PROFILE_1_FLAG;
-    osdConfigMutable()->item_pos[OSD_FLYMODE]           = OSD_POS(18, 9) | OSD_PROFILE_1_FLAG;
-    osdConfigMutable()->item_pos[OSD_VTX_CHANNEL]       = OSD_POS(10, 9) | OSD_PROFILE_1_FLAG;
-    osdConfigMutable()->item_pos[OSD_RSSI_VALUE]        = OSD_POS(2, 10) | OSD_PROFILE_1_FLAG;
-    osdConfigMutable()->item_pos[OSD_WARNINGS]          = OSD_POS(9, 10);
+    osdElementConfigMutable()->item_pos[OSD_CRAFT_NAME]        = OSD_POS(9, 10) | OSD_PROFILE_1_FLAG;
+    osdElementConfigMutable()->item_pos[OSD_MAIN_BATT_VOLTAGE] = OSD_POS(23, 9) | OSD_PROFILE_1_FLAG;
+    osdElementConfigMutable()->item_pos[OSD_ITEM_TIMER_2]      = OSD_POS(2,  9) | OSD_PROFILE_1_FLAG;
+    osdElementConfigMutable()->item_pos[OSD_FLYMODE]           = OSD_POS(18, 9) | OSD_PROFILE_1_FLAG;
+    osdElementConfigMutable()->item_pos[OSD_VTX_CHANNEL]       = OSD_POS(10, 9) | OSD_PROFILE_1_FLAG;
+    osdElementConfigMutable()->item_pos[OSD_RSSI_VALUE]        = OSD_POS(2, 10) | OSD_PROFILE_1_FLAG;
+    osdElementConfigMutable()->item_pos[OSD_WARNINGS]          = OSD_POS(9, 10);
 
     vtxSettingsConfigMutable()->band = 5;
     vtxSettingsConfigMutable()->channel = 1;
