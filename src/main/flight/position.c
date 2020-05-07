@@ -109,7 +109,7 @@ void calculateEstimatedAltitude(timeUs_t currentTimeUs)
     bool haveGpsAlt = false;
 #ifdef USE_BARO
     if (sensors(SENSOR_BARO)) {
-        if (!isBaroCalibrationComplete()) {
+        if (!baroIsCalibrationComplete()) {
             performBaroCalibrationCycle();
         } else {
             baroAlt = baroCalculateAltitude();
@@ -143,8 +143,8 @@ void calculateEstimatedAltitude(timeUs_t currentTimeUs)
     }
     baroAlt -= baroAltOffset;
     gpsAlt -= gpsAltOffset;
-    
-    
+
+
     if (haveGpsAlt && haveBaroAlt && positionConfig()->altSource == DEFAULT) {
         if (ARMING_FLAG(ARMED)) {
             estimatedAltitudeCm = gpsAlt * gpsTrust + baroAlt * (1 - gpsTrust);
@@ -166,9 +166,9 @@ void calculateEstimatedAltitude(timeUs_t currentTimeUs)
         estimatedVario = calculateEstimatedVario(baroAlt, dTime);
 #endif
     }
-    
+
 	
-    
+
     DEBUG_SET(DEBUG_ALTITUDE, 0, (int32_t)(100 * gpsTrust));
     DEBUG_SET(DEBUG_ALTITUDE, 1, baroAlt);
     DEBUG_SET(DEBUG_ALTITUDE, 2, gpsAlt);
