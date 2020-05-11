@@ -43,7 +43,7 @@
 
 #if (defined(USE_CMS) || defined(USE_VTX_COMMON)) && !defined(USE_VTX_TABLE)
 const char *rtc6705PowerNames[VTX_RTC6705_POWER_COUNT + 1] = {
-    "---", "OFF", "MIN", "MAX"
+    "---", "MIN", "MAX"
 };
 #endif
 
@@ -55,7 +55,8 @@ static vtxDevice_t vtxRTC6705 = {
 #endif
 
 static uint16_t rtc6705Frequency;
-static int8_t rtc6705PowerIndex = VTX_RTC6705_DEFAULT_POWER_INDEX;
+static int8_t rtc6705PowerIndex;
+static bool rtc6705PitModeActive;
 
 static void vtxRTC6705SetBandAndChannel(vtxDevice_t *vtxDevice, uint8_t band, uint8_t channel);
 static void vtxRTC6705SetFrequency(vtxDevice_t *vtxDevice, uint16_t frequency);
@@ -175,7 +176,7 @@ static void vtxRTC6705SetPowerByIndex(vtxDevice_t *vtxDevice, uint8_t index)
     }
 #else
     rtc6705PowerIndex = index;
-    rtc6705SetRFPower(MAX(newPowerValue, VTX_RTC6705_MIN_POWER_VALUE);
+    rtc6705SetRFPower(newPowerValue);
 #endif
 }
 
@@ -222,8 +223,17 @@ static bool vtxRTC6705GetFreq(const vtxDevice_t *vtxDevice, uint16_t *pFrequency
 static bool vtxRTC6705GetStatus(const vtxDevice_t *vtxDevice, unsigned *status)
 {
     UNUSED(vtxDevice);
-    UNUSED(status);
-    return false;
+    *status = rtc6705PitModeActive ? VTX_STATUS_PIT_MODE : 0;
+    return true;
+}
+
+static uint8_t vtxRTC6705GetPowerLevels(const vtxDevice_t *vtxDevice, uint16_t *levels, uint16_t *powers)
+{
+    UNUSED(vtxDevice);
+    UNUSED(levels);
+    UNUSED(powers);
+
+    return 0;
 }
 
 static vtxVTable_t rtc6705VTable = {
@@ -238,6 +248,7 @@ static vtxVTable_t rtc6705VTable = {
     .getPowerIndex = vtxRTC6705GetPowerIndex,
     .getFrequency = vtxRTC6705GetFreq,
     .getStatus = vtxRTC6705GetStatus,
+    .getPowerLevels = vtxRTC6705GetPowerLevels,
 };
 #endif // VTX_COMMON
 

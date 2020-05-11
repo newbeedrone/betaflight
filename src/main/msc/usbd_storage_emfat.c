@@ -33,6 +33,7 @@
 #include "common/utils.h"
 
 #include "drivers/light_led.h"
+#include "drivers/usb_msc.h"
 
 #include "msc/usbd_storage.h"
 #include "msc/usbd_storage_emfat.h"
@@ -40,7 +41,7 @@
 
 #define STORAGE_LUN_NBR 1
 
-static const uint8_t STORAGE_Inquirydata[] = 
+static const uint8_t STORAGE_Inquirydata[] =
 {
     0x00, 0x80, 0x02, 0x02,
 #ifdef USE_HAL_DRIVER
@@ -95,9 +96,8 @@ static int8_t STORAGE_Read(
     uint16_t blk_len)   // nmber of blocks to be read
 {
     UNUSED(lun);
-    LED0_ON;
+    mscSetActive();
     emfat_read(&emfat, buf, blk_addr, blk_len);
-    LED0_OFF;
     return 0;
 }
 

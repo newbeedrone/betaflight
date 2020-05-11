@@ -277,6 +277,7 @@ scheduler_unittest_SRC := \
 
 sensor_gyro_unittest_SRC := \
 		$(USER_DIR)/sensors/gyro.c \
+		$(USER_DIR)/sensors/gyro_init.c \
 		$(USER_DIR)/sensors/boardalignment.c \
 		$(USER_DIR)/common/filter.c \
 		$(USER_DIR)/common/maths.c \
@@ -439,7 +440,9 @@ COMMON_FLAGS = \
 ifeq ($(shell $(CC) -v 2>&1 | grep -q "clang version" && echo "clang"),clang)
 COMMON_FLAGS += -fblocks
 ifndef CYGWIN
+ifndef MACOSX
 LDFLAGS	     += -lBlocksRuntime
+endif
 endif
 endif
 

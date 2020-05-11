@@ -36,7 +36,7 @@
 
 #include "drivers/vtx_common.h"
 
-#include "fc/config.h"
+#include "config/config.h"
 
 #include "io/vtx_tramp.h"
 #include "io/vtx.h"
@@ -112,7 +112,7 @@ static void trampCmsUpdateFreqRef(void)
     }
 }
 
-static long trampCmsConfigBand(displayPort_t *pDisp, const void *self)
+static const void *trampCmsConfigBand(displayPort_t *pDisp, const void *self)
 {
     UNUSED(pDisp);
     UNUSED(self);
@@ -128,10 +128,10 @@ static long trampCmsConfigBand(displayPort_t *pDisp, const void *self)
         trampCmsBand = 0;
     }
 
-    return 0;
+    return NULL;
 }
 
-static long trampCmsConfigChan(displayPort_t *pDisp, const void *self)
+static const void *trampCmsConfigChan(displayPort_t *pDisp, const void *self)
 {
     UNUSED(pDisp);
     UNUSED(self);
@@ -147,10 +147,10 @@ static long trampCmsConfigChan(displayPort_t *pDisp, const void *self)
         trampCmsChan = 0;
     }
 
-    return 0;
+    return NULL;
 }
 
-static long trampCmsConfigPower(displayPort_t *pDisp, const void *self)
+static const void *trampCmsConfigPower(displayPort_t *pDisp, const void *self)
 {
     UNUSED(pDisp);
     UNUSED(self);
@@ -164,7 +164,7 @@ static long trampCmsConfigPower(displayPort_t *pDisp, const void *self)
         trampCmsPower = 0;
     }
 
-    return 0;
+    return NULL;
 }
 
 static OSD_INT16_t trampCmsEntTemp = { &trampTemperature, -100, 300, 0 };
@@ -175,7 +175,7 @@ static const char * const trampCmsPitModeNames[] = {
 
 static OSD_TAB_t trampCmsEntPitMode = { &trampCmsPitMode, 2, trampCmsPitModeNames };
 
-static long trampCmsSetPitMode(displayPort_t *pDisp, const void *self)
+static const void *trampCmsSetPitMode(displayPort_t *pDisp, const void *self)
 {
     UNUSED(pDisp);
     UNUSED(self);
@@ -190,10 +190,11 @@ static long trampCmsSetPitMode(displayPort_t *pDisp, const void *self)
     } else {
         trampCmsPitMode = 0;
     }
-    return 0;
+
+    return NULL;
 }
 
-static long trampCmsCommence(displayPort_t *pDisp, const void *self)
+static const void *trampCmsCommence(displayPort_t *pDisp, const void *self)
 {
     UNUSED(pDisp);
     UNUSED(self);
@@ -270,13 +271,15 @@ static bool trampCmsInitSettings(void)
     return true;
 }
 
-static long trampCmsOnEnter(void)
+static const void *trampCmsOnEnter(displayPort_t *pDisp)
 {
+    UNUSED(pDisp);
+
     if (!trampCmsInitSettings()) {
         return MENU_CHAIN_BACK;
     }
 
-    return 0;
+    return NULL;
 }
 
 static long trampCmsCommenceOnEnter(void)
@@ -301,6 +304,7 @@ static CMS_Menu trampCmsMenuCommence = {
 #endif
     .onEnter = trampCmsCommenceOnEnter,
     .onExit = NULL,
+    .onDisplayUpdate = NULL,
     .entries = trampCmsMenuCommenceEntries,
 };
 
@@ -328,6 +332,7 @@ CMS_Menu cmsx_menuVtxTramp = {
 #endif
     .onEnter = trampCmsOnEnter,
     .onExit = NULL,
+    .onDisplayUpdate = NULL,
     .entries = trampMenuEntries,
 };
 #endif
