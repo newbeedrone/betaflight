@@ -135,6 +135,7 @@ void targetConfiguration(void)
 
     osdElementConfigMutable()->item_pos[OSD_CRAFT_NAME]        = OSD_POS(9, 10) | OSD_PROFILE_1_FLAG;
     osdElementConfigMutable()->item_pos[OSD_MAIN_BATT_VOLTAGE] = OSD_POS(23, 9) | OSD_PROFILE_1_FLAG;
+    osdElementConfigMutable()->item_pos[OSD_CURRENT_DRAW]      = OSD_POS(22, 10)| OSD_PROFILE_1_FLAG;
     osdElementConfigMutable()->item_pos[OSD_ITEM_TIMER_2]      = OSD_POS(2,  9) | OSD_PROFILE_1_FLAG;
     osdElementConfigMutable()->item_pos[OSD_FLYMODE]           = OSD_POS(18, 9) | OSD_PROFILE_1_FLAG;
     osdElementConfigMutable()->item_pos[OSD_VTX_CHANNEL]       = OSD_POS(10, 9) | OSD_PROFILE_1_FLAG;
