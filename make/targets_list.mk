@@ -1,20 +1,3 @@
-OFFICIAL_TARGETS  = \
-    ALIENFLIGHTF3 \
-    ALIENFLIGHTF4 \
-    ANYFCF7 \
-    BETAFLIGHTF3 \
-    BLUEJAYF4 \
-    FURYF4 REVO \
-    SIRINFPV \
-    SPARKY \
-    SPRACINGF3 \
-    SPRACINGF3EVO \
-    SPRACINGF3NEO \
-    SPRACINGF4EVO \
-    SPRACINGF7DUAL \
-    SPRACINGH7EXTREME \
-    STM32F3DISCOVERY
-
 ALT_TARGET_PATHS  = $(filter-out %/target,$(basename $(wildcard $(ROOT)/src/main/target/*/*.mk)))
 ALT_TARGET_NAMES  = $(notdir $(ALT_TARGET_PATHS))
 BASE_TARGET_NAMES = $(notdir $(patsubst %/,%,$(dir $(ALT_TARGET_PATHS))))
@@ -75,6 +58,8 @@ UNSUPPORTED_TARGETS := \
     MIDELICF3 \
     MOTOLAB \
     MULTIFLITEPICO \
+    NUCLEOF103RG \
+    NUCLEOF303RE \
     OMNIBUS \
     RACEBASE \
     RCEXPLORERF3 \
@@ -93,6 +78,11 @@ UNSUPPORTED_TARGETS := \
     TINYFISH \
     X_RACERSPI \
     ZCOREF3
+
+UNIFIED_TARGETS := STM32F405 \
+	STM32F411 \
+	STM32F7X2 \
+	STM32F745
 
 # Legacy targets are targets that have been replaced by Unified Target configurations
 LEGACY_TARGETS := MATEKF405 \
@@ -212,10 +202,10 @@ LEGACY_TARGETS := MATEKF405 \
     VRRACE \
     KROOZX
 
-CI_TARGETS := $(filter-out $(LEGACY_TARGETS), $(filter-out $(UNSUPPORTED_TARGETS), $(VALID_TARGETS)))
+CI_TARGETS := $(filter-out $(LEGACY_TARGETS) $(UNSUPPORTED_TARGETS), $(VALID_TARGETS))
 
 TARGETS_TOTAL := $(words $(CI_TARGETS))
-TARGET_GROUPS := 5
+TARGET_GROUPS := 3
 TARGETS_PER_GROUP := $(shell expr $(TARGETS_TOTAL) / $(TARGET_GROUPS) )
 
 ST := 1
@@ -226,12 +216,4 @@ ST := $(shell expr $(ET) + 1)
 ET := $(shell expr $(ST) + $(TARGETS_PER_GROUP))
 GROUP_2_TARGETS := $(wordlist $(ST), $(ET), $(CI_TARGETS))
 
-ST := $(shell expr $(ET) + 1)
-ET := $(shell expr $(ST) + $(TARGETS_PER_GROUP))
-GROUP_3_TARGETS := $(wordlist $(ST), $(ET), $(CI_TARGETS))
-
-ST := $(shell expr $(ET) + 1)
-ET := $(shell expr $(ST) + $(TARGETS_PER_GROUP))
-GROUP_4_TARGETS := $(wordlist $(ST), $(ET), $(CI_TARGETS))
-
-GROUP_OTHER_TARGETS := $(filter-out $(GROUP_1_TARGETS) $(GROUP_2_TARGETS) $(GROUP_3_TARGETS) $(GROUP_4_TARGETS), $(CI_TARGETS))
+GROUP_OTHER_TARGETS := $(filter-out $(GROUP_1_TARGETS) $(GROUP_2_TARGETS), $(CI_TARGETS))
