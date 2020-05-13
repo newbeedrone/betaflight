@@ -1461,10 +1461,10 @@ static void cliSerialPassthrough(char *cmdline)
             // leave the mode unchanged. serialPassthrough() handles one-way ports.
             // Set the baud rate if specified
             if (ports[i].baud) {
-                cliPrintf("Port%d is already open, setting baud = %d.\n\r", portIndex, ports[i].baud);
+                cliPrintf("Port%d is already open, setting baud = %d.\r\n", portIndex, ports[i].baud);
                 serialSetBaudRate(*port, ports[i].baud);
             } else {
-                cliPrintf("Port%d is already open, baud = %d.\n\r", portIndex, (*port)->baudRate);
+                cliPrintf("Port%d is already open, baud = %d.\r\n", portIndex, (*port)->baudRate);
             }
 
             if (ports[i].mode && (*port)->mode != ports[i].mode) {
@@ -1879,7 +1879,7 @@ static void cliLed(char *cmdline)
     } else {
         ptr = cmdline;
         i = atoi(ptr);
-        if (i < LED_MAX_STRIP_LENGTH) {
+        if (i >= 0 && i < LED_MAX_STRIP_LENGTH) {
             ptr = nextArg(cmdline);
             if (parseLedStripConfig(i, ptr)) {
                 generateLedConfig((ledConfig_t *)&ledStripStatusModeConfig()->ledConfigs[i], ledConfigBuffer, sizeof(ledConfigBuffer));
@@ -2558,6 +2558,15 @@ static void cliVtx(char *cmdline)
     if (isEmpty(cmdline)) {
         printVtx(DUMP_MASTER, vtxConfig(), NULL, NULL);
     } else {
+#ifdef USE_VTX_TABLE
+        const uint8_t maxBandIndex = vtxTableConfig()->bands;
+        const uint8_t maxChannelIndex = vtxTableConfig()->channels;
+        const uint8_t maxPowerIndex = vtxTableConfig()->powerLevels;
+#else
+        const uint8_t maxBandIndex = VTX_TABLE_MAX_BANDS;
+        const uint8_t maxChannelIndex = VTX_TABLE_MAX_CHANNELS;
+        const uint8_t maxPowerIndex = VTX_TABLE_MAX_POWER_LEVELS;
+#endif
         ptr = cmdline;
         i = atoi(ptr++);
         if (i < MAX_CHANNEL_ACTIVATION_CONDITION_COUNT) {
@@ -2574,7 +2583,7 @@ static void cliVtx(char *cmdline)
             ptr = nextArg(ptr);
             if (ptr) {
                 val = atoi(ptr);
-                if (val >= 0 && val <= vtxTableBandCount) {
+                if (val >= 0 && val <= maxBandIndex) {
                     cac->band = val;
                     validArgumentCount++;
                 }
@@ -2582,7 +2591,7 @@ static void cliVtx(char *cmdline)
             ptr = nextArg(ptr);
             if (ptr) {
                 val = atoi(ptr);
-                if (val >= 0 && val <= vtxTableChannelCount) {
+                if (val >= 0 && val <= maxChannelIndex) {
                     cac->channel = val;
                     validArgumentCount++;
                 }
@@ -2590,7 +2599,7 @@ static void cliVtx(char *cmdline)
             ptr = nextArg(ptr);
             if (ptr) {
                 val = atoi(ptr);
-                if (val >= 0 && val < vtxTablePowerLevels) {
+                if (val >= 0 && val <= maxPowerIndex) {
                     cac->power= val;
                     validArgumentCount++;
                 }
@@ -2817,7 +2826,7 @@ static void cliVtxTable(char *cmdline)
         tok = strtok_r(NULL, " ", &saveptr);
 
         int channels = atoi(tok);
-        if (channels < 0 || channels > VTX_TABLE_MAX_BANDS) {
+        if (channels < 0 || channels > VTX_TABLE_MAX_CHANNELS) {
             cliPrintErrorLinef("INVALID CHANNEL COUNT (SHOULD BE BETWEEN 0 AND %d)", VTX_TABLE_MAX_CHANNELS);
             return;
         }
@@ -3778,16 +3787,13 @@ static void executeEscInfoCommand(uint8_t escIndex)
 
     startEscDataRead(escInfoBuffer, ESC_INFO_BLHELI32_EXPECTED_FRAME_SIZE);
 
-    dshotCommandWrite(escIndex, getMotorCount(), DSHOT_CMD_ESC_INFO, true);
+    dshotCommandWrite(escIndex, getMotorCount(), DSHOT_CMD_ESC_INFO, DSHOT_CMD_TYPE_BLOCKING);
 
     delay(10);
 
     printEscInfo(escInfoBuffer, getNumberEscBytesRead());
 }
 #endif // USE_ESC_SENSOR && USE_ESC_SENSOR_INFO
-
-
-// XXX Review dshotprog command under refactored motor handling
 
 static void cliDshotProg(char *cmdline)
 {
@@ -3829,7 +3835,7 @@ static void cliDshotProg(char *cmdline)
                     }
 
                     if (command != DSHOT_CMD_ESC_INFO) {
-                        dshotCommandWrite(escIndex, getMotorCount(), command, true);
+                        dshotCommandWrite(escIndex, getMotorCount(), command, DSHOT_CMD_TYPE_BLOCKING);
                     } else {
 #if defined(USE_ESC_SENSOR) && defined(USE_ESC_SENSOR_INFO)
                         if (featureIsEnabled(FEATURE_ESC_SENSOR)) {
@@ -4709,7 +4715,7 @@ static void cliTasks(char *cmdline)
 
 #ifndef MINIMAL_CLI
     if (systemConfig()->task_statistics) {
-        cliPrintLine("Task list             rate/hz  max/us  avg/us maxload avgload     total/ms");
+        cliPrintLine("Task list             rate/hz  max/us  avg/us maxload avgload  total/ms");
     } else {
         cliPrintLine("Task list");
     }
@@ -4758,6 +4764,7 @@ static void cliTasks(char *cmdline)
         getCheckFuncInfo(&checkFuncInfo);
         cliPrintLinef("RX Check Function %19d %7d %25d", checkFuncInfo.maxExecutionTime, checkFuncInfo.averageExecutionTime, checkFuncInfo.totalExecutionTime / 1000);
         cliPrintLinef("Total (excluding SERIAL) %25d.%1d%% %4d.%1d%%", maxLoadSum/10, maxLoadSum%10, averageLoadSum/10, averageLoadSum%10);
+        schedulerResetCheckFunctionMaxExecutionTime();
     }
 }
 #endif
@@ -4810,13 +4817,13 @@ static void cliRcSmoothing(char *cmdline)
     cliPrint("# RC Smoothing Type: ");
     if (rxConfig()->rc_smoothing_type == RC_SMOOTHING_TYPE_FILTER) {
         cliPrintLine("FILTER");
-        uint16_t avgRxFrameMs = rcSmoothingData->averageFrameTimeUs;
         if (rcSmoothingAutoCalculate()) {
+            const uint16_t avgRxFrameUs = rcSmoothingData->averageFrameTimeUs;
             cliPrint("# Detected RX frame rate: ");
-            if (avgRxFrameMs == 0) {
+            if (avgRxFrameUs == 0) {
                 cliPrintLine("NO SIGNAL");
             } else {
-                cliPrintLinef("%d.%dms", avgRxFrameMs / 1000, avgRxFrameMs % 1000);
+                cliPrintLinef("%d.%03dms", avgRxFrameUs / 1000, avgRxFrameUs % 1000);
             }
         }
         cliPrint("# Input filter type: ");
@@ -6100,12 +6107,12 @@ static void printConfig(char *cmdline, bool doDiff)
 
             printRxRange(dumpMask, rxChannelRangeConfigs_CopyArray, rxChannelRangeConfigs(0), "rxrange");
 
-#ifdef USE_VTX_CONTROL
-            printVtx(dumpMask, &vtxConfig_Copy, vtxConfig(), "vtx");
-#endif
-
 #ifdef USE_VTX_TABLE
             printVtxTable(dumpMask, &vtxTableConfig_Copy, vtxTableConfig(), "vtxtable");
+#endif
+
+#ifdef USE_VTX_CONTROL
+            printVtx(dumpMask, &vtxConfig_Copy, vtxConfig(), "vtx");
 #endif
 
             printRxFailsafe(dumpMask, rxFailsafeChannelConfigs_CopyArray, rxFailsafeChannelConfigs(0), "rxfail");
@@ -6508,7 +6515,7 @@ static void processCharacterInteractive(const char c)
         }
         if (!bufferIndex || pstart != pend) {
             /* Print list of ambiguous matches */
-            cliPrint("\r\033[K");
+            cliPrint("\r\n\033[K");
             for (cmd = pstart; cmd <= pend; cmd++) {
                 cliPrint(cmd->name);
                 cliWrite('\t');
