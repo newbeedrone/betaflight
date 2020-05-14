@@ -40,11 +40,6 @@
 #include "io/vtx_rtc6705.h"
 #include "io/vtx.h"
 
-#if defined(USE_VTX_LOCK_FREQ)
-#define VTX_FREQ_ISM_MAX                5920
-#define VTX_FREQ_ISM_MIN                5650
-#endif // USE_VTX_LOCK_FREQ
-
 static uint8_t cmsx_vtxBand;
 static uint8_t cmsx_vtxChannel;
 static uint8_t cmsx_vtxPower;
@@ -62,9 +57,7 @@ static OSD_TAB_t entryVtxPit = {&cmsx_vtxPit, 2, cmsxCmsPitNames};
 
 static void cmsx_Vtx_ConfigRead(void)
 {
-    //vtxCommonGetBandAndChannel(vtxCommonDevice(), &cmsx_vtxBand, &cmsx_vtxChannel);
-    cmsx_vtxBand = vtxSettingsConfigMutable()->band;
-    cmsx_vtxChannel = vtxSettingsConfigMutable()->channel;
+    vtxCommonGetBandAndChannel(vtxCommonDevice(), &cmsx_vtxBand, &cmsx_vtxChannel);
     vtxCommonGetPowerIndex(vtxCommonDevice(), &cmsx_vtxPower);
     unsigned status;
     if (vtxCommonGetStatus(vtxCommonDevice(), &status)) {
@@ -159,13 +152,8 @@ static const void *cmsx_Vtx_onPitChange(displayPort_t *pDisp, const void *self)
 
 static const OSD_Entry cmsx_menuVtxEntries[] = {
     {"--- VTX ---", OME_Label, NULL, NULL, 0},
-#if defined(USE_VTX_LOCK_FREQ)
-    {"BAND", OME_TAB, cmsx_Vtx_Band_Lock_Check, &entryVtxBand, DYNAMIC},
-    {"CHANNEL", OME_UINT8, cmsx_Vtx_Channel_Lock_Check, &entryVtxChannel, DYNAMIC},
-#else
     {"BAND", OME_TAB, cmsx_Vtx_onBandChange, &entryVtxBand, 0},
     {"CHANNEL", OME_TAB, cmsx_Vtx_onChanChange, &entryVtxChannel, 0},
-#endif // USE_VTX_LOCK_FREQ
     {"POWER", OME_TAB, cmsx_Vtx_onPowerChange, &entryVtxPower, 0},
     {"PIT", OME_TAB, cmsx_Vtx_onPitChange, &entryVtxPit, 0},
     {"BACK", OME_Back, NULL, NULL, 0},

@@ -159,7 +159,6 @@ bool cc2500SpiInit(void)
 
     return true;
 }
-#endif
 
 void cc2500ApplyRegisterConfig(const cc2500RegisterConfigElement_t *configArrayPtr, int configSize)
 {
@@ -169,3 +168,5 @@ void cc2500ApplyRegisterConfig(const cc2500RegisterConfigElement_t *configArrayP
         configArrayPtr++;
     }
 }
+
+#endif

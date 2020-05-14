@@ -35,8 +35,9 @@
 #include "drivers/light_led.h"
 #include "drivers/pwm_esc_detect.h"
 #include "drivers/pwm_output.h"
+#include "drivers/osd.h"
 
-#include "fc/config.h"
+#include "config/config.h"
 #include "fc/controlrate_profile.h"
 #include "fc/core.h"
 #include "fc/rc_adjustments.h"
@@ -118,13 +119,13 @@ void targetConfiguration(void)
         controlRateConfig->dynThrPID = 55;
     }
 
-    osdConfigMutable()->item_pos[OSD_CRAFT_NAME]        = OSD_POS(9, 10) | OSD_PROFILE_1_FLAG;
-    osdConfigMutable()->item_pos[OSD_MAIN_BATT_VOLTAGE] = OSD_POS(23, 9) | OSD_PROFILE_1_FLAG;
-    osdConfigMutable()->item_pos[OSD_ITEM_TIMER_2]      = OSD_POS(2,  9) | OSD_PROFILE_1_FLAG;
-    osdConfigMutable()->item_pos[OSD_FLYMODE]           = OSD_POS(18, 9) | OSD_PROFILE_1_FLAG;
-    osdConfigMutable()->item_pos[OSD_VTX_CHANNEL]       = OSD_POS(10, 9) | OSD_PROFILE_1_FLAG;
-    osdConfigMutable()->item_pos[OSD_RSSI_VALUE]        = OSD_POS(2, 10) | OSD_PROFILE_1_FLAG;
-    osdConfigMutable()->item_pos[OSD_WARNINGS]          = OSD_POS(9, 10);
+    osdElementConfigMutable()->item_pos[OSD_CRAFT_NAME]        = OSD_POS(9, 10) | OSD_PROFILE_1_FLAG;
+    osdElementConfigMutable()->item_pos[OSD_MAIN_BATT_VOLTAGE] = OSD_POS(23, 9) | OSD_PROFILE_1_FLAG;
+    osdElementConfigMutable()->item_pos[OSD_ITEM_TIMER_2]      = OSD_POS(2,  9) | OSD_PROFILE_1_FLAG;
+    osdElementConfigMutable()->item_pos[OSD_FLYMODE]           = OSD_POS(18, 9) | OSD_PROFILE_1_FLAG;
+    osdElementConfigMutable()->item_pos[OSD_VTX_CHANNEL]       = OSD_POS(10, 9) | OSD_PROFILE_1_FLAG;
+    osdElementConfigMutable()->item_pos[OSD_RSSI_VALUE]        = OSD_POS(2, 10) | OSD_PROFILE_1_FLAG;
+    osdElementConfigMutable()->item_pos[OSD_WARNINGS]          = OSD_POS(9, 10);
 
     vtxSettingsConfigMutable()->band = 5;
     vtxSettingsConfigMutable()->channel = 1;
@@ -345,13 +346,13 @@ void targetConfiguration(void)
     controlRateProfilesMutable(2)->tpa_breakpoint = 2000;
     controlRateProfilesMutable(2)->throttle_limit_type = THROTTLE_LIMIT_TYPE_CLIP;
 
-    osdConfigMutable()->item_pos[OSD_CRAFT_NAME]        = OSD_POS(9, 10) | OSD_PROFILE_1_FLAG;
-    osdConfigMutable()->item_pos[OSD_MAIN_BATT_VOLTAGE] = OSD_POS(23, 9) | OSD_PROFILE_1_FLAG;
-    osdConfigMutable()->item_pos[OSD_ITEM_TIMER_2]      = OSD_POS(2,  9) | OSD_PROFILE_1_FLAG;
-    osdConfigMutable()->item_pos[OSD_FLYMODE]           = OSD_POS(17, 9) | OSD_PROFILE_1_FLAG;
-    osdConfigMutable()->item_pos[OSD_VTX_CHANNEL]       = OSD_POS(10, 9) | OSD_PROFILE_1_FLAG;
-    osdConfigMutable()->item_pos[OSD_RSSI_VALUE]        = OSD_POS(2, 10) | OSD_PROFILE_1_FLAG;
-    osdConfigMutable()->item_pos[OSD_WARNINGS]          = OSD_POS(9, 10);
+    osdElementConfigMutable()->item_pos[OSD_CRAFT_NAME]        = OSD_POS(9, 10) | OSD_PROFILE_1_FLAG;
+    osdElementConfigMutable()->item_pos[OSD_MAIN_BATT_VOLTAGE] = OSD_POS(23, 9) | OSD_PROFILE_1_FLAG;
+    osdElementConfigMutable()->item_pos[OSD_ITEM_TIMER_2]      = OSD_POS(2,  9) | OSD_PROFILE_1_FLAG;
+    osdElementConfigMutable()->item_pos[OSD_FLYMODE]           = OSD_POS(17, 9) | OSD_PROFILE_1_FLAG;
+    osdElementConfigMutable()->item_pos[OSD_VTX_CHANNEL]       = OSD_POS(10, 9) | OSD_PROFILE_1_FLAG;
+    osdElementConfigMutable()->item_pos[OSD_RSSI_VALUE]        = OSD_POS(2, 10) | OSD_PROFILE_1_FLAG;
+    osdElementConfigMutable()->item_pos[OSD_WARNINGS]          = OSD_POS(9, 10);
 
     vtxSettingsConfigMutable()->band = 5;
     vtxSettingsConfigMutable()->channel = 1;
@@ -404,7 +405,6 @@ void targetConfiguration(void)
     adjustmentRangesMutable(0) -> auxSwitchChannelIndex = 1;
 
     gyroConfigMutable()->gyro_lowpass2_hz = 375;
-    gyroConfigMutable()->dyn_notch_range = DYN_NOTCH_RANGE_HIGH;
     gyroConfigMutable()->dyn_notch_width_percent = 0;
     gyroConfigMutable()->dyn_notch_q =  70;
     gyroConfigMutable()->dyn_notch_min_hz = 130;
@@ -422,13 +422,13 @@ void targetConfiguration(void)
     mixerConfigMutable()->crashflip_motor_percent = 50;
     osdConfigMutable()->enabledWarnings = 0;
     osdConfigMutable()->cap_alarm = 250;
-    osdConfigMutable()->item_pos[OSD_MAIN_BATT_VOLTAGE] = 2370;
-    osdConfigMutable()->item_pos[OSD_RSSI_VALUE] = 2082;
-    osdConfigMutable()->item_pos[OSD_ITEM_TIMER_2] = 2102;
-    osdConfigMutable()->item_pos[OSD_FLYMODE] = 2392;
-    osdConfigMutable()->item_pos[OSD_VTX_CHANNEL] = 2092;
-    osdConfigMutable()->item_pos[OSD_CRAFT_NAME] = 2379;
-    osdConfigMutable()->item_pos[OSD_WARNINGS] = 298;
+    osdElementConfigMutable()->item_pos[OSD_MAIN_BATT_VOLTAGE] = 2370;
+    osdElementConfigMutable()->item_pos[OSD_RSSI_VALUE] = 2082;
+    osdElementConfigMutable()->item_pos[OSD_ITEM_TIMER_2] = 2102;
+    osdElementConfigMutable()->item_pos[OSD_FLYMODE] = 2392;
+    osdElementConfigMutable()->item_pos[OSD_VTX_CHANNEL] = 2092;
+    osdElementConfigMutable()->item_pos[OSD_CRAFT_NAME] = 2379;
+    osdElementConfigMutable()->item_pos[OSD_WARNINGS] = 298;
     vcdProfileMutable()->video_system = VIDEO_SYSTEM_NTSC;
 
 #if (defined(MOCKINGBIRD_DSM_US) || defined(MOCKINGBIRD_DSM_INTL))
