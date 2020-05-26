@@ -101,7 +101,7 @@ void targetConfiguration(void)
     vtxSettingsConfigMutable()->band = 5;
     vtxSettingsConfigMutable()->channel = 8;
     vtxSettingsConfigMutable()->power = 2;
-#if defined(HMBF41S_FRSKY_BS_OSD_ON_VTX_US) || defined(HMBF41S_FRSKY_BS_OSD_ON_BOARD_US)
+#if defined(HMBF41S_PRO_FRSKY_BS_OSD_ON_VTX_US) || defined(HMBF41S_PRO_FRSKY_BS_OSD_ON_BOARD_US)
     uint16_t vtxTableFrequency[6][8] = {
         { 5865, 5845, 5825, 5805, 5785, 5765, 5745, 5725 }, // Boscam A
         { 5733, 5752, 5771, 5790, 5809, 5828, 5847, 5866 }, // Boscam B
