@@ -185,7 +185,7 @@ CMS_Menu cmsx_menuVtxBsMode = {
 static OSD_Entry bsCmsMenuRaceModeEntries[] =
 {
     {"--- BEESIGN RACE---", OME_Label, NULL, NULL, 0},
-    {"MODE",        OME_Submenu,    cmsMenuChange,          &cmsx_menuVtxBsMode,    0},
+    // {"MODE",        OME_Submenu,    cmsMenuChange,          &cmsx_menuVtxBsMode,    0},
     {"BAND",        OME_TAB,        bsCmsConfigBandByGvar,  &bsEntryVtxBand,        0},
     {"CHANNEL",     OME_TAB,        bsCmsConfigBandByGvar,  &bsEntryVtxChannel,     0},
     {"POWER",       OME_TAB,        NULL,                   &bsEntryVtxPower,       0},
@@ -242,7 +242,8 @@ static long bsCmsConfigMode(const OSD_Entry *self)
 static long bs_Vtx_onEnter(void)
 {
     bs_vtxmode = bsDevice.mode;
-    bsCmsConfigMode(NULL);
+    bs_Vtx_ConfigRead();
+    // bsCmsConfigMode(NULL);
     bsEntryVtxBand.val = &bs_vtxBand;
     bsEntryVtxBand.max = vtxTableBandCount;
     bsEntryVtxBand.names = vtxTableBandNames;
