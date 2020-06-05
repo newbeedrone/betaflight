@@ -122,9 +122,6 @@
 #undef USE_VTX_TRAMP
 #undef USE_VTX_SMARTAUDIO
 #define USE_BEESIGN
-#if defined(HMBF41S_PRO_FRSKY_BS_OSD_ON_VTX_US) || defined(HMBF41S_PRO_FRSKY_BS_OSD_ON_VTX_INTL)
-#define USE_OSD_BEESIGN
-#endif
 #define USE_BEESIGN_UART                SERIAL_PORT_USART1
 
 // *************** ADC *****************************
