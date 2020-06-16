@@ -18,17 +18,9 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
-
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 
-#define EEPROM_CONF_VERSION 173
-
-bool isEEPROMVersionValid(void);
-bool isEEPROMStructureValid(void);
-bool loadEEPROM(void);
-void writeConfigToEEPROM(void);
-
-uint16_t getEEPROMConfigSize(void);
-size_t getEEPROMStorageSize(void);
+bool frskyCheckSumIsGood(uint8_t *data, uint8_t length);
+void frskyCheckSumStep(uint16_t *checksum, uint8_t byte);   // Add byte to checksum
+void frskyCheckSumFini(uint16_t *checksum);                 // Finalize checksum
