@@ -18,17 +18,38 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
-
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 
-#define EEPROM_CONF_VERSION 173
+#include "platform.h"
 
-bool isEEPROMVersionValid(void);
-bool isEEPROMStructureValid(void);
-bool loadEEPROM(void);
-void writeConfigToEEPROM(void);
+#include "rx/frsky_crc.h"
 
-uint16_t getEEPROMConfigSize(void);
-size_t getEEPROMStorageSize(void);
+void frskyCheckSumStep(uint16_t *checksum, uint8_t byte)
+{
+    *checksum += byte;
+}
+
+void frskyCheckSumFini(uint16_t *checksum)
+{
+    while (*checksum > 0xFF) {
+        *checksum = (*checksum & 0xFF) + (*checksum >> 8);
+    }
+
+    *checksum = 0xFF - *checksum;
+}
+
+static uint8_t frskyCheckSum(uint8_t *data, uint8_t length)
+{
+    uint16_t checksum = 0;
+    for (unsigned i = 0; i < length; i++) {
+        frskyCheckSumStep(&checksum, *data++);
+    }
+    frskyCheckSumFini(&checksum);
+    return checksum;
+}
+
+bool frskyCheckSumIsGood(uint8_t *data, uint8_t length)
+{
+    return !frskyCheckSum(data, length);
+}
