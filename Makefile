@@ -472,6 +472,9 @@ targets-group-1: $(GROUP_1_TARGETS)
 ## targets-group-2   : build some targets
 targets-group-2: $(GROUP_2_TARGETS)
 
+## targets-group-beebrain-bl_v2   : build beebrain brushless v2
+targets-group-beebrain-bl-v2: $(GROUP_BEEBRAIN_BL_V2_TARGETS)
+
 ## targets-group-rest: build the rest of the targets (not listed in the other groups)
 targets-group-rest: $(GROUP_OTHER_TARGETS)
 
