@@ -461,6 +461,9 @@ targets-group-3: $(GROUP_3_TARGETS)
 ## targets-group-3   : build some targets
 targets-group-4: $(GROUP_4_TARGETS)
 
+## targets-group-hummingbird-pro   : build hummingbird pro targets
+targets-group-hummingbird-pro: $(GROUP_HUMMINGBIRD_PRO_TARGETS)
+
 ## targets-group-rest: build the rest of the targets (not listed in group 1, 2 or 3)
 targets-group-rest: $(GROUP_OTHER_TARGETS)
 
