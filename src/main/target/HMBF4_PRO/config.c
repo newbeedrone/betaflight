@@ -205,7 +205,6 @@ void targetConfiguration(void)
     imuConfigMutable()->small_angle = 180;
     pidConfigMutable()->pid_process_denom = 1;
     pidConfigMutable()->runaway_takeoff_prevention = true;
-    //osdConfigMutable()->enabledWarnings &= ~(1 << OSD_WARNING_CORE_TEMPERATURE);
     osdConfigMutable()->cap_alarm = 2200;
 
     pidProfilesMutable(0)->dterm_filter_type = FILTER_PT1;
@@ -260,23 +259,6 @@ void targetConfiguration(void)
     ledStripStatusModeConfigMutable()->ledConfigs[2] = DEFINE_LED(9,  7, 11, 0, LF(COLOR), LO(LARSON_SCANNER) | LO(THROTTLE), 0);
     ledStripStatusModeConfigMutable()->ledConfigs[3] = DEFINE_LED(10, 7, 4,  0, LF(COLOR), LO(LARSON_SCANNER) | LO(THROTTLE), 0);
 
-    // do {
-    //     // T8SG
-    //     uint8_t defaultTXHopTable[50] = {0,30,60,91,120,150,180,210,5,35,65,95,125,155,185,215,10,40,70,100,130,160,190,221,15,45,75,105,135,165,195,225,20,50,80,110,140,170,200,230,25,55,85,115,145,175,205,0,0,0};
-    //     rxCc2500SpiConfigMutable()->bindOffset  = 33;
-    //     rxCc2500SpiConfigMutable()->bindTxId[0] = 198;
-    //     rxCc2500SpiConfigMutable()->bindTxId[1] = 185;
-    //     for (uint8_t i = 0; i < 50; i++) {
-    //         rxCc2500SpiConfigMutable()->bindHopData[i] = defaultTXHopTable[i];
-    //     }
-    // } while (0);
     serialConfigMutable()->portConfigs[findSerialPortIndexByIdentifier(SERIAL_PORT_USART1)].functionMask = FUNCTION_VTX_BEESIGN;
-    // rxConfigMutable()->rssi_channel = 9;
-    // for (uint8_t rxRangeIndex = 0; rxRangeIndex < NON_AUX_CHANNEL_COUNT; rxRangeIndex++) {
-    //     rxChannelRangeConfig_t *channelRangeConfig = rxChannelRangeConfigsMutable(rxRangeIndex);
-
-    //     channelRangeConfig->min = 1160;
-    //     channelRangeConfig->max = 1840;
-    // }
 }
 #endif
