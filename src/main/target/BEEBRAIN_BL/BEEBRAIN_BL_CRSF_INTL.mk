@@ -1,1 +1,0 @@
-# BEEBRAIN_BL_CRSF_INTL is used mou6000, crossfire receiver and vtx not lock

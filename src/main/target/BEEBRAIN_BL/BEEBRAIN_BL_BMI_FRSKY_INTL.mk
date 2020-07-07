@@ -1,1 +1,0 @@
-# BEEBRAIN_BL_BMI160_SBUS_INTL is used BMI160, frsky receiver and vtx not lock
