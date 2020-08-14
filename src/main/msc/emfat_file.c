@@ -329,7 +329,6 @@ static int emfat_find_log(emfat_entry_t *entry, int maxCount, int flashfsUsedSpa
         mscSetActive();
         mscActivityLed();
 
-        blinkStatusLed();
         flashfsReadAbs(currOffset, buffer, HDR_BUF_SIZE);
 
         if (strncmp((char *)buffer, logHeader, lenLogHeader)) {
