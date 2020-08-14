@@ -245,7 +245,7 @@ static uint8_t *getActiveLayerBuffer(void)
 static uint8_t max7456Send(uint8_t add, uint8_t data)
 {
     spiTransferByte(busdev->busdev_u.spi.instance, add);
-    delayMicroseconds(15);
+    delayMicroseconds(5);
     return spiTransferByte(busdev->busdev_u.spi.instance, data);
 }
 
@@ -768,7 +768,7 @@ void max7456DrawScreen(void)
 #else
             __spiBusTransactionBegin(busdev);
             for(int k = 0; k < buff_len; k++) {
-                delayMicroseconds(15);
+                delayMicroseconds(3);
                 spiTransferByte(busdev->busdev_u.spi.instance, spiBuff[k]);
             }
             __spiBusTransactionEnd(busdev);
@@ -863,7 +863,7 @@ bool max7456WriteNvm(uint8_t char_address, const uint8_t *font_data)
     // Wait until bit 5 in the status register returns to 0 (12ms)
 
     while ((max7456Send(MAX7456ADD_STAT, 0x00) & STAT_NVR_BUSY) != 0x00) {
-        delay(12);
+        delayMicroseconds(5);
     }
 
     __spiBusTransactionEnd(busdev);

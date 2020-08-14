@@ -98,42 +98,25 @@
 #define USE_VTX_RTC6705
 #undef USE_VTX_SMARTAUDIO
 #undef USE_VTX_TRAMP
+#define RTC6705_SPI_INSTANCE            SPI3
 #define RTC6705_CS_PIN                  PA14
-#define RTC6705_SOFT_ON_HW_SPI_INSTANCE            SPI3
-
-#define USE_VTX_RTC6705_SOFTSPI
-#define RTC6705_SPI_MOSI_PIN            SPI3_MOSI_PIN
-#define RTC6705_SPICLK_PIN              SPI3_SCK_PIN
 
 // *************** ADC *****************************
 #define USE_ADC
 #define ADC_INSTANCE                    ADC1
+#define ADC1_DMA_OPT                    0
 #define VBAT_ADC_PIN                    PB1
 #define CURRENT_METER_ADC_PIN           PA5
-#define ADC1_DMA_OPT                    0
-#define CURRENT_METER_SCALE_DEFAULT    510
+
+#define VBAT_SCALE_DEFAULT              110
+#define CURRENT_METER_SCALE_DEFAULT     510
 
 #define DEFAULT_VOLTAGE_METER_SOURCE    VOLTAGE_METER_ADC
 #define DEFAULT_CURRENT_METER_SOURCE    CURRENT_METER_ADC
 
-// *************** FLASH ***************************
-#define USE_FLASHFS
-#define USE_FLASH_M25P16
-#define USE_FLASH_W25M
-#define USE_FLASH_W25M512
-#define USE_FLASH_W25N01G
-#define USE_FLASH_W25M02G
-#define FLASH_CS_PIN                    PB10
-#define FLASH_SPI_INSTANCE              SPI3
-#define ENABLE_BLACKBOX_LOGGING_ON_SPIFLASH_BY_DEFAULT
-
 // *************** OTHERS **************************
 #define LED0_PIN                        PC13
 #define LED1_PIN                        PC14
-
-#define USE_BEEPER
-#define BEEPER_PIN                      NONE
-#define BEEPER_INVERTED
 
 #define USE_ESCSERIAL
 #define ENABLE_DSHOT_DMAR               DSHOT_DMAR_ON
