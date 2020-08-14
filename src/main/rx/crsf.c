@@ -64,9 +64,11 @@ STATIC_UNIT_TESTED crsfFrame_t crsfChannelDataFrame;
 STATIC_UNIT_TESTED uint32_t crsfChannelData[CRSF_MAX_CHANNEL];
 
 static serialPort_t *serialPort;
-static uint32_t crsfFrameStartAtUs = 0;
+static timeUs_t crsfFrameStartAtUs = 0;
 static uint8_t telemetryBuf[CRSF_FRAME_SIZE_MAX];
 static uint8_t telemetryBufLen = 0;
+
+static timeUs_t lastRcFrameTimeUs = 0;
 
 /*
  * CRSF protocol
@@ -150,27 +152,26 @@ typedef struct crsfPayloadLinkstatistics_s {
 
 static timeUs_t lastLinkStatisticsFrameUs;
 
-#ifdef USE_RX_LINK_QUALITY_INFO
-STATIC_UNIT_TESTED uint16_t scaleCrsfLq(uint16_t lqvalue) {
-  return (lqvalue % 100) ? ((lqvalue * 3.41) + 1) : (lqvalue * 3.41);
-}
-#endif
 static void handleCrsfLinkStatisticsFrame(const crsfLinkStatistics_t* statsPtr, timeUs_t currentTimeUs)
 {
     const crsfLinkStatistics_t stats = *statsPtr;
     lastLinkStatisticsFrameUs = currentTimeUs;
-    const uint8_t rssiDbm = stats.active_antenna ? stats.uplink_RSSI_2 : stats.uplink_RSSI_1;
+    int16_t rssiDbm = -1 * (stats.active_antenna ? stats.uplink_RSSI_2 : stats.uplink_RSSI_1);
     if (rssiSource == RSSI_SOURCE_RX_PROTOCOL_CRSF) {
-        const uint16_t rssiPercentScaled = scaleRange(rssiDbm, 130, 0, 0, RSSI_MAX_VALUE);
+        const uint16_t rssiPercentScaled = scaleRange(rssiDbm, CRSF_RSSI_MIN, 0, 0, RSSI_MAX_VALUE);
         setRssi(rssiPercentScaled, RSSI_SOURCE_RX_PROTOCOL_CRSF);
     }
 #ifdef USE_RX_RSSI_DBM
+    if (rxConfig()->crsf_use_rx_snr) {
+        rssiDbm = stats.uplink_SNR;
+    }
     setRssiDbm(rssiDbm, RSSI_SOURCE_RX_PROTOCOL_CRSF);
 #endif
 
 #ifdef USE_RX_LINK_QUALITY_INFO
     if (linkQualitySource == LQ_SOURCE_RX_PROTOCOL_CRSF) {
-        setLinkQualityDirect(scaleCrsfLq((stats.rf_Mode * 100) + stats.uplink_Link_quality));
+        setLinkQualityDirect(stats.uplink_Link_quality);
+        rxSetRfMode(stats.rf_Mode);
     }
 #endif
 
@@ -203,7 +204,11 @@ static void crsfCheckRssi(uint32_t currentTimeUs) {
         if (rssiSource == RSSI_SOURCE_RX_PROTOCOL_CRSF) {
             setRssiDirect(0, RSSI_SOURCE_RX_PROTOCOL_CRSF);
 #ifdef USE_RX_RSSI_DBM
-            setRssiDbmDirect(130, RSSI_SOURCE_RX_PROTOCOL_CRSF);
+            if (rxConfig()->crsf_use_rx_snr) {
+                setRssiDbmDirect(CRSF_SNR_MIN, RSSI_SOURCE_RX_PROTOCOL_CRSF);
+            } else {
+                setRssiDbmDirect(CRSF_RSSI_MIN, RSSI_SOURCE_RX_PROTOCOL_CRSF);
+            }
 #endif
         }
 #ifdef USE_RX_LINK_QUALITY_INFO
@@ -231,13 +236,13 @@ STATIC_UNIT_TESTED void crsfDataReceive(uint16_t c, void *data)
     UNUSED(data);
 
     static uint8_t crsfFramePosition = 0;
-    const uint32_t currentTimeUs = micros();
+    const timeUs_t currentTimeUs = microsISR();
 
 #ifdef DEBUG_CRSF_PACKETS
     debug[2] = currentTimeUs - crsfFrameStartAtUs;
 #endif
 
-    if (currentTimeUs > crsfFrameStartAtUs + CRSF_TIME_NEEDED_PER_FRAME_US) {
+    if (cmpTimeUs(currentTimeUs, crsfFrameStartAtUs) > CRSF_TIME_NEEDED_PER_FRAME_US) {
         // We've received a character after max time needed to complete a frame,
         // so this must be the start of a new frame.
         crsfFramePosition = 0;
@@ -260,6 +265,7 @@ STATIC_UNIT_TESTED void crsfDataReceive(uint16_t c, void *data)
                 {
                     case CRSF_FRAMETYPE_RC_CHANNELS_PACKED:
                         if (crsfFrame.frame.deviceAddress == CRSF_ADDRESS_FLIGHT_CONTROLLER) {
+                            lastRcFrameTimeUs = currentTimeUs;
                             crsfFrameDone = true;
                             memcpy(&crsfChannelDataFrame, &crsfFrame, sizeof(crsfFrame));
                         }
@@ -306,9 +312,9 @@ STATIC_UNIT_TESTED void crsfDataReceive(uint16_t c, void *data)
     }
 }
 
-STATIC_UNIT_TESTED uint8_t crsfFrameStatus(rxRuntimeConfig_t *rxRuntimeConfig)
+STATIC_UNIT_TESTED uint8_t crsfFrameStatus(rxRuntimeState_t *rxRuntimeState)
 {
-    UNUSED(rxRuntimeConfig);
+    UNUSED(rxRuntimeState);
 
 #if defined(USE_CRSF_LINK_STATISTICS)
     crsfCheckRssi(micros());
@@ -339,9 +345,9 @@ STATIC_UNIT_TESTED uint8_t crsfFrameStatus(rxRuntimeConfig_t *rxRuntimeConfig)
     return RX_FRAME_PENDING;
 }
 
-STATIC_UNIT_TESTED uint16_t crsfReadRawRC(const rxRuntimeConfig_t *rxRuntimeConfig, uint8_t chan)
+STATIC_UNIT_TESTED uint16_t crsfReadRawRC(const rxRuntimeState_t *rxRuntimeState, uint8_t chan)
 {
-    UNUSED(rxRuntimeConfig);
+    UNUSED(rxRuntimeState);
     /* conversion from RC value to PWM
      *       RC     PWM
      * min  172 ->  988us
@@ -369,17 +375,23 @@ void crsfRxSendTelemetryData(void)
     }
 }
 
-bool crsfRxInit(const rxConfig_t *rxConfig, rxRuntimeConfig_t *rxRuntimeConfig)
+static timeUs_t crsfFrameTimeUs(void)
+{
+    return lastRcFrameTimeUs;
+}
+
+bool crsfRxInit(const rxConfig_t *rxConfig, rxRuntimeState_t *rxRuntimeState)
 {
     for (int ii = 0; ii < CRSF_MAX_CHANNEL; ++ii) {
         crsfChannelData[ii] = (16 * rxConfig->midrc) / 10 - 1408;
     }
 
-    rxRuntimeConfig->channelCount = CRSF_MAX_CHANNEL;
-    rxRuntimeConfig->rxRefreshRate = CRSF_TIME_BETWEEN_FRAMES_US; //!!TODO this needs checking
+    rxRuntimeState->channelCount = CRSF_MAX_CHANNEL;
+    rxRuntimeState->rxRefreshRate = CRSF_TIME_BETWEEN_FRAMES_US; //!!TODO this needs checking
 
-    rxRuntimeConfig->rcReadRawFn = crsfReadRawRC;
-    rxRuntimeConfig->rcFrameStatusFn = crsfFrameStatus;
+    rxRuntimeState->rcReadRawFn = crsfReadRawRC;
+    rxRuntimeState->rcFrameStatusFn = crsfFrameStatus;
+    rxRuntimeState->rcFrameTimeUsFn = crsfFrameTimeUs;
 
     const serialPortConfig_t *portConfig = findSerialPortConfig(FUNCTION_RX_SERIAL);
     if (!portConfig) {

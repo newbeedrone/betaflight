@@ -46,7 +46,7 @@ const timerHardware_t timerHardware[1]; // unused
 #include "flight/imu.h"
 
 #include "config/feature.h"
-#include "fc/config.h"
+#include "config/config.h"
 #include "scheduler/scheduler.h"
 
 #include "pg/rx.h"
@@ -593,7 +593,7 @@ void spektrumBind(rxConfig_t *rxConfig)
     printf("spektrumBind\n");
 }
 
-void initializeUnusedPins(void)
+void unusedPinsInit(void)
 {
-    printf("initializeUnusedPins\n");
+    printf("unusedPinsInit\n");
 }
