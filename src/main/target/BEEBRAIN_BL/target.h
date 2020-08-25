@@ -42,17 +42,17 @@
 
 // *************** UART *****************************
 #define USE_VCP
-#define USE_UART1
-#define USE_UART2
+#define USE_MSP_UART
 
+#define USE_UART1
 #define UART1_TX_PIN                    PA9
 #define UART1_RX_PIN                    PA10
 
+#define USE_UART2
 #define UART2_TX_PIN                    PA2
 #define UART2_RX_PIN                    PA3
 
 #define SERIAL_PORT_COUNT               3
-#define USE_MSP_UART
 
 // *************** Gyro & ACC **********************
 #define USE_GYRO
@@ -72,13 +72,8 @@
 // *************** RX ******************************
 #define DEFAULT_RX_FEATURE              FEATURE_RX_SERIAL
 #define SERIALRX_UART                   SERIAL_PORT_USART2
-#if defined(BEEBRAIN_BL_SBUS_INTL) || \
-    defined(BEEBRAIN_BL_SBUS_US)
+#if defined(BEEBRAIN_BL_INTL) || defined(BEEBRAIN_BL_US)
 #define SERIALRX_PROVIDER               SERIALRX_SBUS
-#define RX_CHANNELS_AETR
-#elif   defined(BEEBRAIN_BL_CRSF_INTL) || \
-        defined(BEEBRAIN_BL_CRSF_US)
-#define SERIALRX_PROVIDER               SERIALRX_CRSF
 #define RX_CHANNELS_AETR
 #else
 #define SERIALRX_PROVIDER               SERIALRX_SPEKTRUM2048
@@ -95,7 +90,7 @@
 #undef USE_VTX_SMARTAUDIO
 #undef USE_VTX_TRAMP
 #define RTC6705_CS_PIN                  PA14
-#define RTC6705_SOFT_ON_HW_SPI_INSTANCE            SPI3
+#define RTC6705_SOFT_ON_HW_SPI_INSTANCE SPI3
 
 #define USE_VTX_RTC6705_SOFTSPI
 #define RTC6705_SPI_MOSI_PIN            SPI3_MOSI_PIN
@@ -106,10 +101,12 @@
 // *************** ADC *****************************
 #define USE_ADC
 #define ADC_INSTANCE                    ADC1
+#define ADC1_DMA_OPT                    0
 #define VBAT_ADC_PIN                    PB1
 #define CURRENT_METER_ADC_PIN           PA5
-#define ADC1_DMA_OPT                    0
-#define CURRENT_METER_SCALE_DEFAULT    510
+
+#define VBAT_SCALE_DEFAULT              110
+#define CURRENT_METER_SCALE_DEFAULT     510
 
 #define DEFAULT_VOLTAGE_METER_SOURCE    VOLTAGE_METER_ADC
 #define DEFAULT_CURRENT_METER_SOURCE    CURRENT_METER_ADC
@@ -119,6 +116,7 @@
 #define USE_FLASH_M25P16
 #define FLASH_CS_PIN                    SPI2_NSS_PIN
 #define FLASH_SPI_INSTANCE              SPI2
+
 #define ENABLE_BLACKBOX_LOGGING_ON_SPIFLASH_BY_DEFAULT
 
 // *************** OTHERS **************************
