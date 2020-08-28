@@ -91,6 +91,8 @@
 
 // *************** OSD *****************************
 #define USE_MAX7456
+#define NBD_MCU_OSD
+
 #define MAX7456_SPI_INSTANCE            SPI3
 #define MAX7456_SPI_CS_PIN              SPI3_NSS_PIN
 
