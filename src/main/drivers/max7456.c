@@ -483,6 +483,7 @@ bool max7456Init(const max7456Config_t *max7456Config, const vcdProfile_t *pVcdP
     // Detect MAX7456 and compatible device by reading OSDM (OSD Insertion MUX) register.
     // This register is not modified in this driver, therefore ensured to remain at its default value (0x1B).
 
+#ifndef NBD_MCU_OSD
     spiSetDivisor(busdev->busdev_u.spi.instance, MAX7456_SPI_CLK * 2);
 
     __spiBusTransactionBegin(busdev);
@@ -499,6 +500,7 @@ bool max7456Init(const max7456Config_t *max7456Config, const vcdProfile_t *pVcdP
     // At this point, we can claim the ownership of the CS pin
     max7456DeviceDetected = true;
     IOInit(busdev->busdev_u.spi.csnPin, OWNER_OSD_CS, 0);
+#endif
 
     // Detect device type by writing and reading CA[8] bit at CMAL[6].
     // This is a bit for accessing second half of character glyph storage, supported only by AT variant.
@@ -739,8 +741,9 @@ void max7456DrawScreen(void)
     if (!fontIsLoading) {
 
         // (Re)Initialize MAX7456 at startup or stall is detected.
-
+#ifndef NBD_MCU_OSD
         max7456ReInitIfRequired(false);
+#endif
 
         uint8_t *buffer = getActiveLayerBuffer();
 
