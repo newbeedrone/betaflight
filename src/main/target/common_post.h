@@ -142,7 +142,7 @@
 #undef USE_VTX_TABLE
 #endif
 
-#if defined(USE_RX_FRSKY_SPI_D) || defined(USE_RX_FRSKY_SPI_X)
+#if defined(USE_RX_FRSKY_SPI_D) || defined(USE_RX_FRSKY_SPI_X) || defined(USE_RX_REDPINE_SPI)
 #define USE_RX_CC2500
 #define USE_RX_FRSKY_SPI
 #endif
@@ -376,4 +376,13 @@ extern uint8_t __config_end;
 
 #if defined(USE_CUSTOM_DEFAULTS)
 #define USE_CUSTOM_DEFAULTS_ADDRESS
+#endif
+
+#if !defined(USE_EXTI)
+#undef USE_RX_SPI
+#undef USE_RANGEFINDER_HCSR04
+#endif
+
+#if defined(USE_RX_SPI) || defined (USE_SERIALRX_SRXL2)
+#define USE_RX_BIND
 #endif
