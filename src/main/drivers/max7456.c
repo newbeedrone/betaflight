@@ -485,6 +485,7 @@ bool max7456Init(const max7456Config_t *max7456Config, const vcdProfile_t *pVcdP
 
     spiSetDivisor(busdev->busdev_u.spi.instance, MAX7456_SPI_CLK * 2);
 
+#ifndef NBD_MCU_OSD
     __spiBusTransactionBegin(busdev);
 
     uint8_t osdm = max7456Send(MAX7456ADD_OSDM|MAX7456ADD_READ, 0xff);
@@ -495,6 +496,9 @@ bool max7456Init(const max7456Config_t *max7456Config, const vcdProfile_t *pVcdP
         IOConfigGPIO(busdev->busdev_u.spi.csnPin, IOCFG_IPU);
         return false;
     }
+
+    __spiBusTransactionEnd(busdev);
+#endif
 
     // At this point, we can claim the ownership of the CS pin
     max7456DeviceDetected = true;
