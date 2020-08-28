@@ -77,7 +77,7 @@ void targetConfiguration(void)
 #ifdef USE_VTX_TABLE
     const uint16_t vtxTablePowerValues[VTX_TABLE_MAX_POWER_LEVELS] = {0, 1};
     const char *vtxTablePowerLabels[VTX_TABLE_MAX_POWER_LEVELS] = {"5", "25"};
-#if defined(BEEBRAIN_BL_V2_US)
+#if defined(BEEBRAIN_BLV2_US)
     const uint16_t vtxTableFrequency[VTX_TABLE_MAX_BANDS][VTX_TABLE_MAX_CHANNELS] = {
         {5865, 5845, 5825, 5805, 5785, 5765, 5745, 5725}, // Boscam A
         {5733, 5752, 5771, 5790, 5809, 5828, 5847, 5866}, // Boscam B
