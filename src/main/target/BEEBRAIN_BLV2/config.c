@@ -114,7 +114,7 @@ void targetConfiguration(void)
     vtxSettingsConfigMutable()->band = 5;
     vtxSettingsConfigMutable()->channel = 8;
     vtxSettingsConfigMutable()->power = 2;
-#if defined(BEEBRAIN_BL_BMI_FRSKY_US) || defined (BEEBRAIN_BL_BMI_DSM_US)
+#if defined (BEEBRAIN_BLV2_US)
     uint16_t vtxTableFrequency[6][8] = {
         { 5865, 5845, 5825, 5805, 5785, 5765, 5745, 5725 }, // Boscam A
         { 5733, 5752, 5771, 5790, 5809, 5828, 5847, 5866 }, // Boscam B
@@ -123,7 +123,7 @@ void targetConfiguration(void)
         { 5658, 5695, 5732, 5769, 5806, 5843, 5880, 5917 }, // RaceBand
         { 5732, 5765, 5828, 5840, 5866, 5740,    0,    0 }, // IMD6
     };
-#else 
+#else
     uint16_t vtxTableFrequency[6][8] = {
         { 5865, 5845, 5825, 5805, 5785, 5765, 5745, 5725 }, // Boscam A
         { 5733, 5752, 5771, 5790, 5809, 5828, 5847, 5866 }, // Boscam B
@@ -139,7 +139,7 @@ void targetConfiguration(void)
             "BOSCAM E",
             "FATSHARK",
             "RACEBAND",
-            "IMD6"
+            "IMD6    "
     };
     char vtxTableBandLetters[7] = "ABEFRI";
     vtxTableConfigMutable()->bands = 6;
@@ -194,7 +194,6 @@ void targetConfiguration(void)
     modeActivationConditionsMutable(4)->range.startStep  = CHANNEL_VALUE_TO_STEP(1700);
     modeActivationConditionsMutable(4)->range.endStep    = CHANNEL_VALUE_TO_STEP(2100);
 
-
     strcpy(pilotConfigMutable()->name, "BeeBrain BL");
 
     motorConfigMutable()->dev.useBurstDshot = true;
@@ -207,17 +206,9 @@ void targetConfiguration(void)
     batteryConfigMutable()->vbatmincellvoltage = 290;
     batteryConfigMutable()->vbatwarningcellvoltage = 320;
     voltageSensorADCConfigMutable(0)->vbatscale = 114;
-    // mixerConfigMutable()->yaw_motors_reversed = true;
 
     ledStripStatusModeConfigMutable()->ledConfigs[0] = DEFINE_LED(7, 7,  8, 0, LF(COLOR), LO(LARSON_SCANNER) | LO(THROTTLE), 0);
     ledStripStatusModeConfigMutable()->ledConfigs[1] = DEFINE_LED(8, 7, 13, 0, LF(COLOR), LO(LARSON_SCANNER) | LO(THROTTLE), 0);
     ledStripStatusModeConfigMutable()->ledConfigs[2] = DEFINE_LED(9, 7, 11, 0, LF(COLOR), LO(LARSON_SCANNER) | LO(THROTTLE), 0);
-
-    adjustmentRangesMutable(0)->auxChannelIndex = 1;
-    adjustmentRangesMutable(0)->range.startStep = CHANNEL_VALUE_TO_STEP(1400);
-    adjustmentRangesMutable(0)->range.endStep = CHANNEL_VALUE_TO_STEP(1600);
-    adjustmentRangesMutable(0)->adjustmentConfig = 12;
-    adjustmentRangesMutable(0)->auxSwitchChannelIndex = 1;
-
 }
 #endif

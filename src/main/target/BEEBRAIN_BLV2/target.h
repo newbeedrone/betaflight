@@ -20,8 +20,8 @@
 
 #pragma once
 
-#define TARGET_BOARD_IDENTIFIER         "BBBL" // BeeBrain BL
-#define USBD_PRODUCT_STRING             "BeeBrain BL"
+#define TARGET_BOARD_IDENTIFIER         "BeeBrain BLV2" // BeeBrain BL
+#define USBD_PRODUCT_STRING             "BeeBrain BLV2"
 
 #define USE_TARGET_CONFIG
 
@@ -60,7 +60,7 @@
 #define USE_ACC
 #define USE_SPI_GYRO
 #define USE_ACCGYRO_BMI160
-#define BMI160_SPI_DIVISOR      16
+#define BMI160_SPI_DIVISOR              16
 
 #define GYRO_1_CS_PIN                   PA4
 #define GYRO_1_SPI_INSTANCE             SPI3
@@ -73,7 +73,6 @@
 #define GYRO_1_ALIGN                    CW0_DEG
 
 // *************** RX ******************************
-#define DJTS
 #define USE_RX_SPI
 #define RX_SPI_INSTANCE             SPI2
 #define RX_NSS_PIN                  SPI2_NSS_PIN
