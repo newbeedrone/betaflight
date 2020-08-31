@@ -20,7 +20,7 @@
 
 #pragma once
 
-#define TARGET_BOARD_IDENTIFIER         "BBL" // BeeBrain Lite
+#define TARGET_BOARD_IDENTIFIER         "BeeBrain Lite" // BeeBrain Lite
 #define USBD_PRODUCT_STRING             "BeeBrain Lite"
 
 #define USE_TARGET_CONFIG
@@ -71,33 +71,14 @@
 #define GYRO_1_ALIGN                    CW90_DEG
 
 // *************** RX ******************************
-#if (defined(BEEBRAIN_LITED_US) || defined(BEEBRAIN_LITED_INTL))
-    #define SERIALRX_PROVIDER           SERIALRX_SPEKTRUM2048
-    #undef  USE_SPEKTRUM_REAL_RSSI
-    #undef  USE_SPEKTRUM_FAKE_RSSI
-    #define DEFAULT_RX_FEATURE          FEATURE_RX_SERIAL
+#if (defined(BEEBRAIN_LITE_DSM_INTL) || defined(BEEBRAIN_LITE_DSM_US))
     #define SERIALRX_UART               SERIAL_PORT_USART2
+    #undef USE_SPEKTRUM_REAL_RSSI
+    #undef USE_SPEKTRUM_FAKE_RSSI
+    #define DEFAULT_RX_FEATURE          FEATURE_RX_SERIAL
+    #define SERIALRX_PROVIDER           SERIALRX_SPEKTRUM2048
     #define RX_CHANNELS_TAER
-#elif (defined(BEEBRAIN_LITESF_US) || defined(BEEBRAIN_LITESF_INTL))
-    #define USE_RX_SPI
-    #define RX_SPI_INSTANCE             SPI2
-    #define RX_NSS_PIN                  SPI2_NSS_PIN
-    #define RX_SPI_EXTI_PIN             PB2
-    #define RX_SPI_LED_PIN              PA13
-    #define RX_CC2500_SPI_TX_EN_PIN     PB10
-    #define RX_CC2500_SPI_ANT_SEL_PIN   PA7
-    #define RX_SPI_BIND_PIN                PC15
-    #define RX_CC2500_SPI_LNA_EN_PIN    NONE
-    #define DEFAULT_RX_FEATURE          FEATURE_RX_SPI
-    #define RX_SPI_DEFAULT_PROTOCOL     RX_SPI_SFHSS
-    #define USE_RX_FRSKY_SPI_TELEMETRY
-    #define USE_RX_CC2500_SPI_DIVERSITY
-    #define USE_RX_CC2500_SPI_PA_LNA
-    #define USE_RX_FRSKY_SPI_D
-    #define USE_RX_FRSKY_SPI_X
-    #define USE_RX_SFHSS_SPI
 #else
-    #define DJTS
     #define USE_RX_SPI
     #define RX_SPI_INSTANCE             SPI2
     #define RX_NSS_PIN                  SPI2_NSS_PIN
@@ -127,7 +108,7 @@
 #undef USE_VTX_SMARTAUDIO
 #undef USE_VTX_TRAMP
 #define RTC6705_CS_PIN                  PA14
-#define RTC6705_SOFT_ON_HW_SPI_INSTANCE            SPI3
+#define RTC6705_SOFT_ON_HW_SPI_INSTANCE SPI3
 
 #define USE_VTX_RTC6705_SOFTSPI
 #define RTC6705_SPI_MOSI_PIN            SPI3_MOSI_PIN
@@ -153,12 +134,12 @@
 #define DEFAULT_CURRENT_METER_SOURCE    CURRENT_METER_NONE
 
 // *************** FLASH ***************************
-#if defined(BEEBRAIN_LITED)
-#define USE_FLASHFS
-#define USE_FLASH_M25P16
-#define FLASH_CS_PIN         SPI2_NSS_PIN
-#define FLASH_SPI_INSTANCE   SPI2
-#define ENABLE_BLACKBOX_LOGGING_ON_SPIFLASH_BY_DEFAULT
+#if (defined(BEEBRAIN_LITE_DSM_INTL) || defined(BEEBRAIN_LITE_DSM_US))
+    #define USE_FLASHFS
+    #define USE_FLASH_M25P16
+    #define FLASH_CS_PIN                SPI2_NSS_PIN
+    #define FLASH_SPI_INSTANCE          SPI2
+    #define ENABLE_BLACKBOX_LOGGING_ON_SPIFLASH_BY_DEFAULT
 #endif
 // *************** OTHERS **************************
 #define LED0_PIN                        PC13
