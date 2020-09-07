@@ -149,34 +149,33 @@ void targetConfiguration(void)
     vtxSettingsConfigMutable()->channel = 8;
     vtxSettingsConfigMutable()->power   = 2;
 
-    for (uint8_t pidProfileIndex = 0; pidProfileIndex < PID_PROFILE_COUNT; pidProfileIndex++) {
+    pidProfilesMutable(0)->feedForwardTransition = 80;
+    pidProfilesMutable(0)->iterm_relax = ITERM_RELAX_RPY;
+    pidProfilesMutable(0)->iterm_relax_type = ITERM_RELAX_GYRO;
+    pidProfilesMutable(0)->pid[PID_ROLL].P = 70;
+    pidProfilesMutable(0)->pid[PID_ROLL].I = 49;
+    pidProfilesMutable(0)->pid[PID_ROLL].D = 45;
+    pidProfilesMutable(0)->pid[PID_ROLL].F = 5;
+    pidProfilesMutable(0)->pid[PID_PITCH].P = 68;
+    pidProfilesMutable(0)->pid[PID_PITCH].I = 55;
+    pidProfilesMutable(0)->pid[PID_PITCH].D = 42;
+    pidProfilesMutable(0)->pid[PID_PITCH].F = 5;
+    pidProfilesMutable(0)->pid[PID_YAW].P = 57;
+    pidProfilesMutable(0)->pid[PID_YAW].I = 52;
+    pidProfilesMutable(0)->pid[PID_YAW].D = 21;
+    pidProfilesMutable(0)->pid[PID_YAW].F = 5;
+    pidProfilesMutable(0)->pid[PID_LEVEL].D = 89;
+    pidProfilesMutable(0)->levelAngleLimit = 85;
+    pidProfilesMutable(0)->d_min[FD_ROLL] = 0;
+    pidProfilesMutable(0)->d_min[FD_PITCH] = 0;
 
-        pidProfile_t *pidProfile = pidProfilesMutable(pidProfileIndex);
-
-        pidProfile->pid[PID_ROLL].P = 84;
-        pidProfile->pid[PID_ROLL].I = 50;
-        pidProfile->pid[PID_ROLL].D = 58;
-        pidProfile->pid[PID_PITCH].P = 87;
-        pidProfile->pid[PID_PITCH].I = 55;
-        pidProfile->pid[PID_PITCH].D = 58;
-        pidProfile->pid[PID_YAW].P = 110;
-        pidProfile->pid[PID_YAW].I = 75;
-        pidProfile->pid[PID_YAW].D = 25;
-    }
-
-    for (uint8_t rateProfileIndex = 0; rateProfileIndex < CONTROL_RATE_PROFILE_COUNT; rateProfileIndex++) {
-
-        controlRateConfig_t *controlRateConfig = controlRateProfilesMutable(rateProfileIndex);
-
-        controlRateConfig->rcRates[FD_YAW] = 100;
-        controlRateConfig->rcExpo[FD_ROLL] = 15;
-        controlRateConfig->rcExpo[FD_PITCH] = 15;
-        controlRateConfig->rcExpo[FD_YAW] = 15;
-        controlRateConfig->rates[FD_ROLL] = 73;
-        controlRateConfig->rates[FD_PITCH] = 73;
-        controlRateConfig->rates[FD_YAW] = 73;
-        controlRateConfig->dynThrPID = 55;
-    }
+    controlRateProfilesMutable(0)->rcExpo[FD_ROLL] = 15;
+    controlRateProfilesMutable(0)->rcExpo[FD_PITCH] = 15;
+    controlRateProfilesMutable(0)->rcExpo[FD_YAW] = 15;
+    controlRateProfilesMutable(0)->rates[FD_ROLL] = 73;
+    controlRateProfilesMutable(0)->rates[FD_PITCH] = 73;
+    controlRateProfilesMutable(0)->rates[FD_YAW] = 73;
+    controlRateProfilesMutable(0)->dynThrPID = 55;
 
     osdElementConfigMutable()->item_pos[OSD_CRAFT_NAME]         = OSD_POS(9, 10) | OSD_PROFILE_1_FLAG;
     osdElementConfigMutable()->item_pos[OSD_MAIN_BATT_VOLTAGE]  = OSD_POS(23, 9) | OSD_PROFILE_1_FLAG;
@@ -211,8 +210,6 @@ void targetConfiguration(void)
 
     strcpy(pilotConfigMutable()->name, "BeeBrain BL");
 
-    motorConfigMutable()->dev.useBurstDshot = true;
-    motorConfigMutable()->dev.useDshotTelemetry = false;
     motorConfigMutable()->motorPoleCount = 12;
     motorConfigMutable()->dev.motorPwmProtocol = PWM_TYPE_DSHOT600;
 
