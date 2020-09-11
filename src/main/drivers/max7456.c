@@ -867,7 +867,7 @@ bool max7456WriteNvm(uint8_t char_address, const uint8_t *font_data)
     // Wait until bit 5 in the status register returns to 0 (12ms)
 
     while ((max7456Send(MAX7456ADD_STAT, 0x00) & STAT_NVR_BUSY) != 0x00) {
-        delayMicroseconds(5);
+        delayMicroseconds(5000);
     }
 
     __spiBusTransactionEnd(busdev);
