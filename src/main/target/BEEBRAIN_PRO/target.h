@@ -133,10 +133,13 @@
 #if (defined(BEEBRAIN_PRO_DSM_US) || defined(BEEBRAIN_PRO_DSM_INTL))
     #define CURRENT_METER_ADC_PIN       PA5
     #define CURRENT_METER_SCALE_DEFAULT 510
+    #define CURRENT_METER_OFFSET_DEFAULT 430
     #define DEFAULT_CURRENT_METER_SOURCE CURRENT_METER_ADC
 #else
     #define DEFAULT_CURRENT_METER_SOURCE CURRENT_METER_NONE
 #endif
+#define VBAT_SCALE_DEFAULT              112
+#define DEFAULT_VOLTAGE_METER_SOURCE    VOLTAGE_METER_ADC
 
 // *************** OTHERS **************************
 #define LED0_PIN                        PC13

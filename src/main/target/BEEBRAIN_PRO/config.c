@@ -139,6 +139,9 @@ void targetConfiguration(void)
     osdElementConfigMutable()->item_pos[OSD_VTX_CHANNEL]       = OSD_POS(10, 9) | OSD_PROFILE_1_FLAG;
     osdElementConfigMutable()->item_pos[OSD_RSSI_VALUE]        = OSD_POS(2, 10) | OSD_PROFILE_1_FLAG;
     osdElementConfigMutable()->item_pos[OSD_WARNINGS]          = OSD_POS(9, 10);
+#if (defined(BEEBRAIN_PRO_DSM_US) || defined(BEEBRAIN_PRO_DSM_INTL))
+    osdElementConfigMutable()->item_pos[OSD_CURRENT_DRAW]      = OSD_POS(22,10) | OSD_PROFILE_1_FLAG;
+#endif
 
     vtxSettingsConfigMutable()->band = 5;
     vtxSettingsConfigMutable()->channel = 1;
