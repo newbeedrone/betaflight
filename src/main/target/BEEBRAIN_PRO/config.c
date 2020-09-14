@@ -75,12 +75,10 @@
 
 #define BRUSHED_MOTORS_PWM_RATE 25000           // 25kHz
 
-#if (defined(BEEBRAIN_PRO_DSM_US) || defined(BEEBRAIN_PRO_DSM_INTL))
-#define BB_LITE_RSSI_CH_IDX     9
-#endif
-
 void targetConfiguration(void)
 {
+    strcpy(pilotConfigMutable()->name, "Beebrain Pro");
+
     pinioConfigMutable()->config[0] = PINIO_CONFIG_MODE_OUT_PP;
     pinioBoxConfigMutable()->permanentId[0] = 40;
 
@@ -94,43 +92,35 @@ void targetConfiguration(void)
         pidConfigMutable()->pid_process_denom = 1;
     }
 
-    for (uint8_t pidProfileIndex = 0; pidProfileIndex < PID_PROFILE_COUNT; pidProfileIndex++) {
-        pidProfile_t *pidProfile = pidProfilesMutable(pidProfileIndex);
+    pidProfilesMutable(0)->pid[PID_ROLL].P = 66;
+    pidProfilesMutable(0)->pid[PID_ROLL].I = 40;
+    pidProfilesMutable(0)->pid[PID_ROLL].D = 44;
+    pidProfilesMutable(0)->pid[PID_ROLL].F = 20;
+    pidProfilesMutable(0)->pid[PID_PITCH].P = 72;
+    pidProfilesMutable(0)->pid[PID_PITCH].I = 45;
+    pidProfilesMutable(0)->pid[PID_PITCH].D = 43;
+    pidProfilesMutable(0)->pid[PID_PITCH].F = 20;
+    pidProfilesMutable(0)->pid[PID_YAW].P = 95;
+    pidProfilesMutable(0)->pid[PID_YAW].I = 45;
+    pidProfilesMutable(0)->pid[PID_YAW].D = 0;
+    pidProfilesMutable(0)->pid[PID_YAW].F = 0;
+    pidProfilesMutable(0)->pid[PID_LEVEL].P = 40;
+    pidProfilesMutable(0)->pid[PID_LEVEL].I = 40;
+    pidProfilesMutable(0)->pid[PID_LEVEL].D = 40;
+    pidProfilesMutable(0)->dterm_notch_cutoff = 0;
+    pidProfilesMutable(0)->levelAngleLimit = 85;
+    pidProfilesMutable(0)->d_min[FD_ROLL] = 15;
+    pidProfilesMutable(0)->d_min[FD_PITCH] = 17;
+    pidProfilesMutable(0)->d_min[FD_YAW] = 0;
 
-        pidProfile->pid[PID_ROLL].P = 66;
-        pidProfile->pid[PID_ROLL].I = 40;
-        pidProfile->pid[PID_ROLL].D = 44;
-        pidProfile->pid[PID_ROLL].F = 20;
-        pidProfile->pid[PID_PITCH].P = 72;
-        pidProfile->pid[PID_PITCH].I = 45;
-        pidProfile->pid[PID_PITCH].D = 43;
-        pidProfile->pid[PID_PITCH].F = 20;
-        pidProfile->pid[PID_YAW].P = 95;
-        pidProfile->pid[PID_YAW].I = 45;
-        pidProfile->pid[PID_YAW].D = 0;
-        pidProfile->pid[PID_YAW].F = 0;
-        pidProfile->pid[PID_LEVEL].P = 40;
-        pidProfile->pid[PID_LEVEL].I = 40;
-        pidProfile->pid[PID_LEVEL].D = 40;
-        pidProfile->dterm_notch_cutoff = 0;
-        pidProfile->levelAngleLimit = 85;
-        pidProfile->d_min[FD_ROLL] = 15;
-        pidProfile->d_min[FD_PITCH] = 17;
-        pidProfile->d_min[FD_YAW] = 0;
-    }
-
-    for (uint8_t rateProfileIndex = 0; rateProfileIndex < CONTROL_RATE_PROFILE_COUNT; rateProfileIndex++) {
-        controlRateConfig_t *controlRateConfig = controlRateProfilesMutable(rateProfileIndex);
-
-        controlRateConfig->rcRates[FD_YAW] = 100;
-        controlRateConfig->rcExpo[FD_ROLL] = 15;
-        controlRateConfig->rcExpo[FD_PITCH] = 15;
-        controlRateConfig->rcExpo[FD_YAW] = 15;
-        controlRateConfig->rates[FD_ROLL] = 73;
-        controlRateConfig->rates[FD_PITCH] = 73;
-        controlRateConfig->rates[FD_YAW] = 73;
-        controlRateConfig->dynThrPID = 55;
-    }
+    controlRateProfilesMutable(0)->rcRates[FD_YAW] = 100;
+    controlRateProfilesMutable(0)->rcExpo[FD_ROLL] = 15;
+    controlRateProfilesMutable(0)->rcExpo[FD_PITCH] = 15;
+    controlRateProfilesMutable(0)->rcExpo[FD_YAW] = 15;
+    controlRateProfilesMutable(0)->rates[FD_ROLL] = 73;
+    controlRateProfilesMutable(0)->rates[FD_PITCH] = 73;
+    controlRateProfilesMutable(0)->rates[FD_YAW] = 73;
+    controlRateProfilesMutable(0)->dynThrPID = 55;
 
     osdElementConfigMutable()->item_pos[OSD_CRAFT_NAME]        = OSD_POS(9, 10) | OSD_PROFILE_1_FLAG;
     osdElementConfigMutable()->item_pos[OSD_MAIN_BATT_VOLTAGE] = OSD_POS(23, 9) | OSD_PROFILE_1_FLAG;
@@ -230,22 +220,5 @@ void targetConfiguration(void)
     ledStripStatusModeConfigMutable()->ledConfigs[0] = DEFINE_LED(7, 7,  8, 0, LF(COLOR), LO(LARSON_SCANNER) | LO(THROTTLE), 0);
     ledStripStatusModeConfigMutable()->ledConfigs[1] = DEFINE_LED(8, 7, 13, 0, LF(COLOR), LO(LARSON_SCANNER) | LO(THROTTLE), 0);
     ledStripStatusModeConfigMutable()->ledConfigs[2] = DEFINE_LED(9, 7, 11, 0, LF(COLOR), LO(LARSON_SCANNER) | LO(THROTTLE), 0);
-
-    strcpy(pilotConfigMutable()->name, "Beebrain Pro");
-
-#if (defined(BEEBRAIN_PRO_DSM_US) || defined(BEEBRAIN_PRO_DSM_INTL))
-    // DSM version
-    rxConfigMutable()->rssi_channel = BB_LITE_RSSI_CH_IDX;
-    rxFailsafeChannelConfig_t *channelFailsafeConfig = rxFailsafeChannelConfigsMutable(BB_LITE_RSSI_CH_IDX - 1);
-    channelFailsafeConfig->mode = RX_FAILSAFE_MODE_SET;
-    channelFailsafeConfig->step = CHANNEL_VALUE_TO_RXFAIL_STEP(1000);
-
-    for (uint8_t rxRangeIndex = 0; rxRangeIndex < NON_AUX_CHANNEL_COUNT; rxRangeIndex++) {
-        rxChannelRangeConfig_t *channelRangeConfig = rxChannelRangeConfigsMutable(rxRangeIndex);
-
-        channelRangeConfig->min = 1160;
-        channelRangeConfig->max = 1840;
-    }
-#endif
 }
 #endif

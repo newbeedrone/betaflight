@@ -767,9 +767,9 @@ static uint8_t cmsx_dstControlRateProfile;
 
 static const char * const cmsx_ProfileNames[] = {
     "-",
-    "GOLD",
-    "PAILD",
-    "BLACK"
+    "1",
+    "2",
+    "3"
 };
 
 static OSD_TAB_t cmsx_tmpPidProfileTable = { &tmpPidProfileIndex, 3, cmsx_ProfileNames };
