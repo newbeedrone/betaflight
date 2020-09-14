@@ -83,12 +83,11 @@ void targetConfiguration(void)
 {
     pinioConfigMutable()->config[0] = PINIO_CONFIG_MODE_OUT_PP;
     pinioBoxConfigMutable()->permanentId[0] = 40;
+
     flight3DConfigMutable()->neutral3d = 1500;
     flight3DConfigMutable()->deadband3d_high = 1550;
     flight3DConfigMutable()->deadband3d_low = 1450;
-    // rxConfigMutable()->midrc = 1500;
-    // rxConfigMutable()->mincheck = 1450;
-    // rxConfigMutable()->maxcheck = 1550;
+
     if (getDetectedMotorType() == MOTOR_BRUSHED) {
         motorConfigMutable()->dev.motorPwmRate = BRUSHED_MOTORS_PWM_RATE;
         motorConfigMutable()->minthrottle = 1030;
@@ -98,23 +97,23 @@ void targetConfiguration(void)
     for (uint8_t pidProfileIndex = 0; pidProfileIndex < PID_PROFILE_COUNT; pidProfileIndex++) {
         pidProfile_t *pidProfile = pidProfilesMutable(pidProfileIndex);
 
-        pidProfile->pid[PID_ROLL].P  = 66;
-        pidProfile->pid[PID_ROLL].I  = 40;
-        pidProfile->pid[PID_ROLL].D  = 44;
-        pidProfile->pid[PID_ROLL].F  = 20;
+        pidProfile->pid[PID_ROLL].P = 66;
+        pidProfile->pid[PID_ROLL].I = 40;
+        pidProfile->pid[PID_ROLL].D = 44;
+        pidProfile->pid[PID_ROLL].F = 20;
         pidProfile->pid[PID_PITCH].P = 72;
         pidProfile->pid[PID_PITCH].I = 45;
         pidProfile->pid[PID_PITCH].D = 43;
         pidProfile->pid[PID_PITCH].F = 20;
-        pidProfile->pid[PID_YAW].P   = 95;
-        pidProfile->pid[PID_YAW].I   = 45;
-        pidProfile->pid[PID_YAW].D   = 0;
-        pidProfile->pid[PID_YAW].F   = 0;
+        pidProfile->pid[PID_YAW].P = 95;
+        pidProfile->pid[PID_YAW].I = 45;
+        pidProfile->pid[PID_YAW].D = 0;
+        pidProfile->pid[PID_YAW].F = 0;
         pidProfile->pid[PID_LEVEL].P = 40;
         pidProfile->pid[PID_LEVEL].I = 40;
         pidProfile->pid[PID_LEVEL].D = 40;
         pidProfile->dterm_notch_cutoff = 0;
-        pidProfile->levelAngleLimit  = 85;
+        pidProfile->levelAngleLimit = 85;
         pidProfile->d_min[FD_ROLL] = 15;
         pidProfile->d_min[FD_PITCH] = 17;
         pidProfile->d_min[FD_YAW] = 0;
@@ -126,8 +125,8 @@ void targetConfiguration(void)
         controlRateConfig->rcRates[FD_YAW] = 100;
         controlRateConfig->rcExpo[FD_ROLL] = 15;
         controlRateConfig->rcExpo[FD_PITCH] = 15;
-        controlRateConfig->rcExpo[FD_YAW]  = 15;
-        controlRateConfig->rates[FD_ROLL]  = 73;
+        controlRateConfig->rcExpo[FD_YAW] = 15;
+        controlRateConfig->rates[FD_ROLL] = 73;
         controlRateConfig->rates[FD_PITCH] = 73;
         controlRateConfig->rates[FD_YAW] = 73;
         controlRateConfig->dynThrPID = 55;
@@ -144,7 +143,7 @@ void targetConfiguration(void)
     vtxSettingsConfigMutable()->band = 5;
     vtxSettingsConfigMutable()->channel = 1;
     vtxSettingsConfigMutable()->power = 3;
-#if (defined(BEEBRAIN_PRO_DSM_US) || defined(BEEBRAIN_PRO_SFHSS_US) || defined(BEEBRAIN_PRO_FRSKY_US) || defined(BEEBRAIN_PRO_FRSKYX_US))
+#if (defined(BEEBRAIN_PRO_DSM_US) || defined(BEEBRAIN_PRO_FRSKY_US))
     uint16_t vtxTableFrequency[6][8] = {
         { 5865, 5845, 5825, 5805, 5785, 5765, 5745, 5725 }, // Boscam A
         { 5733, 5752, 5771, 5790, 5809, 5828, 5847, 5866 }, // Boscam B
@@ -153,7 +152,7 @@ void targetConfiguration(void)
         { 5658, 5695, 5732, 5769, 5806, 5843, 5880, 5917 }, // RaceBand
         { 5732, 5765, 5828, 5840, 5866, 5740,    0,    0 }, // IMD6
     };
-#else 
+#else
     uint16_t vtxTableFrequency[6][8] = {
         { 5865, 5845, 5825, 5805, 5785, 5765, 5745, 5725 }, // Boscam A
         { 5733, 5752, 5771, 5790, 5809, 5828, 5847, 5866 }, // Boscam B
@@ -198,11 +197,10 @@ void targetConfiguration(void)
     strcpy(vtxTableConfigMutable()->powerLabels[0], "OFF");
     strcpy(vtxTableConfigMutable()->powerLabels[1], "MIN");
     strcpy(vtxTableConfigMutable()->powerLabels[2], "MAX");
-    
 
-    batteryConfigMutable()->batteryCapacity = 250;
-    batteryConfigMutable()->vbatmincellvoltage = 28;
-    batteryConfigMutable()->vbatwarningcellvoltage = 32;
+    batteryConfigMutable()->batteryCapacity = 300;
+    batteryConfigMutable()->vbatmincellvoltage = 280;
+    batteryConfigMutable()->vbatwarningcellvoltage = 310;
 
     imuConfigMutable()->small_angle = 180;
 
@@ -226,11 +224,6 @@ void targetConfiguration(void)
     modeActivationConditionsMutable(3)->range.startStep  = CHANNEL_VALUE_TO_STEP(1700);
     modeActivationConditionsMutable(3)->range.endStep    = CHANNEL_VALUE_TO_STEP(2100);
 
-    // modeActivationConditionsMutable(3)->modeId           = BOXAIRMODE;
-    // modeActivationConditionsMutable(3)->auxChannelIndex  = AUX2 - NON_AUX_CHANNEL_COUNT;
-    // modeActivationConditionsMutable(3)->range.startStep  = CHANNEL_VALUE_TO_STEP(1700);
-    // modeActivationConditionsMutable(3)->range.endStep    = CHANNEL_VALUE_TO_STEP(2100);
-
     ledStripStatusModeConfigMutable()->ledConfigs[0] = DEFINE_LED(7, 7,  8, 0, LF(COLOR), LO(LARSON_SCANNER) | LO(THROTTLE), 0);
     ledStripStatusModeConfigMutable()->ledConfigs[1] = DEFINE_LED(8, 7, 13, 0, LF(COLOR), LO(LARSON_SCANNER) | LO(THROTTLE), 0);
     ledStripStatusModeConfigMutable()->ledConfigs[2] = DEFINE_LED(9, 7, 11, 0, LF(COLOR), LO(LARSON_SCANNER) | LO(THROTTLE), 0);
@@ -250,17 +243,6 @@ void targetConfiguration(void)
         channelRangeConfig->min = 1160;
         channelRangeConfig->max = 1840;
     }
-#else
-    do {
-        // T8SG
-        uint8_t defaultTXHopTable[50] = {0,30,60,91,120,150,180,210,5,35,65,95,125,155,185,215,10,40,70,100,130,160,190,221,15,45,75,105,135,165,195,225,20,50,80,110,140,170,200,230,25,55,85,115,145,175,205,0,0,0};
-        rxCc2500SpiConfigMutable()->bindOffset  = 33;
-        rxCc2500SpiConfigMutable()->bindTxId[0] = 198;
-        rxCc2500SpiConfigMutable()->bindTxId[1] = 185;
-        for (uint8_t i = 0; i < 50; i++) {
-            rxCc2500SpiConfigMutable()->bindHopData[i] = defaultTXHopTable[i];
-        }
-    } while (0);
 #endif
 }
 #endif
