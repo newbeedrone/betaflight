@@ -528,6 +528,12 @@
 #if !defined(ADC5_DMA_OPT)
 #define ADC5_DMA_OPT (DMA_OPT_UNUSED)
 #endif
+#if !defined(ADC4_DMA_OPT)
+#define ADC4_DMA_OPT (-1)
+#endif
+#if !defined(ADC5_DMA_OPT)
+#define ADC5_DMA_OPT (-1)
+#endif
 
 #endif // USE_ADC
 

@@ -58,17 +58,24 @@
 // *************** Gyro & ACC **********************
 #define USE_GYRO
 #define USE_ACC
-#define USE_GYRO_SPI_MPU6000
-#define USE_ACC_SPI_MPU6000
+#if (defined(BEEBRAIN_PRO_DSM_US) || defined(BEEBRAIN_PRO_DSM_INTL))
+    #define USE_SPI_GYRO
+    #define USE_ACCGYRO_BMI160
+    #define BMI160_SPI_DIVISOR          16
+    #define GYRO_1_ALIGN                CW0_DEG
+#else
+    #define USE_GYRO_SPI_MPU6000
+    #define USE_ACC_SPI_MPU6000
+    #define GYRO_1_ALIGN                CW90_DEG
+#endif
 
 #define GYRO_1_CS_PIN                   PA4
 #define GYRO_1_SPI_INSTANCE             SPI3
 
 #define USE_EXTI
+#define USE_GYRO_EXTI
 #define GYRO_1_EXTI_PIN                 PB0
 #define USE_MPU_DATA_READY_SIGNAL
-
-#define GYRO_1_ALIGN                    CW90_DEG
 
 // *************** RX ******************************
 #if (defined(BEEBRAIN_PRO_DSM_US) || defined(BEEBRAIN_PRO_DSM_INTL))
@@ -78,24 +85,6 @@
     #define DEFAULT_RX_FEATURE          FEATURE_RX_SERIAL
     #define SERIALRX_UART               SERIAL_PORT_USART2
     #define RX_CHANNELS_TAER
-#elif (defined(BEEBRAIN_PRO_SFHSS_US) || defined(BEEBRAIN_PRO_SFHSS_INTL))
-    #define USE_RX_SPI
-    #define RX_SPI_INSTANCE             SPI2
-    #define RX_NSS_PIN                  SPI2_NSS_PIN
-    #define RX_SPI_EXTI_PIN             PB2
-    #define RX_SPI_LED_PIN              PA13
-    #define RX_CC2500_SPI_TX_EN_PIN     PB10
-    #define RX_CC2500_SPI_ANT_SEL_PIN   PA7
-    #define RX_SPI_BIND_PIN             PC15
-    #define RX_CC2500_SPI_LNA_EN_PIN    NONE
-    #define DEFAULT_RX_FEATURE          FEATURE_RX_SPI
-    #define RX_SPI_DEFAULT_PROTOCOL     RX_SPI_SFHSS
-    #define USE_RX_FRSKY_SPI_TELEMETRY
-    #define USE_RX_CC2500_SPI_DIVERSITY
-    #define USE_RX_CC2500_SPI_PA_LNA
-    #define USE_RX_FRSKY_SPI_D
-    #define USE_RX_FRSKY_SPI_X
-    #define USE_RX_SFHSS_SPI
 #else
     #define DJTS
     #define USE_RX_SPI
@@ -108,11 +97,7 @@
     #define RX_SPI_BIND_PIN             PC15
     #define RX_CC2500_SPI_LNA_EN_PIN    NONE
     #define DEFAULT_RX_FEATURE          FEATURE_RX_SPI
-#if (defined(BEEBRAIN_PRO_FRSKY_US) || defined(BEEBRAIN_PRO_FRSKY_INTL))
     #define RX_SPI_DEFAULT_PROTOCOL     RX_SPI_FRSKY_D
-#else
-    #define RX_SPI_DEFAULT_PROTOCOL     RX_SPI_FRSKY_X
-#endif
     #define USE_RX_FRSKY_SPI_TELEMETRY
     #define USE_RX_CC2500_SPI_DIVERSITY
     #define USE_RX_CC2500_SPI_PA_LNA
@@ -131,7 +116,7 @@
 #undef USE_VTX_SMARTAUDIO
 #undef USE_VTX_TRAMP
 #define RTC6705_CS_PIN                  PA14
-#define RTC6705_SOFT_ON_HW_SPI_INSTANCE            SPI3
+#define RTC6705_SOFT_ON_HW_SPI_INSTANCE SPI3
 
 #define USE_VTX_RTC6705_SOFTSPI
 #define RTC6705_SPI_MOSI_PIN            SPI3_MOSI_PIN
@@ -140,31 +125,19 @@
 #define RTC6705_POWER_PIN_HIGH_ENABLE
 #define USE_RTC6705_PITMODE_CTRL
 
-// *************** BARO ****************************
-// #define USE_BARO
-// #define USE_BARO_BMP280
-// #define USE_BARO_SPI_BMP280
-// #define DEFAULT_BARO_SPI_BMP280
-// #define BARO_SPI_INSTANCE               SPI3
-// #define BARO_CS_PIN                     PA1
-
 // *************** ADC *****************************
 #define USE_ADC
 #define ADC_INSTANCE                    ADC1
-#define VBAT_ADC_PIN                    PB1
 #define ADC1_DMA_OPT                    0
+#define VBAT_ADC_PIN                    PB1
+#if (defined(BEEBRAIN_PRO_DSM_US) || defined(BEEBRAIN_PRO_DSM_INTL))
+    #define CURRENT_METER_ADC_PIN       PA5
+    #define CURRENT_METER_SCALE_DEFAULT 510
+    #define DEFAULT_CURRENT_METER_SOURCE CURRENT_METER_ADC
+#else
+    #define DEFAULT_CURRENT_METER_SOURCE CURRENT_METER_NONE
+#endif
 
-#define DEFAULT_VOLTAGE_METER_SOURCE    VOLTAGE_METER_ADC
-#define DEFAULT_CURRENT_METER_SOURCE    CURRENT_METER_NONE
-
-// *************** FLASH ***************************
-// #if defined(BEEBRAIN_LITED)
-// #define USE_FLASHFS
-// #define USE_FLASH_M25P16
-// #define FLASH_CS_PIN         SPI2_NSS_PIN
-// #define FLASH_SPI_INSTANCE   SPI2
-// #define ENABLE_BLACKBOX_LOGGING_ON_SPIFLASH_BY_DEFAULT
-// #endif
 // *************** OTHERS **************************
 #define LED0_PIN                        PC13
 #define LED1_PIN                        PC14
@@ -175,11 +148,8 @@
 
 /*---------- turtle SWITCH---------*/
 #define USE_PINIO
-#define PINIO1_PIN              PA8 // turtle switcher
+#define PINIO1_PIN                      PA8 // turtle switcher
 #define USE_PINIOBOX
-
-// #define USE_USB_DETECT
-// #define USB_DETECT_PIN                  PA5
 
 #define USE_ESCSERIAL
 #define ENABLE_DSHOT_DMAR               DSHOT_DMAR_ON

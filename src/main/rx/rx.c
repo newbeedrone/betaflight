@@ -84,6 +84,9 @@ static uint8_t rfMode = 0;
 
 #define MSP_RSSI_TIMEOUT_US 1500000   // 1.5 sec
 
+#define DSM_TEAR_JUMP_VAL 94
+#define DSM_AUX_JUMP_VAL 64
+
 #define RSSI_ADC_DIVISOR (4096 / 1024)
 #define RSSI_OFFSET_SCALING (1024 / 100.0f)
 
@@ -106,6 +109,7 @@ static uint8_t  skipRxSamples = 0;
 
 static int16_t rcRaw[MAX_SUPPORTED_RC_CHANNEL_COUNT];     // interval [1000;2000]
 int16_t rcData[MAX_SUPPORTED_RC_CHANNEL_COUNT];     // interval [1000;2000]
+int16_t rcOldData[MAX_SUPPORTED_RC_CHANNEL_COUNT];     // interval [1000;2000]
 uint32_t rcInvalidPulsPeriod[MAX_SUPPORTED_RC_CHANNEL_COUNT];
 
 #define MAX_INVALID_PULS_TIME    300
@@ -638,6 +642,19 @@ static void detectAndApplySignalLossBehaviour(void)
         {
             rcData[channel] = sample;
         }
+
+        if (channel < 4) {
+            rcData[channel] = (rcData[channel] == (1500 + DSM_TEAR_JUMP_VAL)) ? (rcData[channel] - DSM_TEAR_JUMP_VAL) : rcData[channel];
+            if (abs(DSM_TEAR_JUMP_VAL - abs(rcData[channel] - rcOldData[channel])) <= 2) {
+                rcData[channel] = rcOldData[channel];
+            }
+        } else {
+            if (rcData[channel] == (1500 + DSM_AUX_JUMP_VAL)) {
+                rcData[channel] -= DSM_AUX_JUMP_VAL;
+            }
+        }
+
+        rcOldData[channel] = rcData[channel];
     }
 
     if (rxFlightChannelsValid && !IS_RC_MODE_ACTIVE(BOXFAILSAFE)) {
