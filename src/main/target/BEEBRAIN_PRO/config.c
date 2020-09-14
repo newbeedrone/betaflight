@@ -75,12 +75,16 @@
 
 #define BRUSHED_MOTORS_PWM_RATE 25000           // 25kHz
 
+#if (defined(BEEBRAIN_PRO_DSM_US) || defined(BEEBRAIN_PRO_DSM_INTL))
+    #define BB_LITE_RSSI_CH_IDX 9
+#endif
+
 void targetConfiguration(void)
 {
     strcpy(pilotConfigMutable()->name, "Beebrain Pro");
 
     pinioConfigMutable()->config[0] = PINIO_CONFIG_MODE_OUT_PP;
-    pinioBoxConfigMutable()->permanentId[0] = 40;
+    pinioBoxConfigMutable()->permanentId[0] = 35;
 
     flight3DConfigMutable()->neutral3d = 1500;
     flight3DConfigMutable()->deadband3d_high = 1550;
@@ -212,7 +216,7 @@ void targetConfiguration(void)
     modeActivationConditionsMutable(2)->range.startStep  = CHANNEL_VALUE_TO_STEP(1300);
     modeActivationConditionsMutable(2)->range.endStep    = CHANNEL_VALUE_TO_STEP(1700);
 
-    modeActivationConditionsMutable(3)->modeId           =  BOXUSER1;
+    modeActivationConditionsMutable(3)->modeId           = BOXFLIPOVERAFTERCRASH;
     modeActivationConditionsMutable(3)->auxChannelIndex  = AUX3 - NON_AUX_CHANNEL_COUNT;
     modeActivationConditionsMutable(3)->range.startStep  = CHANNEL_VALUE_TO_STEP(1700);
     modeActivationConditionsMutable(3)->range.endStep    = CHANNEL_VALUE_TO_STEP(2100);
@@ -220,5 +224,19 @@ void targetConfiguration(void)
     ledStripStatusModeConfigMutable()->ledConfigs[0] = DEFINE_LED(7, 7,  8, 0, LF(COLOR), LO(LARSON_SCANNER) | LO(THROTTLE), 0);
     ledStripStatusModeConfigMutable()->ledConfigs[1] = DEFINE_LED(8, 7, 13, 0, LF(COLOR), LO(LARSON_SCANNER) | LO(THROTTLE), 0);
     ledStripStatusModeConfigMutable()->ledConfigs[2] = DEFINE_LED(9, 7, 11, 0, LF(COLOR), LO(LARSON_SCANNER) | LO(THROTTLE), 0);
+
+#if (defined(BEEBRAIN_PRO_DSM_US) || defined(BEEBRAIN_PRO_DSM_INTL))
+    rxConfigMutable()->rssi_channel = BB_LITE_RSSI_CH_IDX;
+    rxFailsafeChannelConfig_t *channelFailsafeConfig = rxFailsafeChannelConfigsMutable(BB_LITE_RSSI_CH_IDX - 1);
+    channelFailsafeConfig->mode = RX_FAILSAFE_MODE_SET;
+    channelFailsafeConfig->step = CHANNEL_VALUE_TO_RXFAIL_STEP(1000);
+
+    for (uint8_t rxRangeIndex = 0; rxRangeIndex < NON_AUX_CHANNEL_COUNT; rxRangeIndex++) {
+        rxChannelRangeConfig_t *channelRangeConfig = rxChannelRangeConfigsMutable(rxRangeIndex);
+
+        channelRangeConfig->min = 1160;
+        channelRangeConfig->max = 1840;
+    }
+#endif
 }
 #endif

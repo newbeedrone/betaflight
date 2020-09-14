@@ -154,6 +154,8 @@
 #define PINIO1_PIN                      PA8 // turtle switcher
 #define USE_PINIOBOX
 
+#define USE_BRUSHED_TURTLE
+
 #define USE_ESCSERIAL
 #define ENABLE_DSHOT_DMAR               DSHOT_DMAR_ON
 
