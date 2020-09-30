@@ -26,102 +26,104 @@
 
 #ifdef USE_TARGET_CONFIG
 
-#include "common/axis.h"
-#include "common/maths.h"
+#include "flight/pid.h"
+#include "flight/imu.h"
+#include "flight/mixer.h"
 
-#include "config/feature.h"
-
-#include "drivers/barometer/barometer.h"
-#include "drivers/light_led.h"
-#include "drivers/pwm_esc_detect.h"
-#include "drivers/pwm_output.h"
-
-#include "config/config.h"
 #include "fc/controlrate_profile.h"
-#include "fc/core.h"
-#include "fc/rc_adjustments.h"
 #include "fc/rc_modes.h"
 #include "fc/rc_controls.h"
 
-#include "flight/mixer.h"
-#include "flight/pid.h"
-#include "flight/imu.h"
+#include "drivers/vtx_table.h"
 
-#include "pg/vcd.h"
-#include "pg/rx.h"
-#include "pg/motor.h"
 #include "pg/vtx_table.h"
+#include "pg/motor.h"
 
-#include "rx/rx.h"
-#include "rx/cc2500_frsky_common.h"
+#include "config/config.h"
 
-#include "pg/rx.h"
-#include "pg/rx_spi.h"
-#include "pg/rx_spi_cc2500.h"
-#include "pg/vcd.h"
+#include "sensors/gyro.h"
 
-#include "osd/osd.h"
-
-#include "io/serial.h"
 #include "io/vtx.h"
 #include "io/ledstrip.h"
 
-#include "sensors/battery.h"
-#include "sensors/gyro.h"
-#include "sensors/barometer.h"
+#include "osd/osd.h"
 
-#include "telemetry/telemetry.h"
+#include "rx/rx.h"
 
 void targetConfiguration(void)
 {
-#ifdef USE_VTX_TABLE
-    const uint16_t vtxTablePowerValues[VTX_TABLE_MAX_POWER_LEVELS] = {0, 1};
-    const char *vtxTablePowerLabels[VTX_TABLE_MAX_POWER_LEVELS] = {"5", "25"};
-#if defined(BEEBRAIN_BLV2_US)
-    const uint16_t vtxTableFrequency[VTX_TABLE_MAX_BANDS][VTX_TABLE_MAX_CHANNELS] = {
-        {5865, 5845, 5825, 5805, 5785, 5765, 5745, 5725}, // Boscam A
-        {5733, 5752, 5771, 5790, 5809, 5828, 5847, 5866}, // Boscam B
-        {5705, 5685, 5665,    0, 5885, 5905,    0,    0}, // Boscam E
-        {5740, 5760, 5780, 5800, 5820, 5840, 5860, 5880}, // FatShark
-        {5658, 5695, 5732, 5769, 5806, 5843, 5880, 5917}, // RaceBand
-        {5732, 5765, 5828, 5840, 5866, 5740,    0,    0}, // IMD6
-    };
-    const char *vtxTableBandNames[VTX_TABLE_MAX_BANDS] = {
-        "BOSCAM A",
-        "BOSCAM B",
-        "BOSCAM E",
-        "FATSHARK",
-        "RACEBAND",
-        "IMD6",
-    };
-    const char vtxTableBandLetters[VTX_TABLE_MAX_BANDS] = "ABEFRI";
-    const char *vtxTableChannelNames[VTX_TABLE_MAX_CHANNELS] = { "1", "2", "3", "4", "5", "6", "7", "8", };
-    vtxTableConfigMutable()->bands = 6;
-    vtxTableConfigMutable()->channels = 8;
-#else
-    const uint16_t vtxTableFrequency[VTX_TABLE_MAX_BANDS][VTX_TABLE_MAX_CHANNELS] = {
-        {5865, 5845, 5825, 5805, 5785, 5765, 5745, 5725}, // Boscam A
-        {5733, 5752, 5771, 5790, 5809, 5828, 5847, 5866}, // Boscam B
-        {5705, 5685, 5665, 5645, 5885, 5905, 5925, 5945}, // Boscam E
-        {5740, 5760, 5780, 5800, 5820, 5840, 5860, 5880}, // FatShark
-        {5658, 5695, 5732, 5769, 5806, 5843, 5880, 5917}, // RaceBand
-        {5732, 5765, 5828, 5840, 5866, 5740,    0,    0}, // IMD6
-    };
-    const char *vtxTableBandNames[VTX_TABLE_MAX_BANDS] = {
-        "BOSCAM A",
-        "BOSCAM B",
-        "BOSCAM E",
-        "FATSHARK",
-        "RACEBAND",
-        "IMD6",
-    };
-    const char vtxTableBandLetters[VTX_TABLE_MAX_BANDS] = "ABEFRI";
-    const char *vtxTableChannelNames[VTX_TABLE_MAX_CHANNELS] = { "1", "2", "3", "4", "5", "6", "7", "8", };
-    vtxTableConfigMutable()->bands = 6;
-    vtxTableConfigMutable()->channels = 8;
-#endif
+    pidProfilesMutable(0)->pid[PID_ROLL].P = 70;
+    pidProfilesMutable(0)->pid[PID_ROLL].I = 49;
+    pidProfilesMutable(0)->pid[PID_ROLL].D = 45;
+    pidProfilesMutable(0)->pid[PID_ROLL].F = 5;
+    pidProfilesMutable(0)->pid[PID_PITCH].P = 68;
+    pidProfilesMutable(0)->pid[PID_PITCH].I = 55;
+    pidProfilesMutable(0)->pid[PID_PITCH].D = 42;
+    pidProfilesMutable(0)->pid[PID_PITCH].F = 5;
+    pidProfilesMutable(0)->pid[PID_YAW].P = 57;
+    pidProfilesMutable(0)->pid[PID_YAW].I = 52;
+    pidProfilesMutable(0)->pid[PID_YAW].D = 21;
+    pidProfilesMutable(0)->pid[PID_YAW].F = 5;
+    pidProfilesMutable(0)->pid[PID_LEVEL].D = 89;
+    pidProfilesMutable(0)->feedForwardTransition = 80;
+    pidProfilesMutable(0)->iterm_relax = ITERM_RELAX_RPY;
+    pidProfilesMutable(0)->iterm_relax_type = ITERM_RELAX_GYRO;
+    pidProfilesMutable(0)->levelAngleLimit = 85;
+    pidProfilesMutable(0)->d_min[FD_ROLL] = 0;
+    pidProfilesMutable(0)->d_min[FD_PITCH] = 0;
 
-    vtxTableConfigMutable()->powerLevels = 2;
+    controlRateProfilesMutable(0)->rcExpo[FD_ROLL] = 15;
+    controlRateProfilesMutable(0)->rcExpo[FD_PITCH] = 15;
+    controlRateProfilesMutable(0)->rcExpo[FD_YAW] = 15;
+    controlRateProfilesMutable(0)->rates[FD_ROLL] = 73;
+    controlRateProfilesMutable(0)->rates[FD_PITCH] = 73;
+    controlRateProfilesMutable(0)->rates[FD_YAW] = 73;
+    controlRateProfilesMutable(0)->dynThrPID = 55;
+
+#ifdef USE_VTX_TABLE
+    const uint16_t vtxTablePowerValues[VTX_TABLE_MAX_POWER_LEVELS] = {0, 1, 2};
+    const char *vtxTablePowerLabels[VTX_TABLE_MAX_POWER_LEVELS] = {"OFF", "MIN", "MAX"};
+    vtxTableConfigMutable()->powerLevels = 3;
+
+    #if defined(BEEBRAIN_BL_V2_WHOOP_US)
+        const uint16_t vtxTableFrequency[VTX_TABLE_MAX_BANDS][VTX_TABLE_MAX_CHANNELS] = {
+            {5865, 5845, 5825, 5805, 5785, 5765, 5745, 5725}, // Boscam A
+            {5733, 5752, 5771, 5790, 5809, 5828, 5847, 5866}, // Boscam B
+            {5705, 5685, 5665,    0, 5885, 5905,    0,    0}, // Boscam E
+            {5740, 5760, 5780, 5800, 5820, 5840, 5860, 5880}, // FatShark
+            {5658, 5695, 5732, 5769, 5806, 5843, 5880, 5917}, // RaceBand
+            {5732, 5765, 5828, 5840, 5866, 5740,    0,    0}, // IMD6
+        };
+        const char *vtxTableBandNames[VTX_TABLE_MAX_BANDS] = {
+            "BOSCAM A", "BOSCAM B", "BOSCAM E", "FATSHARK", "RACEBAND", "    IMD6",
+        };
+        const char vtxTableBandLetters[VTX_TABLE_MAX_BANDS] = "ABEFRI";
+        const char *vtxTableChannelNames[VTX_TABLE_MAX_CHANNELS] = {
+            "1", "2", "3", "4", "5", "6", "7", "8",
+        };
+        vtxTableConfigMutable()->bands = 6;
+        vtxTableConfigMutable()->channels = 8;
+
+    #else
+        const uint16_t vtxTableFrequency[VTX_TABLE_MAX_BANDS][VTX_TABLE_MAX_CHANNELS] = {
+            {5865, 5845, 5825, 5805, 5785, 5765, 5745, 5725}, // Boscam A
+            {5733, 5752, 5771, 5790, 5809, 5828, 5847, 5866}, // Boscam B
+            {5705, 5685, 5665, 5645, 5885, 5905, 5925, 5945}, // Boscam E
+            {5740, 5760, 5780, 5800, 5820, 5840, 5860, 5880}, // FatShark
+            {5658, 5695, 5732, 5769, 5806, 5843, 5880, 5917}, // RaceBand
+            {5732, 5765, 5828, 5840, 5866, 5740,    0,    0}, // IMD6
+        };
+        const char *vtxTableBandNames[VTX_TABLE_MAX_BANDS] = {
+            "BOSCAM A", "BOSCAM B", "BOSCAM E", "FATSHARK", "RACEBAND", "    IMD6",
+        };
+        const char vtxTableBandLetters[VTX_TABLE_MAX_BANDS] = "ABEFRI";
+        const char *vtxTableChannelNames[VTX_TABLE_MAX_CHANNELS] = {
+            "1", "2", "3", "4", "5", "6", "7", "8",
+        };
+        vtxTableConfigMutable()->bands = 6;
+        vtxTableConfigMutable()->channels = 8;
+
+    #endif
 
     for (int band = 0; band < VTX_TABLE_MAX_BANDS; band++) {
         for (int channel = 0; channel < VTX_TABLE_MAX_CHANNELS; channel++) {
@@ -143,39 +145,25 @@ void targetConfiguration(void)
     for (int band = 0; band < VTX_TABLE_MAX_BANDS; band++) {
         vtxTableConfigMutable()->isFactoryBand[band] = false;
     }
+
 #endif /* USE_VTX_TABLE */
 
-    vtxSettingsConfigMutable()->band    = 5;
+    strcpy(pilotConfigMutable()->name, "BBBL V2");
+
+    gyroConfigMutable()->gyro_lowpass2_hz = 238;
+    gyroConfigMutable()->dyn_lpf_gyro_min_hz = 190;
+    gyroConfigMutable()->dyn_lpf_gyro_max_hz = 475;
+
+    vtxSettingsConfigMutable()->band = 5;
     vtxSettingsConfigMutable()->channel = 8;
-    vtxSettingsConfigMutable()->power   = 2;
+    vtxSettingsConfigMutable()->power = 3;
 
-    pidProfilesMutable(0)->feedForwardTransition = 80;
-    pidProfilesMutable(0)->iterm_relax = ITERM_RELAX_RPY;
-    pidProfilesMutable(0)->iterm_relax_type = ITERM_RELAX_GYRO;
-    pidProfilesMutable(0)->pid[PID_ROLL].P = 70;
-    pidProfilesMutable(0)->pid[PID_ROLL].I = 49;
-    pidProfilesMutable(0)->pid[PID_ROLL].D = 45;
-    pidProfilesMutable(0)->pid[PID_ROLL].F = 5;
-    pidProfilesMutable(0)->pid[PID_PITCH].P = 68;
-    pidProfilesMutable(0)->pid[PID_PITCH].I = 55;
-    pidProfilesMutable(0)->pid[PID_PITCH].D = 42;
-    pidProfilesMutable(0)->pid[PID_PITCH].F = 5;
-    pidProfilesMutable(0)->pid[PID_YAW].P = 57;
-    pidProfilesMutable(0)->pid[PID_YAW].I = 52;
-    pidProfilesMutable(0)->pid[PID_YAW].D = 21;
-    pidProfilesMutable(0)->pid[PID_YAW].F = 5;
-    pidProfilesMutable(0)->pid[PID_LEVEL].D = 89;
-    pidProfilesMutable(0)->levelAngleLimit = 85;
-    pidProfilesMutable(0)->d_min[FD_ROLL] = 0;
-    pidProfilesMutable(0)->d_min[FD_PITCH] = 0;
+    imuConfigMutable()->small_angle = 180;
 
-    controlRateProfilesMutable(0)->rcExpo[FD_ROLL] = 15;
-    controlRateProfilesMutable(0)->rcExpo[FD_PITCH] = 15;
-    controlRateProfilesMutable(0)->rcExpo[FD_YAW] = 15;
-    controlRateProfilesMutable(0)->rates[FD_ROLL] = 73;
-    controlRateProfilesMutable(0)->rates[FD_PITCH] = 73;
-    controlRateProfilesMutable(0)->rates[FD_YAW] = 73;
-    controlRateProfilesMutable(0)->dynThrPID = 55;
+    mixerConfigMutable()->yaw_motors_reversed = true;
+
+    motorConfigMutable()->motorPoleCount = 12;
+    motorConfigMutable()->dev.motorPwmProtocol = PWM_TYPE_DSHOT600;
 
     osdElementConfigMutable()->item_pos[OSD_CRAFT_NAME]         = OSD_POS(9, 10) | OSD_PROFILE_1_FLAG;
     osdElementConfigMutable()->item_pos[OSD_MAIN_BATT_VOLTAGE]  = OSD_POS(23, 9) | OSD_PROFILE_1_FLAG;
@@ -185,8 +173,6 @@ void targetConfiguration(void)
     osdElementConfigMutable()->item_pos[OSD_RSSI_VALUE]         = OSD_POS(2, 10) | OSD_PROFILE_1_FLAG;
     osdElementConfigMutable()->item_pos[OSD_WARNINGS]           = OSD_POS(9, 10);
     osdElementConfigMutable()->item_pos[OSD_CURRENT_DRAW]       = OSD_POS(22,10) | OSD_PROFILE_1_FLAG;
-
-    imuConfigMutable()->small_angle = 180;
 
     modeActivationConditionsMutable(0)->modeId          = BOXARM;
     modeActivationConditionsMutable(0)->auxChannelIndex = AUX1 - NON_AUX_CHANNEL_COUNT;
@@ -207,11 +193,6 @@ void targetConfiguration(void)
     modeActivationConditionsMutable(4)->auxChannelIndex = AUX3 - NON_AUX_CHANNEL_COUNT;
     modeActivationConditionsMutable(4)->range.startStep = CHANNEL_VALUE_TO_STEP(1700);
     modeActivationConditionsMutable(4)->range.endStep   = CHANNEL_VALUE_TO_STEP(2100);
-
-    strcpy(pilotConfigMutable()->name, "BeeBrain BL");
-
-    motorConfigMutable()->motorPoleCount = 12;
-    motorConfigMutable()->dev.motorPwmProtocol = PWM_TYPE_DSHOT600;
 
     ledStripStatusModeConfigMutable()->ledConfigs[0] = DEFINE_LED(7, 7,  8, 0, LF(COLOR), LO(LARSON_SCANNER) | LO(THROTTLE), 0);
     ledStripStatusModeConfigMutable()->ledConfigs[1] = DEFINE_LED(8, 7, 13, 0, LF(COLOR), LO(LARSON_SCANNER) | LO(THROTTLE), 0);
