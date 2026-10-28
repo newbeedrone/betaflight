@@ -47,7 +47,7 @@
 // failureMode() resets to the ROM bootloader, so a transient SPI error gets retried first
 #define LSM6DSV_INIT_ATTEMPTS 3
 
-// LSM6DSV320X datasheet DS14623, revision 1.
+// LSM6DSV320X datasheet DS14623, revision 3.
 #define LSM6DSV320X_CTRL1_XL_HG 0x4E
 
 // Need to see at least this many interrupts during initialisation to confirm EXTI connectivity
@@ -448,6 +448,8 @@
 #define LSM6DSV_OUT_TEMP_L                  0x20
 #define LSM6DSV_OUT_TEMP_H                  0x21
 
+// OUT*_L precedes OUT*_H, so SPI bursts are LSB-first and need no byte swap
+// (LSM6DSV320X DS14623 revision 3, sections 9.30-9.35).
 // Angular rate sensor pitch axis (X) angular rate output register (R)
 #define LSM6DSV_OUTX_L_G                    0x22
 #define LSM6DSV_OUTX_H_G                    0x23
