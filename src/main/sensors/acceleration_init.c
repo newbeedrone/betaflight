@@ -344,6 +344,15 @@ retry:
         FALLTHROUGH;
 #endif
 
+#ifdef USE_ACCGYRO_LSM6DSV320X
+    case ACC_LSM6DSV320X:
+        if (lsm6dsv320xSpiAccDetect(dev)) {
+            accHardware = ACC_LSM6DSV320X;
+            break;
+        }
+        FALLTHROUGH;
+#endif
+
 #ifdef USE_ACCGYRO_LSM6DSK320X
     case ACC_LSM6DSK320X:
         if (lsm6dsk320xSpiAccDetect(dev)) {

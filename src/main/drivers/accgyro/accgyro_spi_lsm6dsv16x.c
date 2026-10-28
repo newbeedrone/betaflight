@@ -24,7 +24,7 @@
 
 #include "platform.h"
 
-#if defined(USE_ACCGYRO_LSM6DSV16X) || defined(USE_ACCGYRO_LSM6DSV32X) || defined(USE_ACCGYRO_LSM6DSK320X)
+#if defined(USE_ACCGYRO_LSM6DSV16X) || defined(USE_ACCGYRO_LSM6DSV32X) || defined(USE_ACCGYRO_LSM6DSK320X) || defined(USE_ACCGYRO_LSM6DSV320X)
 
 #include "accgyro_spi_lsm6dsv16x.h"
 
@@ -46,6 +46,9 @@
 #define LSM6DSV_RESET_TIMEOUT_MS 20
 // failureMode() resets to the ROM bootloader, so a transient SPI error gets retried first
 #define LSM6DSV_INIT_ATTEMPTS 3
+
+// LSM6DSV320X datasheet DS14623, revision 1.
+#define LSM6DSV320X_CTRL1_XL_HG 0x4E
 
 // Need to see at least this many interrupts during initialisation to confirm EXTI connectivity
 #define GYRO_EXTI_DETECT_THRESHOLD 1000
@@ -864,8 +867,6 @@
 
 #define LSM6DSV16X_READY                    0
 
-#define LSM6DSK320X_WHO_AM_I_CONST          (0x75)
-
 uint8_t lsm6dsk320xSpiDetect(const extDevice_t *dev)
 {
     const uint8_t whoAmI = spiReadRegMsk(dev, LSM6DSV_WHO_AM_I);
@@ -876,6 +877,15 @@ uint8_t lsm6dsk320xSpiDetect(const extDevice_t *dev)
 
     return LSM6DSK320X_SPI;
 }
+
+#ifdef USE_ACCGYRO_LSM6DSV320X
+uint8_t lsm6dsv320xSpiDetect(const extDevice_t *dev)
+{
+    return spiReadRegMsk(dev, LSM6DSV_WHO_AM_I) == LSM6DSV320X_WHO_AM_I_CONST
+        ? LSM6DSV320X_SPI
+        : MPU_NONE;
+}
+#endif
 
 static bool lsm6dsvReset(const extDevice_t *dev, uint8_t whoAmI);
 
@@ -1049,6 +1059,20 @@ bool lsm6dsv16xSpiAccDetect(accDev_t *acc)
     return true;
 }
 
+#ifdef USE_ACCGYRO_LSM6DSV320X
+bool lsm6dsv320xSpiAccDetect(accDev_t *acc)
+{
+    if (acc->mpuDetectionResult.sensor != LSM6DSV320X_SPI) {
+        return false;
+    }
+
+    acc->initFn = lsm6dsv16xAccInit;
+    acc->readFn = lsm6dsv16xAccReadSPI;
+
+    return true;
+}
+#endif
+
 static bool lsm6dsvWriteRegVerified(const extDevice_t *dev, uint8_t reg, uint8_t value)
 {
     spiWriteReg(dev, reg, value);
@@ -1065,6 +1089,9 @@ static bool lsm6dsvReset(const extDevice_t *dev, uint8_t whoAmI)
     // passing as a completed reset and leaving the previous firmware's CTRL8 in place.
     if (!lsm6dsvWriteRegVerified(dev, LSM6DSV_CTRL1, ctrl1) ||
         !lsm6dsvWriteRegVerified(dev, LSM6DSV_CTRL2, ctrl2) ||
+        // DSV320X also requires its high-g accelerometer to be powered down before reset.
+        (whoAmI == LSM6DSV320X_WHO_AM_I_CONST &&
+            !lsm6dsvWriteRegVerified(dev, LSM6DSV320X_CTRL1_XL_HG, 0)) ||
         !lsm6dsvWriteRegVerified(dev, LSM6DSV_CTRL3, LSM6DSV_CTRL3_IF_INC)) {
         return false;
     }
@@ -1101,6 +1128,11 @@ static bool lsm6dsvConfigure(const extDevice_t *dev, uint8_t whoAmI, bool is32x)
         return false;
     }
 
+    if (whoAmI == LSM6DSV320X_WHO_AM_I_CONST &&
+        !lsm6dsvWriteRegVerified(dev, LSM6DSV_IF_CFG, LSM6DSV_IF_CFG_I2C_I3C_DISABLE)) {
+        return false;
+    }
+
     const uint8_t accelMode = LSM6DSV_ENCODE_BITS(LSM6DSV_CTRL1_OP_MODE_XL_HIGH_ACCURACY,
         LSM6DSV_CTRL1_OP_MODE_XL_MASK, LSM6DSV_CTRL1_OP_MODE_XL_SHIFT);
     const uint8_t gyroMode = LSM6DSV_ENCODE_BITS(LSM6DSV_CTRL2_OP_MODE_G_HIGH_ACCURACY,
@@ -1125,8 +1157,9 @@ static bool lsm6dsvConfigure(const extDevice_t *dev, uint8_t whoAmI, bool is32x)
                 LSM6DSV_CTRL8_FS_XL_MASK, LSM6DSV_CTRL8_FS_XL_SHIFT) },
         { LSM6DSV_CTRL9, LSM6DSV_CTRL9_LPF2_XL_EN },
         // 16X/320X: +/-2000 dps. 32X: +/-4000 dps.
-        // 320X FS_G is only bits [2:0]; bit 3 must be 1 (DS15060 Table 64, reset value 0x08).
-        { LSM6DSV_CTRL6, (whoAmI == LSM6DSK320X_WHO_AM_I_CONST ? 0x08 : 0) |
+        // DSK320X/DSV320X FS_G is only bits [2:0]; bit 3 must be 1 (DS15060/DS14623).
+        { LSM6DSV_CTRL6, ((whoAmI == LSM6DSK320X_WHO_AM_I_CONST ||
+            whoAmI == LSM6DSV320X_WHO_AM_I_CONST) ? 0x08 : 0) |
             LSM6DSV_ENCODE_BITS(lpf1BandwidthOptions[gyroConfig()->gyro_hardware_lpf],
                 LSM6DSV_CTRL6_LPF1_G_BW_MASK, LSM6DSV_CTRL6_LPF1_G_BW_SHIFT) |
             LSM6DSV_ENCODE_BITS(is32x ? LSM6DSV_CTRL6_FS_G_4000DPS : LSM6DSV_CTRL6_FS_G_2000DPS,
@@ -1183,6 +1216,13 @@ static void lsm6dsv16xGyroInit(gyroDev_t *gyro)
 {
     lsm6dsvGyroInit(gyro, LSM6DSV16X_WHO_AM_I_CONST);
 }
+
+#ifdef USE_ACCGYRO_LSM6DSV320X
+static void lsm6dsv320xGyroInit(gyroDev_t *gyro)
+{
+    lsm6dsvGyroInit(gyro, LSM6DSV320X_WHO_AM_I_CONST);
+}
+#endif
 
 static bool lsm6dsv16xGyroReadSPI(gyroDev_t *gyro)
 {
@@ -1281,4 +1321,18 @@ bool lsm6dsk320xSpiGyroDetect(gyroDev_t *gyro)
     return true;
 }
 
-#endif // USE_ACCGYRO_LSM6DSV16X || USE_ACCGYRO_LSM6DSV32X || USE_ACCGYRO_LSM6DSK320X
+#ifdef USE_ACCGYRO_LSM6DSV320X
+bool lsm6dsv320xSpiGyroDetect(gyroDev_t *gyro)
+{
+    if (gyro->mpuDetectionResult.sensor != LSM6DSV320X_SPI) {
+        return false;
+    }
+
+    gyro->initFn = lsm6dsv320xGyroInit;
+    gyro->readFn = lsm6dsv16xGyroReadSPI;
+
+    return true;
+}
+#endif
+
+#endif // USE_ACCGYRO_LSM6DSV16X || USE_ACCGYRO_LSM6DSV32X || USE_ACCGYRO_LSM6DSK320X || USE_ACCGYRO_LSM6DSV320X

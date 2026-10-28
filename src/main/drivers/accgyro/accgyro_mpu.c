@@ -374,6 +374,9 @@ static gyroSpiDetectFn_t gyroSpiDetectFnTable[] = {
 #if defined(USE_ACCGYRO_LSM6DSV16X) || defined(USE_ACCGYRO_LSM6DSV32X)
     lsm6dsv16xSpiDetect,
 #endif
+#ifdef USE_ACCGYRO_LSM6DSV320X
+    lsm6dsv320xSpiDetect,
+#endif
 #ifdef USE_ACCGYRO_LSM6DSK320X
     lsm6dsk320xSpiDetect,
 #endif

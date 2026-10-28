@@ -329,6 +329,7 @@ void gyroInitSensor(gyroSensor_t *gyroSensor, const gyroDeviceConfig_t *config)
     case GYRO_LSM6DSV16X:
     case GYRO_LSM6DSV32X:
     case GYRO_LSM6DSK320X:
+    case GYRO_LSM6DSV320X:
     case GYRO_ICM42622P:
     case GYRO_ICM42686P:
     case GYRO_ICM42688P:
@@ -560,6 +561,15 @@ STATIC_UNIT_TESTED gyroHardware_e gyroDetect(gyroDev_t *dev)
 #endif
         if (lsm6dsv16xSpiGyroDetect(dev)) {
             gyroHardware = dev->mpuDetectionResult.sensor == LSM6DSV32X_SPI ? GYRO_LSM6DSV32X : GYRO_LSM6DSV16X;
+            break;
+        }
+        FALLTHROUGH;
+#endif
+
+#ifdef USE_ACCGYRO_LSM6DSV320X
+    case GYRO_LSM6DSV320X:
+        if (lsm6dsv320xSpiGyroDetect(dev)) {
+            gyroHardware = GYRO_LSM6DSV320X;
             break;
         }
         FALLTHROUGH;

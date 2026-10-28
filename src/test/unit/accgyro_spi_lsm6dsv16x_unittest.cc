@@ -34,6 +34,7 @@ PG_REGISTER(gyroConfig_t, gyroConfig, PG_GYRO_CONFIG, 0);
 namespace {
 
 // Register addresses and expected values from the ST register maps.
+constexpr uint8_t IF_CFG = 0x03;
 constexpr uint8_t INT1_CTRL = 0x0d;
 constexpr uint8_t WHO_AM_I = 0x0f;
 constexpr uint8_t CTRL1 = 0x10;
@@ -45,9 +46,19 @@ constexpr uint8_t CTRL8 = 0x17;
 constexpr uint8_t CTRL9 = 0x18;
 constexpr uint8_t OUTX_L_G = 0x22;
 constexpr uint8_t OUTX_L_A = 0x28;
+constexpr uint8_t CTRL1_XL_HG = 0x4e;
 constexpr uint8_t HAODR_CFG = 0x62;
 
-enum class Variant { Dsv16x, Dsv32x, Dsk320x };
+enum class Variant { Dsv16x, Dsv32x, Dsk320x, Dsv320x };
+
+uint8_t whoAmI(Variant variant)
+{
+    switch (variant) {
+    case Variant::Dsk320x: return 0x75;
+    case Variant::Dsv320x: return 0x73;
+    default: return 0x70;
+    }
+}
 
 mpuSensor_e expectedSensor(Variant variant)
 {
@@ -61,12 +72,21 @@ mpuSensor_e expectedSensor(Variant variant)
 #ifdef USE_ACCGYRO_LSM6DSK320X
     case Variant::Dsk320x: return LSM6DSK320X_SPI;
 #endif
+#ifdef USE_ACCGYRO_LSM6DSV320X
+    case Variant::Dsv320x: return LSM6DSV320X_SPI;
+#endif
     default: return MPU_NONE;
     }
 }
 
 uint8_t detectSensor(const extDevice_t *dev)
 {
+#ifdef USE_ACCGYRO_LSM6DSV320X
+    const uint8_t dsv320xSensor = lsm6dsv320xSpiDetect(dev);
+    if (dsv320xSensor != MPU_NONE) {
+        return dsv320xSensor;
+    }
+#endif
 #if defined(USE_ACCGYRO_LSM6DSV16X) || defined(USE_ACCGYRO_LSM6DSV32X)
     const uint8_t sensor = lsm6dsv16xSpiDetect(dev);
     if (sensor != MPU_NONE) {
@@ -82,6 +102,11 @@ uint8_t detectSensor(const extDevice_t *dev)
 
 bool detectGyroCallbacks(gyroDev_t *gyro)
 {
+#ifdef USE_ACCGYRO_LSM6DSV320X
+    if (lsm6dsv320xSpiGyroDetect(gyro)) {
+        return true;
+    }
+#endif
 #ifdef USE_ACCGYRO_LSM6DSK320X
     if (lsm6dsk320xSpiGyroDetect(gyro)) {
         return true;
@@ -96,6 +121,11 @@ bool detectGyroCallbacks(gyroDev_t *gyro)
 
 bool detectAccCallbacks(accDev_t *acc)
 {
+#ifdef USE_ACCGYRO_LSM6DSV320X
+    if (lsm6dsv320xSpiAccDetect(acc)) {
+        return true;
+    }
+#endif
 #ifdef USE_ACCGYRO_LSM6DSK320X
     if (lsm6dsk320xSpiAccDetect(acc)) {
         return true;
@@ -176,17 +206,20 @@ protected:
         gyro.mpuDetectionResult.sensor = expectedSensor(GetParam());
         acc.mpuDetectionResult = gyro.mpuDetectionResult;
         acc.gyro = &gyro;
-        registers[WHO_AM_I] = is320x() ? 0x75 : 0x70;
+        registers[WHO_AM_I] = whoAmI(GetParam());
         registers[CTRL8] = is32x() ? 0x04 : 0;
         // An MCU-only restart can leave both sensors running.
         registers[CTRL1] = 0x19;
         registers[CTRL2] = 0x1c;
+        if (GetParam() == Variant::Dsv320x) {
+            registers[CTRL1_XL_HG] = 0x09;
+        }
         gyroConfigMutable()->gyro_hardware_lpf = GYRO_HARDWARE_LPF_NORMAL;
         ASSERT_TRUE(detectGyroCallbacks(&gyro));
         ASSERT_TRUE(detectAccCallbacks(&acc));
     }
 
-    bool is320x() const { return GetParam() == Variant::Dsk320x; }
+    bool is320x() const { return GetParam() == Variant::Dsk320x || GetParam() == Variant::Dsv320x; }
     bool is32x() const { return GetParam() == Variant::Dsv32x; }
 
     void expectSample(const std::array<int16_t, 6>& sample)
@@ -228,9 +261,9 @@ TEST_P(AccgyroSpiLsm6dsv, DetectsExpectedIdentity)
 
 TEST_P(AccgyroSpiLsm6dsv, DetectsOnlyEnabledVariants)
 {
-    for (const Variant variant : {Variant::Dsv16x, Variant::Dsv32x, Variant::Dsk320x}) {
+    for (const Variant variant : {Variant::Dsv16x, Variant::Dsv32x, Variant::Dsk320x, Variant::Dsv320x}) {
         physicalVariant = variant;
-        registers[WHO_AM_I] = variant == Variant::Dsk320x ? 0x75 : 0x70;
+        registers[WHO_AM_I] = whoAmI(variant);
         registers[CTRL8] = variant == Variant::Dsv32x ? 0x04 : 0;
         resetReads = 0;
         EXPECT_EQ(expectedSensor(variant), detectSensor(&gyro.dev));
@@ -239,13 +272,14 @@ TEST_P(AccgyroSpiLsm6dsv, DetectsOnlyEnabledVariants)
 
 TEST_P(AccgyroSpiLsm6dsv, CallbackDetectionRejectsDisabledVariants)
 {
-    for (const mpuSensor_e sensor : {LSM6DSV16X_SPI, LSM6DSV32X_SPI, LSM6DSK320X_SPI, MPU_NONE}) {
+    for (const mpuSensor_e sensor : {LSM6DSV16X_SPI, LSM6DSV32X_SPI, LSM6DSK320X_SPI, LSM6DSV320X_SPI, MPU_NONE}) {
         gyro.mpuDetectionResult.sensor = sensor;
         acc.mpuDetectionResult.sensor = sensor;
         const bool enabled = sensor != MPU_NONE &&
             (sensor == expectedSensor(Variant::Dsv16x) ||
              sensor == expectedSensor(Variant::Dsv32x) ||
-             sensor == expectedSensor(Variant::Dsk320x));
+             sensor == expectedSensor(Variant::Dsk320x) ||
+             sensor == expectedSensor(Variant::Dsv320x));
         EXPECT_EQ(enabled, detectGyroCallbacks(&gyro));
         EXPECT_EQ(enabled, detectAccCallbacks(&acc));
     }
@@ -302,6 +336,10 @@ TEST_P(AccgyroSpiLsm6dsv, ConfiguresHighAccuracyRatesFiltersAndFullScale)
     EXPECT_EQ(is32x() ? 0x07 : 0x03, registers[CTRL8]); // ODR/4, variant and FSR
     EXPECT_EQ(0x08, registers[CTRL9]); // Accel LPF2 enable
     EXPECT_EQ(0x02, registers[INT1_CTRL]);
+    if (GetParam() == Variant::Dsv320x) {
+        EXPECT_EQ(0x01, registers[IF_CFG]); // Primary 4-wire SPI interface only
+        EXPECT_EQ(0, registers[CTRL1_XL_HG]); // Use only the low-g UI channel
+    }
     EXPECT_FLOAT_EQ(is32x() ? 0.140f : 0.070f, gyro.scale);
     acc.initFn(&acc);
     EXPECT_EQ(is32x() ? 1024 : 2048, acc.acc_1G);
@@ -319,6 +357,11 @@ TEST_P(AccgyroSpiLsm6dsv, PowersDownBeforeResetAndStartsGyroBeforeAccelerometer)
     ASSERT_LT(gyroPowerDown, reset);
     EXPECT_GE(writes[reset].atUs - writes[accPowerDown].atUs, 500u);
     EXPECT_GE(writes[reset].atUs - writes[gyroPowerDown].atUs, 500u);
+    if (GetParam() == Variant::Dsv320x) {
+        const size_t highGPowerDown = findWrite(CTRL1_XL_HG, 0);
+        ASSERT_LT(highGPowerDown, reset);
+        EXPECT_GE(writes[reset].atUs - writes[highGPowerDown].atUs, 500u);
+    }
 
     const size_t gyroStart = findWrite(CTRL2, 0x1c, reset + 1);
     const size_t accStart = findWrite(CTRL1, 0x19, reset + 1);
@@ -380,6 +423,18 @@ TEST_P(AccgyroSpiLsm6dsv, TransientRegisterWriteFailureIsRetried)
     ASSERT_EQ(-1, failure);
     EXPECT_EQ(1u, mpuInitCalls);
     EXPECT_EQ(0x08, registers[CTRL9]);
+}
+
+TEST_P(AccgyroSpiLsm6dsv, Dsv320xHighGPowerDownFailureStopsInitialization)
+{
+    if (GetParam() != Variant::Dsv320x) {
+        return;
+    }
+    droppedWrite = CTRL1_XL_HG;
+    gyro.initFn(&gyro);
+    EXPECT_EQ(FAILURE_GYRO_INIT_FAILED, failure);
+    EXPECT_EQ(0u, mpuInitCalls);
+    EXPECT_EQ(writes.size(), findWrite(CTRL3, 0x01));
 }
 
 TEST_P(AccgyroSpiLsm6dsv, TransientResetTimeoutIsRetried)
@@ -533,6 +588,9 @@ INSTANTIATE_TEST_SUITE_P(Variants, AccgyroSpiLsm6dsv,
 #endif
 #ifdef USE_ACCGYRO_LSM6DSK320X
         Variant::Dsk320x,
+#endif
+#ifdef USE_ACCGYRO_LSM6DSV320X
+        Variant::Dsv320x,
 #endif
     }));
 
